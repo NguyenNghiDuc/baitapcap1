@@ -18,6 +18,11 @@ USING (
  AND (
   owner_id=(SELECT auth.uid())::text
   OR public.current_app_role()='admin'
+  OR EXISTS(
+    SELECT 1 FROM public.users student
+    WHERE student.auth_user_id::text=owner_id
+      AND public.can_access_student(student.id)
+  )
  )
 );
 
