@@ -2,7 +2,7 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
-const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
+const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),errorTracking=require("./lib/error-tracking"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
 
 function load(){return storage.load()}
 function save(db){return storage.save(db)}
@@ -42,6 +42,7 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword("27032006"),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
 
 async function api(req,res,p,ip){
+ if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor}))return;
  if(await handleCaptcha(req,res,p,{send,parseBody}))return;
@@ -118,9 +119,9 @@ async function api(req,res,p,ip){
  return send(res,404,{error:"API không tồn tại"});
 }
 
-storage.init().then(()=>{seedAdmin();monitor.info("startup",{storage:storage.status(),supabase:supabase.enabled()});return http.createServer(async(req,res)=>{
+storage.init().then(()=>{errorTracking.init();seedAdmin();monitor.info("startup",{storage:storage.status(),supabase:supabase.enabled()});return http.createServer(async(req,res)=>{
  const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket.remoteAddress||"unknown";
  if(p.startsWith("/api/"))return api(req,res,p,ip);
  let file=p==="/"?"index.html":decodeURIComponent(p.slice(1));file=path.normalize(file).replace(/^(\.\.(\/|\\|$))+/,"");const abs=path.join(ROOT,file);if(!abs.startsWith(ROOT)){res.writeHead(403);return res.end("Forbidden")}
  fs.stat(abs,(err,st)=>{if(err||!st.isFile()){res.writeHead(404);return res.end("Not found")}res.writeHead(200,{"Content-Type":mime(abs),"Cache-Control":file.endsWith(".html")?"no-cache":"public, max-age=3600","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin","Content-Security-Policy":"default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: wss:; worker-src 'self' blob:; manifest-src 'self'"});fs.createReadStream(abs).pipe(res)})
-}).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT));}).catch(e=>{console.error("[startup]",e);process.exit(1)});
+}).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT));}).catch(e=>{monitor.error("startup_failed",{message:e.message});errorTracking.capture(e,{phase:"startup"});console.error("[startup]",e);process.exit(1)});
