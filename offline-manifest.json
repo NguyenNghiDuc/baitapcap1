@@ -1,5 +1,5 @@
 {
-  "version": "3.1.1",
+  "version": "4.0.0",
   "assets": [
     "/",
     "/index.html",
@@ -67,6 +67,14 @@
     "/js/exams/interaction.js",
     "/js/exams/term-exams.js",
     "/js/exams/runner.js",
-    "/js/exams/catalog.js"
+    "/js/exams/catalog.js",
+    "/css/auth.css",
+    "/js/auth/supabase-client.js",
+    "/js/auth/auth-ui.js",
+    "/js/auth/account-security.js",
+    "/js/supabase/storage.js",
+    "/js/supabase/realtime.js",
+    "/js/teacher/live-classroom.js",
+    "/js/teacher/material-storage.js"
   ]
 }
