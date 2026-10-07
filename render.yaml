@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: baitapcap1
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: AI_API_URL
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: PAYMENT_CHECKOUT_URL
+        sync: false
