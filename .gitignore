@@ -7,3 +7,6 @@ npm-debug.log*
 uploads/
 coverage/
 *.log
+backups/
+playwright-report/
+test-results/
