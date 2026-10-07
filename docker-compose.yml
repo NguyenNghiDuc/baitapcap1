@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: baitapcap1-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: baitapcap1
+      POSTGRES_USER: baitapcap1
+      POSTGRES_PASSWORD: baitapcap1_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - baitapcap1_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U baitapcap1 -d baitapcap1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  baitapcap1_pgdata:
