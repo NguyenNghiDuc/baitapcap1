@@ -7,3 +7,29 @@ test("serves homepage",async()=>{const r=await fetch(base+"/");assert.equal(r.st
 test("integration status is public and JSON",async()=>{const r=await fetch(base+"/api/integrations");assert.equal(r.status,200);const j=await r.json();assert.equal(typeof j.google,"boolean");assert.equal(typeof j.ai,"boolean")});
 test("protected API rejects anonymous user",async()=>{const r=await fetch(base+"/api/classes");assert.equal(r.status,401)});
 test("demo login works when seeded",async()=>{const r=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"hocsinh@demo.vn",password:"Demo1234!"})});assert.equal(r.status,200);const j=await r.json();assert.ok(j.token);assert.equal(j.user.role,"student")});
+
+test("teacher can import question CSV and create exam room",async()=>{
+  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"giaovien@demo.vn",password:"Demo1234!"})});
+  assert.equal(login.status,200);const lj=await login.json(),token=lj.token;
+  const csv="grade,lessonId,level,q,A,B,C,D,answer,explain\n4,g4-mul,Dễ,12 x 5 bang bao nhieu?,50,60,70,80,B,12 x 5 = 60";
+  const imp=await fetch(base+"/api/questions/import-excel",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({filename:"questions.csv",dataUrl:"data:text/csv;base64,"+Buffer.from(csv).toString("base64")})});
+  assert.equal(imp.status,201);assert.equal((await imp.json()).count,1);
+  const room=await fetch(base+"/api/exam-rooms",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({title:"Thi Toan 4",grade:4,lessonId:"g4-mul",durationMin:45})});
+  assert.equal(room.status,201);const rj=await room.json();assert.match(rj.room.code,/^[A-F0-9]{6}$/);
+});
+test("student result can be exported to xlsx",async()=>{
+  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"hocsinh@demo.vn",password:"Demo1234!"})});
+  const lj=await login.json(),token=lj.token;
+  const saved=await fetch(base+"/api/results",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({subject:"math",grade:4,title:"Nhan so tu nhien",score:90,correct:27,total:30,durationSec:1200,wrongQuestionIds:[1,2,3]})});
+  assert.equal(saved.status,201);
+  const out=await fetch(base+"/api/export/results.xlsx",{headers:{Authorization:"Bearer "+token}});
+  assert.equal(out.status,200);assert.match(out.headers.get("content-type"),/spreadsheetml/);assert.ok((await out.arrayBuffer()).byteLength>100);
+});
+test("admin user and storage APIs are protected and functional",async()=>{
+  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"Demo1234!"})});
+  const lj=await login.json(),token=lj.token;
+  const users=await fetch(base+"/api/admin/users",{headers:{Authorization:"Bearer "+token}});
+  assert.equal(users.status,200);assert.ok((await users.json()).users.length>=4);
+  const health=await fetch(base+"/api/storage/health",{headers:{Authorization:"Bearer "+token}});
+  assert.equal(health.status,200);const h=await health.json();assert.equal(h.postgres.enabled,false);assert.equal(h.redis.enabled,false);
+});
