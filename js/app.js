@@ -97,6 +97,9 @@ function sync(){return window.StudentSync?.render()||errorBox("StudentSync chưa
 function targetScore(){return window.StudentTargetScore?.render()||errorBox("StudentTargetScore chưa tải")}
 function topics(){return window.StudentTopics?.render()||errorBox("StudentTopics chưa tải")}
 function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMathWork chưa tải")}
+function targetScore(){return window.StudentTargetScore?.render()||errorBox("StudentTargetScore chưa tải")}
+function topics(){return window.StudentTopics?.render()||errorBox("StudentTopics chưa tải")}
+function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMathWork chưa tải")}
 
 function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync,targetScore,topics,mathWork};$("#content").innerHTML=(map[state.route]||home)();bind()}
 async function render(){shell();const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,questionBank,examRooms,adminUsers,storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};if(asyncMap[state.route]){$("#content").innerHTML='<div class="empty">Đang tải...</div>';$("#content").innerHTML=await asyncMap[state.route]();bind()}else renderSync();shell()}
@@ -159,6 +162,9 @@ function bind(){
  if(state.route==="writing")window.StudentWriting?.bind(toast);
  if(state.route==="handwriting")window.StudentHandwriting?.bind(toast);
  if(state.route==="sync")window.StudentSync?.bind(toast);
+ if(state.route==="targetScore")window.StudentTargetScore?.bind(startCustom);
+ if(state.route==="topics")window.StudentTopics?.bind(startCustom);
+ if(state.route==="mathWork")window.StudentMathWork?.bind();
  if(state.route==="targetScore")window.StudentTargetScore?.bind(startCustom);
  if(state.route==="topics")window.StudentTopics?.bind(startCustom);
  if(state.route==="mathWork")window.StudentMathWork?.bind();
