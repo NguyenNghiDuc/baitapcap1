@@ -2,7 +2,7 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
-const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),handleAI=require("./routes/ai"),errorTracking=require("./lib/error-tracking"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
+const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),handleAI=require("./routes/ai"),errorTracking=require("./lib/error-tracking"),auditStore=require("./lib/audit"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
 
 function load(){return storage.load()}
 function save(db){return storage.save(db)}
@@ -29,7 +29,7 @@ async function auth(req){
 }
 async function requireUser(req,res,roles){const u=await auth(req);if(!u){send(res,401,{error:"Bạn cần đăng nhập"});return null}if(u.locked){send(res,423,{error:"Tài khoản đã bị khóa"});return null}if(roles&&!roles.includes(u.role)){send(res,403,{error:"Bạn không có quyền thực hiện"});return null}return u}
 function rate(ip,key="global",limit=80,windowMs=60e3){const k=ip+":"+key,now=Date.now(),arr=(rateBuckets.get(k)||[]).filter(t=>now-t<windowMs);arr.push(now);rateBuckets.set(k,arr);return arr.length<=limit}
-function audit(db,user,action,meta={}){db.audit.unshift({id:id(),userId:user?.id||null,action,meta,at:new Date().toISOString()});db.audit=db.audit.slice(0,1000)}
+function audit(db,user,action,meta={}){return auditStore.record(db,user,action,meta)}
 function subjectName(id){return ({math:"Toán",vietnamese:"Tiếng Việt",english:"Tiếng Anh",nature:"Tự nhiên & Xã hội",science:"Khoa học",history:"Lịch sử & Địa lý"})[id]||id}
 function normalize(s=""){return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
 function mime(file){return ({".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".svg":"image/svg+xml",".pdf":"application/pdf",".webmanifest":"application/manifest+json"})[path.extname(file).toLowerCase()]||"application/octet-stream"}
@@ -45,11 +45,11 @@ async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
  if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
- if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor}))return;
+ if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor,audit:auditStore}))return;
  if(await handleCaptcha(req,res,p,{send,parseBody}))return;
- if(await handleStorageMeta(req,res,p,{send,parseBody,requireUser,load,save,monitor}))return;
+ if(await handleStorageMeta(req,res,p,{send,parseBody,requireUser,load,save,monitor,audit:auditStore}))return;
  if(await handleApp(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
- if(await handleExamSettings(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
+ if(await handleExamSettings(req,res,p,{send,parseBody,requireUser,load,save,ROOT,audit:auditStore}))return;
  if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(!rate(ip,"api",120))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&p==="/api/register"){if(!rate(ip,"auth",10,10*60e3))return send(res,429,{error:"Thử lại sau"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
