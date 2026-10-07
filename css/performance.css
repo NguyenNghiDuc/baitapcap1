@@ -7,3 +7,5 @@ img[loading="lazy"]{content-visibility:auto}
 .content{content-visibility:auto;contain-intrinsic-size:800px}
 .virtual-list{contain:strict;overflow:auto}
 @media(max-width:600px){.perf-skeleton{padding:16px}.perf-skeleton span{height:68px}}
+
+.perf-list-controls{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:14px 0;flex-wrap:wrap}.perf-search{min-width:min(360px,100%);flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text)}.perf-pager{display:flex;align-items:center;gap:10px}.perf-pager span{font-size:13px;color:var(--muted);white-space:nowrap}@media(max-width:600px){.perf-list-controls{align-items:stretch}.perf-pager{justify-content:space-between;width:100%}}
