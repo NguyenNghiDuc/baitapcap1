@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "3.1.0",
   "assets": [
     "/",
     "/index.html",
@@ -62,6 +62,11 @@
     "/js/app.js",
     "/manifest.webmanifest",
     "/privacy.html",
-    "/terms.html"
+    "/terms.html",
+    "/css/exams.css",
+    "/js/exams/interaction.js",
+    "/js/exams/term-exams.js",
+    "/js/exams/runner.js",
+    "/js/exams/catalog.js"
   ]
 }
