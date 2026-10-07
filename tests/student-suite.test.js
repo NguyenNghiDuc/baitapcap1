@@ -12,6 +12,6 @@ test("student backend is modularized",()=>{assert.ok(fs.existsSync(path.join(roo
 
 test("settings and update center are exposed",()=>{assert.match(html,/href="#settings"/);assert.match(html,/href="#updateCenter"/);assert.match(html,/href="#featureHub"/);});
 test("advanced bank and registry load before app",()=>{assert.ok(html.indexOf("js/advanced-bank.js")>0&&html.indexOf("js/advanced-bank.js")<html.indexOf("js/app.js"));assert.ok(html.indexOf("js/student/registry.js")>0&&html.indexOf("js/student/registry.js")<html.indexOf("js/app.js"));});
-test("offline manifest lists every student module",()=>{const m=JSON.parse(fs.readFileSync(path.join(root,"offline-manifest.json"),"utf8"));for(const x of modules)assert.ok(m.assets.includes("/js/student/"+x+".js"),x);assert.equal(m.version,"3.1.0");});
+test("offline manifest lists every student module",()=>{const m=JSON.parse(fs.readFileSync(path.join(root,"offline-manifest.json"),"utf8"));for(const x of modules)assert.ok(m.assets.includes("/js/student/"+x+".js"),x);assert.equal(m.version,"3.1.1");});
 
 test("term exam modules load before registry and app",()=>{for(const x of ["interaction","term-exams","runner","catalog"]){const i=html.indexOf("js/exams/"+x+".js");assert.ok(i>0&&i<html.indexOf("js/student/registry.js"),x)}});
