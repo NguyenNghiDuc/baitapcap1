@@ -15,3 +15,5 @@
 .dict-input{min-width:180px}.schedule-del,.note-del{white-space:nowrap}
 @media(max-width:900px){.student-hub{grid-template-columns:1fr 1fr}.question-nav{grid-template-columns:repeat(6,1fr)}}
 @media(max-width:580px){.student-hub,.student-route-grid{grid-template-columns:1fr}.question-nav{grid-template-columns:repeat(5,1fr)}}
+
+.reduce-motion *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
