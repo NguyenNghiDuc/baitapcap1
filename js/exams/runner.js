@@ -10,7 +10,7 @@ window.ExamRunner=(()=>{
  function render(){
   const q=quiz.questions[quiz.i],answered=Object.prototype.hasOwnProperty.call(quiz.answers,q.id),tools=window.StudentQuizTools?.renderNavigator({questions:quiz.questions,i:quiz.i,answers:quiz.answers,marked:quiz.marked})||"";
   document.querySelector("#content").innerHTML=`<section class="quiz-shell"><div class="quiz-head"><div><span class="badge">${esc(quiz.title)}</span><h2>Câu ${quiz.i+1}/30</h2></div><div id="timer">⏱</div></div><div class="progress"><span style="width:${(quiz.i+1)/30*100}%"></span></div><div class="quiz-toolbar"><button class="outline small" id="termMark">🚩 ${quiz.marked.includes(q.id)?"Bỏ đánh dấu":"Đánh dấu"}</button><button class="outline small" id="termSpeak">🔊 Đọc câu</button></div><article class="question-card"><h2>${esc(q.q)}</h2>${window.ExamInteraction.render(q,quiz.answers[q.id])}</article><div class="quiz-actions"><button class="outline" id="termPrev" ${quiz.i===0?"disabled":""}>← Trước</button><button class="primary" id="${quiz.i===29?"termFinish":"termNext"}">${quiz.i===29?"Nộp bài":"Tiếp →"}</button></div>${tools}</section>`;
-  window.ExamInteraction.bind(q,quiz,render);
+  window.ExamInteraction.bind(q,quiz,render,save);
   document.querySelector("#termPrev").onclick=()=>{quiz.i--;save();render()};
   document.querySelector("#termNext")?.addEventListener("click",()=>{quiz.i++;save();render()});
   document.querySelector("#termFinish")?.addEventListener("click",finish);
