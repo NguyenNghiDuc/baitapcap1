@@ -1,5 +1,5 @@
 window.PerfLoader=(()=>{
- const loaded=new Map();
+ const loaded=new Map();let hashPromise=null;
  const routeFiles={
   tests:["/js/exams/interaction.js","/js/exams/term-exams.js","/js/exams/runner.js","/js/exams/catalog.js"],
   accountSecurity:["/js/auth/account-security.js"],
@@ -18,14 +18,15 @@ window.PerfLoader=(()=>{
   historyCompare:["/js/student/history-compare.js"],performanceMode:["/js/student/performance-mode.js"],chapterAchievements:["/js/student/chapter-achievements.js"],
   materials:["/js/supabase/storage.js","/js/teacher/material-storage.js"]
  };
- function script(src){
+ async function versioned(src){if(!hashPromise)hashPromise=fetch("/asset-hashes.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null);const m=await hashPromise,h=m?.hashes?.[src];return h?src+"?h="+h:src}
+ async function script(src){
   if(loaded.has(src))return loaded.get(src);
   if(document.querySelector(`script[data-lazy-src="${src}"]`))return Promise.resolve();
-  const p=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.async=true;s.dataset.lazySrc=src;s.onload=()=>resolve();s.onerror=()=>{loaded.delete(src);reject(new Error("Không tải được "+src))};document.head.appendChild(s)});
+  const resolved=await versioned(src);const p=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=resolved;s.async=true;s.dataset.lazySrc=src;s.onload=()=>resolve();s.onerror=()=>{loaded.delete(src);reject(new Error("Không tải được "+src))};document.head.appendChild(s)});
   loaded.set(src,p);return p
  }
  async function ensureRoute(route){for(const src of routeFiles[route]||[])await script(src)}
- function prefetch(route){const files=routeFiles[route]||[];const run=()=>files.forEach(src=>{if(loaded.has(src))return;const l=document.createElement("link");l.rel="prefetch";l.as="script";l.href=src;document.head.appendChild(l)});("requestIdleCallback" in window)?requestIdleCallback(run,{timeout:2500}):setTimeout(run,1200)}
+ function prefetch(route){const files=routeFiles[route]||[];const run=()=>files.forEach(async src=>{if(loaded.has(src))return;const l=document.createElement("link");l.rel="prefetch";l.as="script";l.href=await versioned(src);document.head.appendChild(l)});("requestIdleCallback" in window)?requestIdleCallback(run,{timeout:2500}):setTimeout(run,1200)}
  function cleanupRoute(){window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.()}
  window.addEventListener("online",()=>window.OfflineSyncQueue?.flush?.());
  return {ensureRoute,prefetch,cleanupRoute,routeFiles}
