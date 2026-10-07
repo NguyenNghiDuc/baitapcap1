@@ -17,7 +17,10 @@
     "db:backup": "node scripts/db-backup.js",
     "db:restore": "node scripts/db-restore.js",
     "supabase:verify": "node scripts/supabase-verify.js",
-    "supabase:seed-auth": "node scripts/supabase-seed-auth.js"
+    "supabase:seed-auth": "node scripts/supabase-seed-auth.js",
+    "build": "node scripts/build-production.js",
+    "perf:load": "node scripts/load-test.js",
+    "perf:lighthouse": "node scripts/lighthouse-audit.js"
   },
   "engines": {
     "node": ">=18"
@@ -36,6 +39,9 @@
     "@sentry/node": "^9.12.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0"
+    "@playwright/test": "^1.55.0",
+    "esbuild": "^0.25.9",
+    "autocannon": "^8.0.0",
+    "lighthouse": "^12.8.2"
   }
 }
