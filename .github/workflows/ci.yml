@@ -24,6 +24,6 @@ jobs:
         with:
           node-version: 20
       - run: npm install --ignore-scripts
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:ui -- --project=chromium
       - run: npm run test:ui -- --project=mobile
