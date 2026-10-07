@@ -9,12 +9,12 @@ window.ExamInteraction={
   }
   return `<div class="options">${q.options.map((o,i)=>`<button class="${value===i?"selected":""}" data-answer="${i}"><span>${String.fromCharCode(65+i)}</span>${o}</button>`).join("")}</div>`;
  },
- bind(q,quiz,rerender){
-  const type=q.examType||"mcq";
-  if(type==="truefalse") document.querySelectorAll("[data-exam-value]").forEach(b=>b.onclick=()=>{quiz.answers[q.id]=b.dataset.examValue;localStorage.setItem("bt_quiz",JSON.stringify(quiz));rerender()});
-  else if(type==="fill") document.querySelector("#examFillSave")?.addEventListener("click",()=>{quiz.answers[q.id]=document.querySelector("#examFillInput").value.trim();localStorage.setItem("bt_quiz",JSON.stringify(quiz));rerender()});
-  else if(type==="matching") document.querySelectorAll("[data-match-index]").forEach(s=>s.onchange=()=>{const v=quiz.answers[q.id]&&typeof quiz.answers[q.id]==="object"?quiz.answers[q.id]:{};v[s.dataset.matchIndex]=s.value;quiz.answers[q.id]=v;localStorage.setItem("bt_quiz",JSON.stringify(quiz))});
-  else document.querySelectorAll("[data-answer]").forEach(b=>b.onclick=()=>{quiz.answers[q.id]=Number(b.dataset.answer);localStorage.setItem("bt_quiz",JSON.stringify(quiz));rerender()});
+ bind(q,quiz,rerender,persist){
+  const type=q.examType||"mcq",commit=()=>{if(persist)persist();else commit()};
+  if(type==="truefalse") document.querySelectorAll("[data-exam-value]").forEach(b=>b.onclick=()=>{quiz.answers[q.id]=b.dataset.examValue;commit();rerender()});
+  else if(type==="fill") document.querySelector("#examFillSave")?.addEventListener("click",()=>{quiz.answers[q.id]=document.querySelector("#examFillInput").value.trim();commit();rerender()});
+  else if(type==="matching") document.querySelectorAll("[data-match-index]").forEach(s=>s.onchange=()=>{const v=quiz.answers[q.id]&&typeof quiz.answers[q.id]==="object"?quiz.answers[q.id]:{};v[s.dataset.matchIndex]=s.value;quiz.answers[q.id]=v;commit()});
+  else document.querySelectorAll("[data-answer]").forEach(b=>b.onclick=()=>{quiz.answers[q.id]=Number(b.dataset.answer);commit();rerender()});
  },
  isCorrect(q,value){
   const type=q.examType||"mcq";
