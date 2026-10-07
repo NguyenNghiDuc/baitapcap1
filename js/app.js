@@ -103,7 +103,18 @@ function topics(){return window.StudentTopics?.render()||errorBox("StudentTopics
 function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMathWork chưa tải")}
 
 function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync,targetScore,topics,mathWork};$("#content").innerHTML=(map[state.route]||home)();bind()}
-async function render(){shell();if(window.StudentRegistry?.has(state.route)){$("#content").innerHTML='<div class="empty">Đang tải...</div>';$("#content").innerHTML=await window.StudentRegistry.render(state.route,{user:state.user});bind();window.StudentRegistry.bind(state.route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return}const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,questionBank,examRooms,adminUsers,storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};if(asyncMap[state.route]){$("#content").innerHTML='<div class="empty">Đang tải...</div>';$("#content").innerHTML=await asyncMap[state.route]();bind()}else renderSync();window.StudentI18n?.apply?.();shell()}
+async function render(){
+ shell();
+ $("#content").innerHTML='<div class="perf-skeleton"><span></span><span></span><span></span></div>';
+ try{await window.PerfLoader?.ensureRoute(state.route)}catch(e){$("#content").innerHTML=errorBox(e.message);return}
+ if(window.StudentRegistry?.has(state.route)){
+  $("#content").innerHTML=await window.StudentRegistry.render(state.route,{user:state.user});bind();
+  window.StudentRegistry.bind(state.route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
+ }
+ const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,questionBank,examRooms,adminUsers,storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
+ if(asyncMap[state.route]){$("#content").innerHTML=await asyncMap[state.route]();bind()}else renderSync();
+ window.StudentI18n?.apply?.();shell()
+}
 function filterLessons(){const q=norm($("#lessonSearch")?.value),g=$("#gradeFilter")?.value||"",lv=$("#levelFilter")?.value||"",s=state.subjectFilter;const a=D.lessons.filter(l=>(!q||norm(l.title+" "+subj(l.subject).name+" "+(l.topic||"")).includes(q))&&(!g||String(l.grade)===g)&&(!lv||l.level===lv)&&(!s||l.subject===s));$("#lessonResults").innerHTML=a.map(lessonRow).join("")||'<div class="empty">Không tìm thấy.</div>';bind()}
 function startCustom(qs,title="Luyện tập cá nhân"){if(!Array.isArray(qs)||!qs.length){toast("Chưa có câu phù hợp");return}const grade=qs.find(q=>q.grade)?.grade||state.user?.grade||4;state.quiz={subject:"mixed",grade,assignmentId:null,lessonId:"",examId:"",customTitle:title,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};localStorage.setItem("bt_quiz",JSON.stringify(state.quiz));quiz()}
 function shuffleExamQuestion(q){const pairs=q.options.map((o,i)=>({o,ok:i===q.answer})).sort(()=>Math.random()-.5);return {...q,options:pairs.map(x=>x.o),answer:pairs.findIndex(x=>x.ok)}}
@@ -176,7 +187,7 @@ function bind(){
 $("#menuBtn")?.addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 $("#themeBtn")?.addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";document.documentElement.dataset.theme=state.theme;localStorage.setItem("bt_theme",state.theme)});
 $("#authBtn")?.addEventListener("click",async()=>{if(state.user){await window.AuthUI?.logout();state.user=null;nav("home")}else openAuth()});
-window.addEventListener("hashchange",()=>{state.route=location.hash.slice(1)||"home";render()});
+window.addEventListener("hashchange",()=>{window.PerfLoader?.cleanupRoute?.();state.route=location.hash.slice(1)||"home";render();window.PerfLoader?.prefetch?.(state.route==="home"?"tests":"home")});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 const qp=new URLSearchParams(location.search);if(qp.get("auth_token")){API.setToken(qp.get("auth_token"));history.replaceState(null,"",location.pathname+location.hash)}const savedQuiz=localStorage.getItem("bt_quiz");if(savedQuiz){try{state.quiz=JSON.parse(savedQuiz)}catch{}}window.AuthUI?.setBridge(window.AppAuthBridge);
 (async()=>{try{await window.SupabaseApp?.init(u=>{state.user=u;shell()})}catch{}if(!state.user)await restore();render()})();
