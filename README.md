@@ -24,12 +24,12 @@ $env:SEED_DEMO="1"
 npm start
 ```
 
-Mật khẩu chung: `Demo1234!`
+Mật khẩu demo học sinh / giáo viên / phụ huynh: `Demo1234!`
 
 - Học sinh: `hocsinh@demo.vn`
 - Giáo viên: `giaovien@demo.vn`
 - Phụ huynh: `phuhuynh@demo.vn`
-- Admin: `admin@demo.vn`
+- Admin: `admin@demo.vn` — mật khẩu: `27032006`
 
 ## Các phần đã code
 
