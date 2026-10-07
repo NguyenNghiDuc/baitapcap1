@@ -2,11 +2,10 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
-const pgStore=require("./lib/postgres"),sessionStore=require("./lib/redis-session"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
+const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
 
-function defaultDb(){return {users:[],classes:[],assignments:[],submissions:[],results:[],notifications:[],materials:[],audit:[],subscriptions:[],feedback:[],questionBank:[],examRooms:[],pushSubscriptions:[]}}
-function load(){try{return Object.assign(defaultDb(),JSON.parse(fs.readFileSync(DB_PATH,"utf8")))}catch{return defaultDb()}}
-function save(db){fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});fs.writeFileSync(DB_PATH,JSON.stringify(db,null,2))}
+function load(){return storage.load()}
+function save(db){return storage.save(db)}
 function id(){return crypto.randomUUID()}
 function hashPassword(password,salt=crypto.randomBytes(16).toString("hex")){return salt+":"+crypto.scryptSync(password,salt,64).toString("hex")}
 function verifyPassword(password,stored=""){try{const [salt,hex]=stored.split(":");const a=Buffer.from(hex,"hex"),b=crypto.scryptSync(password,salt,64);return a.length===b.length&&crypto.timingSafeEqual(a,b)}catch{return false}}
@@ -28,7 +27,6 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-teacher",name:"Cô Lan",email:"giaovien@demo.vn",password:hashPassword("Demo1234!"),role:"teacher",avatar:"👩🏻‍🏫",emailVerified:true,createdAt:now},
 {id:"demo-parent",name:"Phụ huynh Minh Anh",email:"phuhuynh@demo.vn",password:hashPassword("Demo1234!"),role:"parent",avatar:"👩🏻",emailVerified:true,children:["demo-student"],createdAt:now},
 {id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword("27032006"),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
-seedAdmin();
 
 async function api(req,res,p,ip){
  if(await handleApp(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
@@ -103,9 +101,9 @@ async function api(req,res,p,ip){
  return send(res,404,{error:"API không tồn tại"});
 }
 
-http.createServer(async(req,res)=>{
+storage.init().then(()=>{seedAdmin();return http.createServer(async(req,res)=>{
  const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket.remoteAddress||"unknown";
  if(p.startsWith("/api/"))return api(req,res,p,ip);
  let file=p==="/"?"index.html":decodeURIComponent(p.slice(1));file=path.normalize(file).replace(/^(\.\.(\/|\\|$))+/,"");const abs=path.join(ROOT,file);if(!abs.startsWith(ROOT)){res.writeHead(403);return res.end("Forbidden")}
  fs.stat(abs,(err,st)=>{if(err||!st.isFile()){res.writeHead(404);return res.end("Not found")}res.writeHead(200,{"Content-Type":mime(abs),"Cache-Control":file.endsWith(".html")?"no-cache":"public, max-age=3600","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin","Content-Security-Policy":"default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; img-src 'self' data:; media-src 'self' data:; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'"});fs.createReadStream(abs).pipe(res)})
-}).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT));
+}).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT));}).catch(e=>{console.error("[startup]",e);process.exit(1)});
