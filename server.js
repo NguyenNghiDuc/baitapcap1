@@ -49,6 +49,10 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 
 async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
+ if(!rate(ip,"api",180,60e3))return send(res,429,{error:"Bạn thao tác quá nhanh"});
+ if(req.method==="POST"&&["/api/ai","/api/ai/analyze-wrong"].includes(p)&&!rate(ip,"ai",24,60e3))return send(res,429,{error:"AI đang bận, thử lại sau"});
+ if(req.method==="POST"&&p==="/api/student/ocr"&&!rate(ip,"ocr",10,60e3))return send(res,429,{error:"OCR đang bận, thử lại sau"});
+ if(req.method==="POST"&&(p.startsWith("/api/storage/")||p==="/api/student/handwriting")&&!rate(ip,"upload",20,60e3))return send(res,429,{error:"Bạn tải file quá nhanh"});
  if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
@@ -58,7 +62,6 @@ async function api(req,res,p,ip){
  if(await handleApp(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(await handleExamSettings(req,res,p,{send,parseBody,requireUser,load,save,ROOT,audit:auditStore}))return;
  if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
- if(!rate(ip,"api",120))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&p==="/api/register"){if(!rate(ip,"auth",10,10*60e3))return send(res,429,{error:"Thử lại sau"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
   const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),role=["student","parent","teacher"].includes(d.role)?d.role:"student";
   if(!/^\S+@\S+\.\S+$/.test(email)||password.length<8)return send(res,400,{error:"Email hợp lệ và mật khẩu tối thiểu 8 ký tự"});
