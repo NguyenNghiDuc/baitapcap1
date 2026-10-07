@@ -1,225 +1,37 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Bài Tập Cấp 1 - Kho bài tập, đề kiểm tra và tài liệu dành cho học sinh tiểu học." />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Bài Tập Cấp 1 - học, luyện tập, kiểm tra và theo dõi tiến bộ cho học sinh lớp 1 đến lớp 5." />
   <title>Bài Tập Cấp 1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#home" aria-label="Bài Tập Cấp 1">
-      <span class="brand-icon">📖</span>
-      <span>Bài Tập <b>Cấp 1</b></span>
-    </a>
-
-    <button class="menu-toggle" id="menuToggle" aria-label="Mở menu">☰</button>
-
-    <nav class="main-nav" id="mainNav">
-      <a class="active" href="#home">Trang chủ</a>
-      <a href="#subjects">Toán</a>
-      <a href="#subjects">Tiếng Việt</a>
-      <a href="#subjects">Tiếng Anh</a>
-      <a href="#subjects">Tự nhiên & Xã hội</a>
-      <a href="#latest">Đề kiểm tra</a>
-      <a href="#footer">Tài liệu</a>
+    <button class="icon-btn mobile-only" id="menuBtn">☰</button>
+    <a class="brand" href="#home"><span class="brand-mark">📖</span><span>Bài Tập <b>Cấp 1</b></span></a>
+    <nav class="topnav">
+      <a href="#home">Trang chủ</a><a href="#subjects">Môn học</a><a href="#tests">Đề kiểm tra</a><a href="#materials">Tài liệu</a>
     </nav>
-
-    <div class="header-actions">
-      <label class="mini-search">
-        <span>⌕</span>
-        <input type="search" placeholder="Tìm bài tập, chủ đề..." />
-      </label>
-      <button class="login-btn">Đăng nhập</button>
-    </div>
+    <div class="top-actions"><button class="ghost" id="themeBtn">☀️</button><button class="primary" id="authBtn">Đăng nhập</button></div>
   </header>
 
-  <main id="home">
-    <section class="hero">
-      <div class="hero-bg hero-bg-left"></div>
-      <div class="hero-bg hero-bg-right"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="profile-mini"><div class="avatar" id="sideAvatar">👧🏻</div><div><b id="sideName">Khách</b><small id="sideRole">Học sinh</small></div></div>
+    <div class="side-title">HỌC TẬP</div>
+    <a href="#home">🏠 Trang chủ</a><a href="#subjects">📚 Môn học</a><a href="#tests">📝 Đề kiểm tra</a><a href="#favorites">❤️ Yêu thích</a><a href="#history">📈 Kết quả học tập</a><a href="#achievements">🏆 Thành tích</a><a href="#materials">📎 Tài liệu</a><a href="#ai">🤖 Trợ giảng AI</a><a href="#parent">👨‍👩‍👧 Phụ huynh</a>
+    <div class="side-title">TÀI KHOẢN</div><a href="#profile">👤 Hồ sơ</a><a class="admin-only" href="#admin">⚙️ Quản trị</a>
+  </aside>
 
-      <div class="hero-kid kid-left" aria-hidden="true">
-        <div class="kid-emoji">👦🏻</div>
-        <div class="pencil">✏️</div>
-      </div>
+  <main class="content" id="content"></main>
 
-      <div class="hero-content">
-        <div class="eyebrow">HỌC VUI MỖI NGÀY</div>
-        <h1>Bài Tập <span>Cấp 1</span></h1>
-        <h2>Học vui – Luyện giỏi – Tiến bộ mỗi ngày</h2>
-        <p>Kho bài tập, đề kiểm tra và tài liệu dành cho học sinh tiểu học đầy đủ, dễ hiểu và bám sát chương trình.</p>
-
-        <form class="hero-search" id="searchForm">
-          <span>🔎</span>
-          <input id="searchInput" type="search" placeholder="Tìm bài tập, chủ đề, lớp học..." />
-          <button type="submit">Tìm kiếm</button>
-        </form>
-        <div class="search-note" id="searchNote" aria-live="polite"></div>
-      </div>
-
-      <div class="hero-kid kid-right" aria-hidden="true">
-        <div class="kid-emoji">👧🏻</div>
-        <div class="book">📗</div>
-      </div>
-    </section>
-
-    <section class="container subjects" id="subjects" aria-label="Môn học">
-      <article class="subject-card pink" data-keywords="toán cộng trừ nhân chia lớp 1 lớp 2 lớp 3 lớp 4 lớp 5">
-        <div class="subject-icon">➕➖<br>✖️➗</div>
-        <h3>Toán</h3>
-        <p>Phép tính, hình học, bài toán có lời văn.</p>
-        <button>Xem bài tập →</button>
-      </article>
-
-      <article class="subject-card yellow" data-keywords="tiếng việt chính tả tập đọc ngữ pháp văn">
-        <div class="subject-icon">📖</div>
-        <h3>Tiếng Việt</h3>
-        <p>Tập đọc, chính tả, luyện từ và câu.</p>
-        <button>Xem bài tập →</button>
-      </article>
-
-      <article class="subject-card blue" data-keywords="tiếng anh english từ vựng ngữ pháp">
-        <div class="subject-icon letters">A<span>B</span>C</div>
-        <h3>Tiếng Anh</h3>
-        <p>Từ vựng, mẫu câu và bài luyện cơ bản.</p>
-        <button>Xem bài tập →</button>
-      </article>
-
-      <article class="subject-card green" data-keywords="tự nhiên xã hội khoa học môi trường">
-        <div class="subject-icon">🌱</div>
-        <h3>Tự nhiên & Xã hội</h3>
-        <p>Khám phá cơ thể, thiên nhiên và cuộc sống.</p>
-        <button>Xem bài tập →</button>
-      </article>
-
-      <article class="subject-card purple" data-keywords="đề kiểm tra giữa kỳ cuối kỳ trắc nghiệm">
-        <div class="subject-icon">📝</div>
-        <h3>Đề kiểm tra</h3>
-        <p>Đề luyện tập theo lớp và theo học kỳ.</p>
-        <button>Xem đề →</button>
-      </article>
-
-      <article class="subject-card orange" data-keywords="tài liệu sách giáo khoa phiếu học tập">
-        <div class="subject-icon">📚</div>
-        <h3>Tài liệu</h3>
-        <p>Phiếu học tập và tài liệu tham khảo.</p>
-        <button>Xem tài liệu →</button>
-      </article>
-    </section>
-
-    <section class="container dashboard" id="latest">
-      <div class="panel latest-panel">
-        <div class="panel-title">
-          <h3>⭐ Bài tập mới nhất</h3>
-          <a href="#subjects">Xem thêm →</a>
-        </div>
-
-        <div class="lesson-list">
-          <button class="lesson-row" data-keywords="toán cộng trừ phạm vi 100 lớp 1">
-            <span class="doc-icon">📄</span>
-            <span class="lesson-name">Bài tập cộng trừ trong phạm vi 100</span>
-            <span class="tag tag-pink">Toán</span>
-            <span class="grade">Lớp 1</span>
-            <span class="date">12/04/2025</span>
-            <span>›</span>
-          </button>
-          <button class="lesson-row" data-keywords="tiếng việt luyện đọc câu bé thông minh lớp 2">
-            <span class="doc-icon">📄</span>
-            <span class="lesson-name">Luyện đọc: Cậu bé thông minh</span>
-            <span class="tag tag-yellow">Tiếng Việt</span>
-            <span class="grade">Lớp 2</span>
-            <span class="date">11/04/2025</span>
-            <span>›</span>
-          </button>
-          <button class="lesson-row" data-keywords="tiếng anh present simple hiện tại đơn lớp 3">
-            <span class="doc-icon">📄</span>
-            <span class="lesson-name">Bài tập thì hiện tại đơn (Present Simple)</span>
-            <span class="tag tag-blue">Tiếng Anh</span>
-            <span class="grade">Lớp 3</span>
-            <span class="date">10/04/2025</span>
-            <span>›</span>
-          </button>
-          <button class="lesson-row" data-keywords="đề kiểm tra giữa học kỳ 2 lớp 4">
-            <span class="doc-icon">📄</span>
-            <span class="lesson-name">Đề kiểm tra giữa học kỳ II</span>
-            <span class="tag tag-purple">Đề kiểm tra</span>
-            <span class="grade">Lớp 4</span>
-            <span class="date">09/04/2025</span>
-            <span>›</span>
-          </button>
-          <button class="lesson-row" data-keywords="tự nhiên xã hội thực vật quanh em lớp 1">
-            <span class="doc-icon">📄</span>
-            <span class="lesson-name">Bài tập về thực vật quanh em</span>
-            <span class="tag tag-green">TN & XH</span>
-            <span class="grade">Lớp 1</span>
-            <span class="date">08/04/2025</span>
-            <span>›</span>
-          </button>
-        </div>
-      </div>
-
-      <aside class="panel trending">
-        <div class="panel-title"><h3>🔥 Chủ đề được quan tâm</h3></div>
-        <ol>
-          <li><span>1</span><div><b>Bảng nhân, bảng chia</b><small>Toán</small></div>›</li>
-          <li><span>2</span><div><b>Chính tả lớp 2</b><small>Tiếng Việt</small></div>›</li>
-          <li><span>3</span><div><b>Từ vựng tiếng Anh lớp 3</b><small>Tiếng Anh</small></div>›</li>
-          <li><span>4</span><div><b>Các mùa trong năm</b><small>Tự nhiên & Xã hội</small></div>›</li>
-          <li><span>5</span><div><b>Đề kiểm tra học kỳ</b><small>Đề kiểm tra</small></div>›</li>
-        </ol>
-      </aside>
-
-      <aside class="panel grade-panel">
-        <div class="panel-title"><h3>🎓 Lớp học</h3></div>
-        <div class="grade-grid">
-          <button data-grade="1">Lớp 1</button>
-          <button data-grade="2">Lớp 2</button>
-          <button data-grade="3">Lớp 3</button>
-          <button data-grade="4">Lớp 4</button>
-          <button data-grade="5">Lớp 5</button>
-        </div>
-        <div class="study-card">
-          <div>
-            <strong>Cùng học,<br>cùng tiến bộ<br>mỗi ngày!</strong>
-          </div>
-          <div class="study-emoji">🧒🏻📚</div>
-        </div>
-      </aside>
-    </section>
-
-    <section class="benefits">
-      <div>✅ <span>Nội dung bám sát chương trình</span></div>
-      <div>💙 <span>Dễ hiểu – Dễ luyện tập</span></div>
-      <div>📊 <span>Cập nhật thường xuyên</span></div>
-      <div>👨‍👩‍👧 <span>Phù hợp cho học sinh tiểu học</span></div>
-    </section>
-  </main>
-
-  <footer id="footer">
-    <div>
-      <a class="brand footer-brand" href="#home"><span class="brand-icon">📖</span> Bài Tập <b>Cấp 1</b></a>
-      <p>Website học tập vui nhộn dành cho học sinh lớp 1 đến lớp 5.</p>
-    </div>
-    <div>
-      <b>Khám phá</b>
-      <a href="#subjects">Môn học</a>
-      <a href="#latest">Bài mới</a>
-      <a href="#latest">Đề kiểm tra</a>
-    </div>
-    <div>
-      <b>Hỗ trợ</b>
-      <a href="#home">Hướng dẫn học</a>
-      <a href="#footer">Liên hệ</a>
-      <a href="#footer">Điều khoản</a>
-    </div>
-  </footer>
-
+  <div class="modal-backdrop hidden" id="modalBackdrop"><div class="modal" id="modal"></div></div>
   <div class="toast" id="toast"></div>
+  <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
