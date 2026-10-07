@@ -2,7 +2,7 @@ const crypto=require("crypto");
 module.exports=async function handleSupabaseAuth(req,res,p,ctx){
  const {send,parseBody,load,save,supabase,monitor,pg}=ctx;
  if(req.method==="GET"&&p==="/api/public-config"){
-  return send(res,200,{supabase:{url:process.env.SUPABASE_URL||"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY||"",enabled:supabase.enabled()},captcha:{provider:process.env.CAPTCHA_PROVIDER||"",siteKey:process.env.TURNSTILE_SITE_KEY||""},appUrl:process.env.APP_PUBLIC_URL||process.env.PUBLIC_BASE_URL||""}),true;
+  return send(res,200,{supabase:{url:process.env.SUPABASE_URL||"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY||"",enabled:supabase.enabled()},captcha:{provider:process.env.CAPTCHA_PROVIDER||"",siteKey:process.env.TURNSTILE_SITE_KEY||""},appUrl:process.env.APP_PUBLIC_URL||process.env.PUBLIC_BASE_URL||"",features:{disabled:String(process.env.DISABLED_FEATURES||"").split(",").map(x=>x.trim()).filter(Boolean)}}),true;
  }
  if(req.method==="POST"&&p==="/api/auth/sync"){
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
