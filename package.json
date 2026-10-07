@@ -17,7 +17,8 @@
     "db:backup": "node scripts/db-backup.js",
     "db:restore": "node scripts/db-restore.js",
     "supabase:verify": "node scripts/supabase-verify.js",
-    "supabase:seed-auth": "node scripts/supabase-seed-auth.js"
+    "supabase:seed-auth": "node scripts/supabase-seed-auth.js",
+    "push:keys": "node scripts/generate-vapid.js"
   },
   "engines": {
     "node": ">=18"
