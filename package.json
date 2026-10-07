@@ -42,6 +42,7 @@
     "@playwright/test": "^1.55.0",
     "esbuild": "^0.25.9",
     "autocannon": "^8.0.0",
-    "lighthouse": "^12.8.2"
+    "lighthouse": "^12.8.2",
+    "chrome-launcher": "^1.0.0"
   }
 }
