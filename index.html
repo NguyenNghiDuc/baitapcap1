@@ -4,11 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="Bài Tập Cấp 1 - học, luyện tập, kiểm tra và theo dõi tiến bộ cho học sinh lớp 1 đến lớp 5." />
-  <title>Bài Tập Cấp 1</title>\n  <meta name="theme-color" content="#1478df">\n  <link rel="manifest" href="/manifest.webmanifest">
+  <title>Bài Tập Cấp 1</title>
+  <meta name="theme-color" content="#1478df">
+  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css" />\n  <link rel="stylesheet" href="css/student.css" />
 </head>
 <body>
   <header class="topbar">
@@ -22,7 +24,7 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="profile-mini"><div class="avatar" id="sideAvatar">👧🏻</div><div><b id="sideName">Khách</b><small id="sideRole">Học sinh</small></div></div>
-    <div class="side-title">HỌC TẬP</div>
+    <div class="side-title">HỌC SINH</div>\n    <a href="#today">🎯 Hôm nay học gì?</a><a href="#wrongReview">🧠 Ôn câu sai</a><a href="#quickPractice">⏱ Luyện nhanh</a><a href="#studyPath">🛤 Lộ trình cá nhân</a><a href="#adaptive">🧩 Luyện thích ứng</a><a href="#goals">✅ Mục tiêu</a><a href="#schedule">📅 Lịch học</a><a href="#formulas">📐 Sổ tay công thức</a><a href="#languageLab">📖 Reading & Dictation</a><a href="#vocab">🗣 Từ vựng & phát âm</a><a href="#speech">🎙 Luyện nói</a><a href="#notes">📝 Ghi chú</a><a href="#worksheet">🖨 Phiếu bài tập</a><a href="#profileStats">📊 Hồ sơ học tập</a><a href="#accessibility">👁 Trợ năng</a>\n    <div class="side-title">HỌC TẬP</div>
     <a href="#home">🏠 Trang chủ</a><a href="#subjects">📚 Môn học</a><a href="#tests">📝 Đề kiểm tra</a><a href="#examRooms">🧪 Phòng thi</a><a href="#classes">🏫 Lớp học</a><a href="#assignments">📌 Bài được giao</a><a href="#favorites">❤️ Yêu thích</a><a href="#history">📈 Kết quả học tập</a><a href="#analytics">📊 Phân tích học tập</a><a href="#flashcards">🧠 Flashcard</a><a href="#game">🎮 Mini game</a><a href="#achievements">🏆 Thành tích</a><a href="#shop">🎁 Shop & XP</a><a href="#premium">⭐ Premium</a><a href="#materials">📎 Tài liệu</a><a href="#notifications">🔔 Thông báo</a><a href="#ai">🤖 Trợ giảng AI</a><a href="#parent">👨‍👩‍👧 Phụ huynh</a>
     <div class="side-title">TÀI KHOẢN</div><a href="#profile">👤 Hồ sơ</a><a class="teacher-only" href="#teacher">👩🏻‍🏫 Giáo viên</a><a class="teacher-only" href="#questionBank">🧮 Ngân hàng câu hỏi</a><a class="teacher-only" href="#submissions">📨 Chấm bài</a><a class="admin-only" href="#admin">⚙️ Quản trị</a><a class="admin-only" href="#adminUsers">👥 Quản lý user</a><a class="admin-only" href="#storageHealth">🐘 PostgreSQL/Redis</a><a href="/privacy.html">🔒 Quyền riêng tư</a>
   </aside>
@@ -31,7 +33,26 @@
 
   <div class="modal-backdrop hidden" id="modalBackdrop"><div class="modal" id="modal"></div></div>
   <div class="toast" id="toast"></div>
-  <script src="js/data.js"></script>\n  <script src="js/math-bank.js"></script>\n  <script src="js/exam-bank.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/math-bank.js"></script>
+  <script src="js/exam-bank.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/student/dashboard.js"></script>
+  <script src="js/student/goals.js"></script>
+  <script src="js/student/formulas.js"></script>
+  <script src="js/student/vocab.js"></script>
+  <script src="js/student/accessibility.js"></script>
+  <script src="js/student/notes.js"></script>
+  <script src="js/student/review.js"></script>
+  <script src="js/student/quick-practice.js"></script>
+  <script src="js/student/study-path.js"></script>
+  <script src="js/student/language.js"></script>
+  <script src="js/student/quiz-tools.js"></script>
+  <script src="js/student/adaptive.js"></script>
+  <script src="js/student/speech.js"></script>
+  <script src="js/student/schedule.js"></script>
+  <script src="js/student/worksheet.js"></script>
+  <script src="js/student/profile-stats.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
