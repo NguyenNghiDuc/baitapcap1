@@ -1,0 +1,5 @@
+window.StudentFeatureHub={render(){const groups=[
+ ["Học thông minh",[["advancedDashboard","📈 Dashboard"],["personalExam","🧠 Đề cá nhân"],["mastery","🏅 Mastery"],["interactiveExercises","🧩 Bài tương tác"],["aiQuestion","🤖 AI theo câu"],["ocrScan","📷 Scan bài"]]],
+ ["Game & xã hội",[["rewards","🪙 Coin & Shop"],["gameMap","🗺 Game Map"],["friends","🤝 Bạn bè"]]],
+ ["Ứng dụng",[["settings","⚙️ Cài đặt"],["updateCenter","⬆️ Cập nhật"],["offlineCenter","📴 Offline"],["smartNotify","🔔 Nhắc học"],["helpFeedback","🆘 Trợ giúp"],["certificate","🎓 Chứng chỉ"]]]
+ ];return `<section class="page-head"><span class="eyebrow">HỌC SINH</span><h1>✨ Tất cả tiện ích</h1><p>Các tính năng nâng cao được tách module để app nhẹ và dễ nâng cấp.</p></section>${groups.map(g=>`<section class="section"><h2>${g[0]}</h2><div class="student-route-grid">${g[1].map(x=>`<button class="outline" data-route="${x[0]}">${x[1]}</button>`).join("")}</div></section>`).join("")}`}};
