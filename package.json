@@ -11,7 +11,12 @@
     "db:migrate": "node scripts/db-migrate.js",
     "db:seed": "node scripts/db-seed.js",
     "db:import-json": "node scripts/db-import-json.js",
-    "db:check": "node scripts/db-check.js"
+    "db:check": "node scripts/db-check.js",
+    "test:ui": "playwright test",
+    "test:ui:headed": "playwright test --headed",
+    "db:backup": "node scripts/db-backup.js",
+    "db:restore": "node scripts/db-restore.js",
+    "supabase:verify": "node scripts/supabase-verify.js"
   },
   "engines": {
     "node": ">=18"
@@ -23,6 +28,12 @@
     "pg": "^8.13.1",
     "ioredis": "^5.4.1",
     "web-push": "^3.6.7",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "@supabase/supabase-js": "^2.49.8",
+    "@supabase/ssr": "^0.6.1",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
   }
 }
