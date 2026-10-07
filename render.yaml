@@ -2,14 +2,31 @@ services:
   - type: web
     name: baitapcap1
     runtime: docker
-    plan: free
-    healthCheckPath: /
+    plan: starter
+    healthCheckPath: /api/health
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
+      - key: APP_PUBLIC_URL
+        sync: false
       - key: PUBLIC_BASE_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: PGSSL
+        value: 1
+      - key: PG_POOL_MAX
+        value: 5
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: REDIS_URL
         sync: false
       - key: AI_API_URL
         sync: false
@@ -17,9 +34,17 @@ services:
         sync: false
       - key: AI_MODEL
         sync: false
-      - key: GOOGLE_CLIENT_ID
+      - key: AI_VISION_MODEL
         sync: false
-      - key: GOOGLE_CLIENT_SECRET
+      - key: TURNSTILE_SITE_KEY
         sync: false
-      - key: PAYMENT_CHECKOUT_URL
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
         sync: false
