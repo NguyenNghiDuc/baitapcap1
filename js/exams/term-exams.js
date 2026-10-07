@@ -36,7 +36,7 @@ window.TermExamBank=(()=>{
   return {id,grade,subject,type:"matching",examType:"matching",q:"Nối mỗi nội dung ở cột trái với đáp án phù hợp ở cột phải.",pairs,explain:"Ghép theo đúng quy tắc/ý nghĩa đã học."}
  }
  function build(exam,seedExtra=""){
-  const seed=hash(exam.id+seedExtra),p=shuffle(pool(exam),seed),geo=shuffle(p.filter(q=>q.subject==="math"&&(q.type==="geometry"||q.type==="perimeter"||q.type==="chart")),seed+9);
+  const seed=hash(exam.id+seedExtra),p=shuffle(pool(exam),seed),geo=shuffle((D.questions||[]).filter(q=>q.grade===exam.grade&&q.subject==="math"&&["geometry","perimeter","chart"].includes(q.type)),seed+9);
   const used=new Set(),take=(pred)=>{const q=p.find(x=>!used.has(x.id)&&pred(x));if(q)used.add(q.id);return q};
   const out=[];let n=0;
   for(let i=0;i<15;i++){const q=take(()=>true)||p[i%p.length];if(q)out.push(cloneMcq(q,`${exam.id}-m${++n}`))}
