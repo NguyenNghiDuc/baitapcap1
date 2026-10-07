@@ -2,7 +2,7 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
-const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),handleAI=require("./routes/ai"),handleExamDrafts=require("./routes/exam-drafts"),errorTracking=require("./lib/error-tracking"),auditStore=require("./lib/audit"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
+const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),handleAI=require("./routes/ai"),handleExamDrafts=require("./routes/exam-drafts"),handleMetrics=require("./routes/metrics"),errorTracking=require("./lib/error-tracking"),auditStore=require("./lib/audit"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
 
 function load(){return storage.load()}
 function save(db){return storage.save(db)}
@@ -49,6 +49,7 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 
 async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
+ if(await handleMetrics(req,res,p,{send,parseBody,monitor}))return;
  if(!rate(ip,"api",180,60e3))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&["/api/ai","/api/ai/analyze-wrong"].includes(p)&&!rate(ip,"ai",24,60e3))return send(res,429,{error:"AI đang bận, thử lại sau"});
  if(req.method==="POST"&&p==="/api/student/ocr"&&!rate(ip,"ocr",10,60e3))return send(res,429,{error:"OCR đang bận, thử lại sau"});
