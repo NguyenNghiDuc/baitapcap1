@@ -30,7 +30,8 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword("Demo1234!"),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
 seedAdmin();
 
-async function api(req,res,p,ip){\n if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
+async function api(req,res,p,ip){
+ if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(!rate(ip,"api",120))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&p==="/api/register"){if(!rate(ip,"auth",10,10*60e3))return send(res,429,{error:"Thử lại sau"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
   const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),role=["student","parent","teacher"].includes(d.role)?d.role:"student";
