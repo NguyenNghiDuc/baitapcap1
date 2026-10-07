@@ -27,7 +27,7 @@ window.PerfLoader=(()=>{
  }
  async function ensureRoute(route){for(const src of routeFiles[route]||[])await script(src)}
  function prefetch(route){const files=routeFiles[route]||[];const run=()=>files.forEach(async src=>{if(loaded.has(src))return;const l=document.createElement("link");l.rel="prefetch";l.as="script";l.href=await versioned(src);document.head.appendChild(l)});("requestIdleCallback" in window)?requestIdleCallback(run,{timeout:2500}):setTimeout(run,1200)}
- function cleanupRoute(){window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.()}
+ function cleanupRoute(){window.API?.abortAll?.();window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.();try{window.speechSynthesis?.cancel?.()}catch{}try{window._btSpeechRecognition?.abort?.()}catch{}if(window._btBreak){clearTimeout(window._btBreak);window._btBreak=null}}
  window.addEventListener("online",()=>window.OfflineSyncQueue?.flush?.());
  return {ensureRoute,prefetch,cleanupRoute,routeFiles}
 })();
