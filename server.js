@@ -2,7 +2,7 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
-const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),errorTracking=require("./lib/error-tracking"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
+const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),handleAI=require("./routes/ai"),errorTracking=require("./lib/error-tracking"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
 
 function load(){return storage.load()}
 function save(db){return storage.save(db)}
@@ -43,6 +43,7 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 
 async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
+ if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor}))return;
  if(await handleCaptcha(req,res,p,{send,parseBody}))return;
