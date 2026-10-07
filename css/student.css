@@ -1,0 +1,17 @@
+.student-hub{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.student-hub .test-card{min-height:150px}
+.question-nav{display:grid;grid-template-columns:repeat(10,minmax(34px,1fr));gap:7px;margin-top:10px}
+.qnav{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:9px;padding:8px 4px;font-weight:700}
+.qnav.answered{background:#e9f8ee;border-color:#80c99a}.qnav.current{outline:3px solid rgba(20,120,223,.22);border-color:var(--blue)}.qnav.marked{box-shadow:inset 0 -4px #ffb433}
+.quiz-nav-panel{margin-top:14px}.quiz-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.quiz-toolbar button{flex:0 0 auto}
+#scratchPad,.student-textarea{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:12px;resize:vertical}
+.large-text body{font-size:18px}.large-text .question-card h2{font-size:30px}.large-text button,.large-text input,.large-text select{font-size:17px}
+.high-contrast{--bg:#fff;--surface:#fff;--surface2:#f2f2f2;--text:#000;--muted:#222;--line:#000;--blue:#003cff}
+.high-contrast[data-theme="dark"]{--bg:#000;--surface:#050505;--surface2:#111;--text:#fff;--muted:#eee;--line:#fff;--blue:#7bb7ff}
+.focus-mode .sidebar,.focus-mode .topnav,.focus-mode .profile-mini{display:none!important}.focus-mode .content{margin-left:0;max-width:1100px;margin-right:auto}.focus-mode .topbar{justify-content:flex-end}
+.dyslexia-mode body{font-family:Arial,Verdana,sans-serif!important;letter-spacing:.03em;line-height:1.65}
+.student-progress{height:12px;border-radius:999px;background:var(--surface2);overflow:hidden}.student-progress span{display:block;height:100%;background:linear-gradient(90deg,#36b37e,#1478df)}
+.student-route-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.student-route-grid button{min-height:80px}
+.dict-input{min-width:180px}.schedule-del,.note-del{white-space:nowrap}
+@media(max-width:900px){.student-hub{grid-template-columns:1fr 1fr}.question-nav{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:580px){.student-hub,.student-route-grid{grid-template-columns:1fr}.question-nav{grid-template-columns:repeat(5,1fr)}}
