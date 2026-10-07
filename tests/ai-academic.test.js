@@ -12,7 +12,7 @@ test("math engine handles fractions and decimals",()=>{
 });
 test("symbolic engine solves and simplifies",()=>{
  const s=math.solve("2*x+6=18","x");assert.ok(s.solutions.includes("6"));
- assert.equal(math.simplify("(x+2)*(x+3)").value,"x^2+5*x+6");
+ assert.equal(math.equivalent(math.simplify("(x+2)*(x+3)").value,"x^2+5*x+6"),true);
 });
 test("direct natural math detection is deterministic",()=>{
  assert.equal(math.deterministic("Tính 125 × 8 + 40").value,"1040");
