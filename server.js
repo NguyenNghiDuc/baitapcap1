@@ -120,9 +120,29 @@ async function api(req,res,p,ip){
  return send(res,404,{error:"API không tồn tại"});
 }
 
-storage.init().then(()=>{errorTracking.init();seedAdmin();monitor.info("startup",{storage:storage.status(),supabase:supabase.enabled()});return http.createServer(async(req,res)=>{
- const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket.remoteAddress||"unknown";
- if(p.startsWith("/api/"))return api(req,res,p,ip);
- let file=p==="/"?"index.html":decodeURIComponent(p.slice(1));file=path.normalize(file).replace(/^(\.\.(\/|\\|$))+/,"");const abs=path.join(ROOT,file);if(!abs.startsWith(ROOT)){res.writeHead(403);return res.end("Forbidden")}
- fs.stat(abs,(err,st)=>{if(err||!st.isFile()){res.writeHead(404);return res.end("Not found")}res.writeHead(200,{"Content-Type":mime(abs),"Cache-Control":file.endsWith(".html")?"no-cache":"public, max-age=3600","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin","Content-Security-Policy":"default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: wss:; worker-src 'self' blob:; manifest-src 'self'"});fs.createReadStream(abs).pipe(res)})
-}).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT));}).catch(e=>{monitor.error("startup_failed",{message:e.message});errorTracking.capture(e,{phase:"startup"});console.error("[startup]",e);process.exit(1)});
+let bootPromise=null;
+function bootstrap(){
+ if(!bootPromise)bootPromise=storage.init().then(()=>{errorTracking.init();seedAdmin();monitor.info("startup",{storage:storage.status(),supabase:supabase.enabled()});return true});
+ return bootPromise
+}
+async function handler(req,res){
+ await bootstrap();
+ try{
+  const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket?.remoteAddress||req.headers?.["x-forwarded-for"]||"unknown";
+  if(p.startsWith("/api/"))return await api(req,res,p,ip);
+  let file=p==="/"?"index.html":decodeURIComponent(p.slice(1));file=path.normalize(file).replace(/^(\.\.(\/|\\|$))+/,"");const abs=path.join(ROOT,file);
+  if(!abs.startsWith(ROOT)){res.writeHead(403);return res.end("Forbidden")}
+  return await new Promise(resolve=>fs.stat(abs,(err,st)=>{
+   if(err||!st.isFile()){res.writeHead(404);res.end("Not found");return resolve()}
+   res.writeHead(200,{"Content-Type":mime(abs),"Cache-Control":file.endsWith(".html")?"no-cache":"public, max-age=3600","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin","Content-Security-Policy":"default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: wss:; worker-src 'self' blob:; manifest-src 'self'"});
+   const rs=fs.createReadStream(abs);rs.on("close",resolve);rs.on("error",()=>resolve());rs.pipe(res)
+  }))
+ }catch(e){
+  monitor.error("request_failed",{message:e.message,url:req.url});errorTracking.capture(e,{url:req.url});
+  if(!res.headersSent)send(res,500,{error:"Lỗi máy chủ"});else try{res.end()}catch{}
+ }
+}
+if(require.main===module){
+ bootstrap().then(()=>http.createServer((req,res)=>handler(req,res)).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT))).catch(e=>{monitor.error("startup_failed",{message:e.message});errorTracking.capture(e,{phase:"startup"});console.error("[startup]",e);process.exit(1)})
+}
+module.exports={handler,bootstrap};
