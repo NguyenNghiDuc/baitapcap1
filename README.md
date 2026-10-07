@@ -102,3 +102,36 @@ Giáo viên/Admin có thể import thêm câu bằng Excel/CSV theo mẫu `templ
 8. Redis session + PostgreSQL adapter/migration khi có `REDIS_URL` và `DATABASE_URL`.
 
 CI kiểm tra số lượng câu, lời giải, import, phòng thi, export và API quản trị.
+
+
+## PostgreSQL thật
+
+App đã có schema PostgreSQL production trong `db/schema.sql`, Docker Compose local và các lệnh migration/import.
+
+Cách nhanh nhất trên máy:
+
+```bash
+docker compose up -d postgres
+copy .env.example .env
+npm install
+npm run db:migrate
+npm run db:seed
+npm run db:check
+```
+
+Nếu muốn chuyển dữ liệu hiện tại từ `data/db.json` sang PostgreSQL:
+
+```bash
+npm run db:import-json
+```
+
+Connection local mặc định:
+
+```env
+DATABASE_URL=postgresql://baitapcap1:baitapcap1_dev_password@127.0.0.1:5432/baitapcap1
+PGSSL=0
+```
+
+Hướng dẫn đầy đủ xem `docs/DATABASE.md`.
+
+Lưu ý: app vẫn giữ JSON fallback để chạy khi chưa có DATABASE_URL. Khi deploy production, nên cấu hình PostgreSQL + Redis và backup DB định kỳ.
