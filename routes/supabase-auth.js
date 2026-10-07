@@ -1,6 +1,6 @@
 const crypto=require("crypto");
 module.exports=async function handleSupabaseAuth(req,res,p,ctx){
- const {send,parseBody,load,save,supabase,monitor}=ctx;
+ const {send,parseBody,load,save,supabase,monitor,pg}=ctx;
  if(req.method==="GET"&&p==="/api/public-config"){
   return send(res,200,{supabase:{url:process.env.SUPABASE_URL||"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY||"",enabled:supabase.enabled()},captcha:{provider:process.env.CAPTCHA_PROVIDER||"",siteKey:process.env.TURNSTILE_SITE_KEY||""},appUrl:process.env.APP_PUBLIC_URL||process.env.PUBLIC_BASE_URL||""}),true;
  }
@@ -18,7 +18,7 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
    if(["student","parent","teacher"].includes(md.role)&&u.role!=="admin")u.role=md.role;
    if(Number(md.grade)>=1&&Number(md.grade)<=5)u.grade=Number(md.grade);
   }
-  save(db);monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
+  save(db);await pg.upsertUser(u).catch(e=>monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id}));monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
   return send(res,200,{user:{id:u.id,email:u.email,name:u.name,role:u.role,grade:u.grade,avatar:u.avatar,emailVerified:!!u.emailVerified}}),true;
  }
  return false;
