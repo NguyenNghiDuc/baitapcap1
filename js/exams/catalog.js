@@ -1,0 +1,1 @@
+window.TermExamCatalog={render(){return window.TermExamBank?.render()||'<div class="empty">Ngân hàng đề chưa tải.</div>'},bind(){window.TermExamBank?.bind((qs,title,meta)=>window.ExamRunner?.start(qs,title,meta))}};
