@@ -34,4 +34,4 @@ test("admin user and storage APIs are protected and functional",async()=>{
   assert.equal(health.status,200);const h=await health.json();assert.equal(h.postgres.enabled,false);assert.equal(h.redis.enabled,false);
 });
 
-test("app version endpoint reports 3.0.0",async()=>{const r=await fetch(base+"/api/app/version");assert.equal(r.status,200);const j=await r.json();assert.equal(j.version,"3.0.0")});
+test("app version endpoint reports 3.0.0",async()=>{const r=await fetch(base+"/api/app/version");assert.equal(r.status,200);const j=await r.json();assert.equal(j.version,"3.1.0")});
