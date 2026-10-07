@@ -79,3 +79,26 @@ Copy `.env.example` thành biến môi trường trên server và điền:
 - `SMTP_URL` (phần gửi mail production cần nối SMTP provider)
 
 > Trước khi có người dùng thật: chuyển JSON store sang PostgreSQL, session sang Redis/database + cookie HttpOnly/Secure, thêm CAPTCHA/Web Push/object storage và compliance dữ liệu trẻ em như checklist trong `docs/PRODUCTION.md`.
+
+
+## Toán lớp 4–5 trọng tâm
+
+Hệ thống có **10 bài Toán × 30 câu = 300 câu**, mỗi câu có đáp án và lời giải từng bước:
+
+- Lớp 4: nhân số tự nhiên, chia số tự nhiên, quy đồng mẫu số, cộng/trừ phân số, hình chữ nhật & hình vuông.
+- Lớp 5: nhân số thập phân, chia số thập phân, phân số nâng cao, tam giác/hình thang/hình tròn, hình hộp chữ nhật & hình lập phương.
+
+Giáo viên/Admin có thể import thêm câu bằng Excel/CSV theo mẫu `templates/questions-template.csv`.
+
+## 8 chức năng trọng tâm đã nối
+
+1. Import câu hỏi Excel/CSV.
+2. Ngân hàng câu hỏi Toán lớp 4–5.
+3. Phòng thi online có mã phòng.
+4. Xuất kết quả Excel/PDF.
+5. AI phân tích câu sai và gợi ý ôn tập.
+6. Web Push (cần VAPID keys khi deploy).
+7. Admin quản lý tài khoản, vai trò, khóa/mở user.
+8. Redis session + PostgreSQL adapter/migration khi có `REDIS_URL` và `DATABASE_URL`.
+
+CI kiểm tra số lượng câu, lời giải, import, phòng thi, export và API quản trị.
