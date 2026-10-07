@@ -1,7 +1,7 @@
 window.ExamRunner=(()=>{
  let quiz=null;
  const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
- function save(){localStorage.setItem("bt_term_quiz",JSON.stringify(quiz))}
+ function save(){localStorage.setItem("bt_term_quiz",JSON.stringify(quiz));window.OfflineSyncQueue?.saveDraft?.({kind:"term",quiz})}
  function start(questions,title,meta={}){
   if(!Array.isArray(questions)||questions.length!==30)return alert("Đề chưa đủ 30 câu.");
   quiz={questions,i:0,answers:{},marked:[],title,grade:questions[0]?.grade||meta.grade||4,start:Date.now(),meta};
@@ -27,8 +27,8 @@ window.ExamRunner=(()=>{
   const results=JSON.parse(localStorage.getItem("bt_results")||"[]");results.push(result);localStorage.setItem("bt_results",JSON.stringify(results));
   window.StudentReview?.add(wrong.map(q=>({id:q.id,q:q.q,options:q.options,answer:q.answer,grade:q.grade,subject:q.subject,type:q.type,topic:q.type,explain:q.explain})));
   window.StudentRewards?.earn(score,correct);window.StudentMastery?.record(quiz.questions,correctIds);
-  try{if(API.token)await API.post("/api/results",{...result,wrongQuestionIds:wrong.map(q=>q.id)})}catch{}
-  localStorage.removeItem("bt_term_quiz");
+  if(API.token){result.clientSubmissionId=window.OfflineSyncQueue?.enqueueResult?.({...result,wrongQuestionIds:wrong.map(q=>q.id)});await window.OfflineSyncQueue?.flush?.()}
+  localStorage.removeItem("bt_term_quiz");window.OfflineSyncQueue?.clearDraft?.();
   document.querySelector("#content").innerHTML=`<section class="result-card"><div class="score-ring"><b>${score}%</b><span>${correct}/30 đúng</span></div><h1>${score>=80?"Làm rất tốt 🎉":score>=50?"Khá tốt 👍":"Cần ôn lại 💪"}</h1><p>${quiz.meta.daily?"Đây là bài ôn hằng ngày.":"Đề kiểm tra theo học kỳ."} Các câu sai đã được đưa vào mục Ôn câu sai.</p><div class="result-review">${quiz.questions.map((q,i)=>{const ok=window.ExamInteraction.isCorrect(q,quiz.answers[q.id]);return `<div class="review ${ok?"":"bad"}"><b>Câu ${i+1}: ${esc(q.q)}</b><p>Đáp án đúng: ${esc(window.ExamInteraction.correctText(q))}</p><small>💡 ${esc(q.explain||"")}</small></div>`}).join("")}</div><div class="quiz-actions"><button class="outline" id="backTests">← Về danh sách đề</button><button class="primary" id="reviewWrongNow">🧠 Ôn câu sai</button></div></section>`;
   document.querySelector("#backTests").onclick=()=>{location.hash="tests"};
   document.querySelector("#reviewWrongNow").onclick=()=>{location.hash="wrongReview"};
