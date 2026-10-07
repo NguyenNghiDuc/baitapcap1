@@ -2,7 +2,7 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
-const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
+const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
 
 function load(){return storage.load()}
 function save(db){return storage.save(db)}
@@ -13,7 +13,20 @@ function safeUser(u){if(!u)return null;return {id:u.id,name:u.name,email:u.email
 function send(res,code,obj,extra={}){res.writeHead(code,{"Content-Type":"application/json; charset=utf-8","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin","Permissions-Policy":"camera=(), geolocation=(), microphone=(self)",...extra});res.end(JSON.stringify(obj))}
 function parseBody(req){return new Promise((resolve,reject)=>{let d="";req.on("data",c=>{d+=c;if(d.length>MAX_BODY){reject(new Error("too_large"));req.destroy()}});req.on("end",()=>{try{resolve(JSON.parse(d||"{}"))}catch{reject(new Error("bad_json"))}})})}
 function token(req){return (req.headers.authorization||"").replace(/^Bearer\s+/i,"")}
-async function auth(req){const t=token(req);if(!t)return null;const ss=await sessionStore.get(t);if(!ss||ss.exp<Date.now()){if(ss)await sessionStore.del(t);return null}return load().users.find(x=>x.id===ss.uid)||null}
+async function auth(req){
+ const t=token(req);if(!t)return null;
+ const ss=await sessionStore.get(t);
+ if(ss&&ss.exp>=Date.now())return load().users.find(x=>x.id===ss.uid)||null;
+ if(ss&&ss.exp<Date.now())await sessionStore.del(t);
+ if(supabase.enabled()){
+  const su=await supabase.getUserFromToken(t);
+  if(su){
+   const db=load();let u=db.users.find(x=>x.authUserId===su.id||String(x.email||"").toLowerCase()===String(su.email||"").toLowerCase());
+   if(u){u.authUserId=su.id;u.emailVerified=!!su.email_confirmed_at;save(db);return u}
+  }
+ }
+ return null
+}
 async function requireUser(req,res,roles){const u=await auth(req);if(!u){send(res,401,{error:"Bạn cần đăng nhập"});return null}if(u.locked){send(res,423,{error:"Tài khoản đã bị khóa"});return null}if(roles&&!roles.includes(u.role)){send(res,403,{error:"Bạn không có quyền thực hiện"});return null}return u}
 function rate(ip,key="global",limit=80,windowMs=60e3){const k=ip+":"+key,now=Date.now(),arr=(rateBuckets.get(k)||[]).filter(t=>now-t<windowMs);arr.push(now);rateBuckets.set(k,arr);return arr.length<=limit}
 function audit(db,user,action,meta={}){db.audit.unshift({id:id(),userId:user?.id||null,action,meta,at:new Date().toISOString()});db.audit=db.audit.slice(0,1000)}
@@ -29,6 +42,9 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword("27032006"),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
 
 async function api(req,res,p,ip){
+ if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor}))return;
+ if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor}))return;
+ if(await handleCaptcha(req,res,p,{send,parseBody}))return;
  if(await handleApp(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(await handleExamSettings(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
@@ -101,7 +117,7 @@ async function api(req,res,p,ip){
  return send(res,404,{error:"API không tồn tại"});
 }
 
-storage.init().then(()=>{seedAdmin();return http.createServer(async(req,res)=>{
+storage.init().then(()=>{seedAdmin();monitor.info("startup",{storage:storage.status(),supabase:supabase.enabled()});return http.createServer(async(req,res)=>{
  const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket.remoteAddress||"unknown";
  if(p.startsWith("/api/"))return api(req,res,p,ip);
  let file=p==="/"?"index.html":decodeURIComponent(p.slice(1));file=path.normalize(file).replace(/^(\.\.(\/|\\|$))+/,"");const abs=path.join(ROOT,file);if(!abs.startsWith(ROOT)){res.writeHead(403);return res.end("Forbidden")}
