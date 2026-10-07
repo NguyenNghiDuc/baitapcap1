@@ -9,7 +9,7 @@ window.StudentRegistry=(()=>{
  return {
   routes,utilities,
   has(route){return !!routes[route]},
-  async render(route,ctx={}){const m=window[routes[route]];if(!m?.render)return '<div class="empty">Module chưa tải.</div>';return await m.render(ctx.user)},
+  async render(route,ctx={}){if(route==="gameMap"&&!window.StudentParentLock?.allowed("game"))return `<div class="empty large"><h2>🔐 Game đang bị Parent Lock giới hạn</h2></div>`;if(route==="rewards"&&!window.StudentParentLock?.allowed("reward"))return `<div class="empty large"><h2>🔐 Shop đang bị Parent Lock giới hạn</h2></div>`;const m=window[routes[route]];if(!m?.render)return '<div class="empty">Module chưa tải.</div>';return await m.render(ctx.user)},
   bind(route,ctx){const m=window[routes[route]];if(!m?.bind)return;const deps={
    settings:[ctx.toast],updateCenter:[ctx.toast],offlineCenter:[ctx.toast],rewards:[ctx.toast,ctx.render],gameMap:[ctx.nav,ctx.toast],
    friends:[ctx.startCustom,ctx.toast,ctx.render],aiQuestion:[ctx.toast],ocrScan:[ctx.toast],parentLock:[ctx.toast],
