@@ -3,7 +3,7 @@ window.StudentRegistry=(()=>{
   settings:"StudentSettings",updateCenter:"StudentUpdateCenter",offlineCenter:"StudentOfflineCenter",smartNotify:"StudentSmartNotify",
   rewards:"StudentRewards",gameMap:"StudentGameMap",friends:"StudentFriends",aiQuestion:"StudentAIQuestion",ocrScan:"StudentOCRScan",
   advancedDashboard:"StudentAdvancedDashboard",parentLock:"StudentParentLock",certificate:"StudentCertificate",helpFeedback:"StudentHelpFeedback",
-  personalExam:"StudentPersonalExam",mastery:"StudentMastery",interactiveExercises:"StudentInteractiveExercises"
+  personalExam:"StudentPersonalExam",mastery:"StudentMastery",interactiveExercises:"StudentInteractiveExercises",historyCompare:"StudentHistoryCompare",performanceMode:"StudentPerformanceMode",chapterAchievements:"StudentChapterAchievements"
  };
  const utilities=["StudentExamProctor","StudentI18n"];
  return {
@@ -13,7 +13,7 @@ window.StudentRegistry=(()=>{
   bind(route,ctx){const m=window[routes[route]];if(!m?.bind)return;const deps={
    settings:[ctx.toast],updateCenter:[ctx.toast],offlineCenter:[ctx.toast],rewards:[ctx.toast,ctx.render],gameMap:[ctx.nav,ctx.toast],
    friends:[ctx.startCustom,ctx.toast,ctx.render],aiQuestion:[ctx.toast],ocrScan:[ctx.toast],parentLock:[ctx.toast],
-   certificate:[ctx.toast],helpFeedback:[ctx.toast],personalExam:[ctx.startCustom],interactiveExercises:[ctx.toast]
+   certificate:[ctx.toast],helpFeedback:[ctx.toast],personalExam:[ctx.startCustom],interactiveExercises:[ctx.toast],performanceMode:[ctx.startCustom]
   };m.bind(...(deps[route]||[]))}
  }
 })();
