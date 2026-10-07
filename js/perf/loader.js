@@ -9,14 +9,14 @@ window.PerfLoader=(()=>{
   studyPath:["/js/student/study-path.js"],languageLab:["/js/student/language.js"],adaptive:["/js/student/adaptive.js"],speech:["/js/student/speech.js"],
   schedule:["/js/student/schedule.js"],worksheet:["/js/student/worksheet.js"],profileStats:["/js/student/profile-stats.js"],missions:["/js/student/missions.js"],
   leaderboard:["/js/student/leaderboard.js"],bookmarks:["/js/student/bookmarks.js"],prepPlan:["/js/student/prep-plan.js"],writing:["/js/student/writing.js"],
-  handwriting:["/js/supabase/storage.js","/js/student/handwriting.js"],sync:["/js/student/sync.js"],targetScore:["/js/student/target-score.js"],
+  handwriting:["/js/perf/image-opt.js","/js/supabase/storage.js","/js/student/handwriting.js"],sync:["/js/student/sync.js"],targetScore:["/js/student/target-score.js"],
   topics:["/js/student/topics.js"],mathWork:["/js/student/math-work.js"],settings:["/js/student/settings.js"],updateCenter:["/js/student/update-center.js"],
   offlineCenter:["/js/student/offline-center.js"],smartNotify:["/js/student/smart-notify.js"],rewards:["/js/student/rewards.js"],gameMap:["/js/student/parent-lock.js","/js/student/game-map.js"],
   friends:["/js/student/friends.js"],aiQuestion:["/js/student/ai-question.js"],ocrScan:["/js/student/ocr-scan.js"],advancedDashboard:["/js/student/advanced-dashboard.js"],
   parentLock:["/js/student/parent-lock.js"],certificate:["/js/student/certificate.js"],helpFeedback:["/js/student/help-feedback.js"],personalExam:["/js/student/personal-exam.js"],
   mastery:["/js/student/mastery.js"],interactiveExercises:["/js/student/interactive-exercises.js"],featureHub:["/js/student/feature-hub.js"],
   historyCompare:["/js/student/history-compare.js"],performanceMode:["/js/student/performance-mode.js"],chapterAchievements:["/js/student/chapter-achievements.js"],
-  materials:["/js/supabase/storage.js","/js/teacher/material-storage.js"]
+  materials:["/js/perf/image-opt.js","/js/supabase/storage.js","/js/teacher/material-storage.js"]
  };
  async function versioned(src){if(!hashPromise)hashPromise=fetch("/asset-hashes.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null);const m=await hashPromise,h=m?.hashes?.[src];return h?src+"?h="+h:src}
  async function script(src){
