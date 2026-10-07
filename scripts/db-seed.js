@@ -1,6 +1,6 @@
 const path=require("path"),crypto=require("crypto");
 require("dotenv").config({path:path.join(process.cwd(),".env")});
-const {Pool}=require("pg");
+const {Pool}=require("pg");const pgStore=require("../lib/postgres");
 function hashPassword(p){const salt=crypto.randomBytes(16).toString("hex"),hash=crypto.scryptSync(p,salt,64).toString("hex");return salt+":"+hash}
 async function main(){
  if(!process.env.DATABASE_URL)throw new Error("Thiếu DATABASE_URL");
@@ -19,7 +19,13 @@ async function main(){
     [id,email,hashPassword(password),name,role,grade,avatar]);
   }
   await pool.query("UPDATE users SET children=$1::jsonb WHERE id='demo-parent'",[JSON.stringify(["demo-student"])]);
+  await pgStore.connect();
+  const state=(await pgStore.loadAppState())||{users:[],classes:[],assignments:[],submissions:[],results:[],notifications:[],materials:[],audit:[],subscriptions:[],feedback:[],questionBank:[],examRooms:[],pushSubscriptions:[]};
+  const byId=new Map((state.users||[]).map(x=>[x.id,x]));
+  for(const [id,email,name,role,grade,avatar,password] of users)byId.set(id,{id,email,name,role,grade,avatar,emailVerified:true,password:hashPassword(password),children:id==="demo-parent"?["demo-student"]:[],createdAt:new Date().toISOString()});
+  state.users=[...byId.values()];
+  await pgStore.saveAppState(state);
   console.log("Seed OK. Admin: admin@demo.vn / 27032006");
- }finally{await pool.end()}
+ }finally{await pool.end();await pgStore.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});
