@@ -1,7 +1,8 @@
 const http=require("http"),fs=require("fs"),path=require("path"),crypto=require("crypto"),url=require("url");
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
-const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();\nconst pgStore=require("./lib/postgres"),sessionStore=require("./lib/redis-session");
+const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
+const pgStore=require("./lib/postgres"),sessionStore=require("./lib/redis-session");
 
 function defaultDb(){return {users:[],classes:[],assignments:[],submissions:[],results:[],notifications:[],materials:[],audit:[],subscriptions:[],feedback:[],questionBank:[],examRooms:[],pushSubscriptions:[]}}
 function load(){try{return Object.assign(defaultDb(),JSON.parse(fs.readFileSync(DB_PATH,"utf8")))}catch{return defaultDb()}}
