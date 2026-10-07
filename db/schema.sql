@@ -1,0 +1,11 @@
+CREATE TABLE users(id UUID PRIMARY KEY,email TEXT UNIQUE NOT NULL,password_hash TEXT NOT NULL,name TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ('student','parent','teacher','admin')),grade INT,email_verified BOOLEAN DEFAULT FALSE,created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE classes(id UUID PRIMARY KEY,name TEXT NOT NULL,grade INT NOT NULL,teacher_id UUID REFERENCES users(id),code TEXT UNIQUE NOT NULL,created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE class_students(class_id UUID REFERENCES classes(id),student_id UUID REFERENCES users(id),PRIMARY KEY(class_id,student_id));
+CREATE TABLE assignments(id UUID PRIMARY KEY,class_id UUID REFERENCES classes(id),teacher_id UUID REFERENCES users(id),title TEXT NOT NULL,subject TEXT,deadline TIMESTAMPTZ,max_attempts INT DEFAULT 1,created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE submissions(id UUID PRIMARY KEY,assignment_id UUID REFERENCES assignments(id),student_id UUID REFERENCES users(id),answers JSONB,score NUMERIC,feedback TEXT,submitted_at TIMESTAMPTZ DEFAULT now(),graded_at TIMESTAMPTZ);
+CREATE TABLE results(id UUID PRIMARY KEY,user_id UUID REFERENCES users(id),subject TEXT,grade INT,title TEXT,score NUMERIC,correct INT,total INT,wrong_question_ids JSONB,duration_sec INT,created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE materials(id UUID PRIMARY KEY,title TEXT,url TEXT,type TEXT,owner_id UUID REFERENCES users(id),created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE notifications(id UUID PRIMARY KEY,user_id UUID REFERENCES users(id),title TEXT,message TEXT,created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE audit_logs(id UUID PRIMARY KEY,user_id UUID,action TEXT NOT NULL,meta JSONB,created_at TIMESTAMPTZ DEFAULT now());
+CREATE INDEX idx_results_user_created ON results(user_id,created_at DESC);
+CREATE INDEX idx_submissions_assignment_student ON submissions(assignment_id,student_id);

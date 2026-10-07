@@ -1,0 +1,10 @@
+{
+  "name": "Bài Tập Cấp 1",
+  "short_name": "Bài Tập C1",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7fbff",
+  "theme_color": "#1478df",
+  "description": "Ứng dụng học tập cho học sinh tiểu học",
+  "icons": []
+}
