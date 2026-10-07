@@ -94,8 +94,11 @@ function prepPlan(){return window.StudentPrepPlan?.render()||errorBox("StudentPr
 function writing(){return window.StudentWriting?.render()||errorBox("StudentWriting chưa tải")}
 function handwriting(){return window.StudentHandwriting?.render()||errorBox("StudentHandwriting chưa tải")}
 function sync(){return window.StudentSync?.render()||errorBox("StudentSync chưa tải")}
+function targetScore(){return window.StudentTargetScore?.render()||errorBox("StudentTargetScore chưa tải")}
+function topics(){return window.StudentTopics?.render()||errorBox("StudentTopics chưa tải")}
+function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMathWork chưa tải")}
 
-function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync};$("#content").innerHTML=(map[state.route]||home)();bind()}
+function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync,targetScore,topics,mathWork};$("#content").innerHTML=(map[state.route]||home)();bind()}
 async function render(){shell();const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,questionBank,examRooms,adminUsers,storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};if(asyncMap[state.route]){$("#content").innerHTML='<div class="empty">Đang tải...</div>';$("#content").innerHTML=await asyncMap[state.route]();bind()}else renderSync();shell()}
 function filterLessons(){const q=norm($("#lessonSearch")?.value),g=$("#gradeFilter")?.value||"",lv=$("#levelFilter")?.value||"",s=state.subjectFilter;const a=D.lessons.filter(l=>(!q||norm(l.title+" "+subj(l.subject).name+" "+(l.topic||"")).includes(q))&&(!g||String(l.grade)===g)&&(!lv||l.level===lv)&&(!s||l.subject===s));$("#lessonResults").innerHTML=a.map(lessonRow).join("")||'<div class="empty">Không tìm thấy.</div>';bind()}
 function startCustom(qs,title="Luyện tập cá nhân"){if(!Array.isArray(qs)||!qs.length){toast("Chưa có câu phù hợp");return}const grade=qs.find(q=>q.grade)?.grade||state.user?.grade||4;state.quiz={subject:"mixed",grade,assignmentId:null,lessonId:"",examId:"",customTitle:title,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};localStorage.setItem("bt_quiz",JSON.stringify(state.quiz));quiz()}
@@ -156,6 +159,9 @@ function bind(){
  if(state.route==="writing")window.StudentWriting?.bind(toast);
  if(state.route==="handwriting")window.StudentHandwriting?.bind(toast);
  if(state.route==="sync")window.StudentSync?.bind(toast);
+ if(state.route==="targetScore")window.StudentTargetScore?.bind(startCustom);
+ if(state.route==="topics")window.StudentTopics?.bind(startCustom);
+ if(state.route==="mathWork")window.StudentMathWork?.bind();
  window.StudentAccessibility?.apply?.();
  shell()
 }
