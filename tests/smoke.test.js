@@ -34,4 +34,16 @@ test("admin user and storage APIs are protected and functional",async()=>{
   assert.equal(health.status,200);const h=await health.json();assert.equal(h.postgres.enabled,false);assert.equal(h.redis.enabled,false);
 });
 
-test("app version endpoint reports 3.0.0",async()=>{const r=await fetch(base+"/api/app/version");assert.equal(r.status,200);const j=await r.json();assert.equal(j.version,"3.1.0")});
+test("app version endpoint reports 3.0.0",async()=>{const r=await fetch(base+"/api/app/version");assert.equal(r.status,200);const j=await r.json();assert.equal(j.version,"3.1.1")});
+
+test("teacher can configure student exam times",async()=>{
+  const anon=await fetch(base+"/api/exam-settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dailyMin:25})});
+  assert.equal(anon.status,401);
+  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"giaovien@demo.vn",password:"Demo1234!"})});
+  const lj=await login.json(),token=lj.token;
+  const set=await fetch(base+"/api/exam-settings",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({dailyMin:30,grade4Min:50,grade5Min:70})});
+  assert.equal(set.status,200);const sj=await set.json();assert.equal(sj.settings.dailyMin,30);assert.equal(sj.settings.grade4Min,50);assert.equal(sj.settings.grade5Min,70);
+  const over=await fetch(base+"/api/exam-settings",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({examId:"term-g4-s1-p1-v1",minutes:35})});
+  assert.equal(over.status,200);assert.equal((await over.json()).settings.overrides["term-g4-s1-p1-v1"],35);
+  const get=await fetch(base+"/api/exam-settings");assert.equal(get.status,200);const gj=await get.json();assert.equal(gj.settings.dailyMin,30);assert.equal(gj.settings.overrides["term-g4-s1-p1-v1"],35);
+});
