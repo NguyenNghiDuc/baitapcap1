@@ -1,5 +1,5 @@
 const fs=require("fs"),path=require("path"),{spawnSync}=require("child_process");
-const roots=["js","lib"],files=[];
+const roots=["js","lib","routes","scripts"],files=[];
 function walk(dir){for(const name of fs.readdirSync(dir)){const p=path.join(dir,name),st=fs.statSync(p);if(st.isDirectory())walk(p);else if(p.endsWith(".js"))files.push(p)}}
 roots.filter(fs.existsSync).forEach(walk);
 let bad=0;
