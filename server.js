@@ -27,7 +27,7 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-student",name:"Bé Minh Anh",email:"hocsinh@demo.vn",password:hashPassword("Demo1234!"),role:"student",grade:3,avatar:"👧🏻",emailVerified:true,createdAt:now},
 {id:"demo-teacher",name:"Cô Lan",email:"giaovien@demo.vn",password:hashPassword("Demo1234!"),role:"teacher",avatar:"👩🏻‍🏫",emailVerified:true,createdAt:now},
 {id:"demo-parent",name:"Phụ huynh Minh Anh",email:"phuhuynh@demo.vn",password:hashPassword("Demo1234!"),role:"parent",avatar:"👩🏻",emailVerified:true,children:["demo-student"],createdAt:now},
-{id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword("Demo1234!"),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
+{id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword("27032006"),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
 seedAdmin();
 
 async function api(req,res,p,ip){
