@@ -7,9 +7,8 @@ RUN npm run build
 
 FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm install --omit=dev --ignore-scripts
 COPY --from=build /app /app
+RUN npm prune --omit=dev
 ENV NODE_ENV=production
 ENV STATIC_ROOT=/app/dist
 EXPOSE 3000
