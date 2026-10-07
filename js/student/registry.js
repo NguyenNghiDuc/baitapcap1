@@ -1,5 +1,5 @@
 window.StudentRegistry=(()=>{
- const routes={
+ const routes={featureHub:"StudentFeatureHub",
   settings:"StudentSettings",updateCenter:"StudentUpdateCenter",offlineCenter:"StudentOfflineCenter",smartNotify:"StudentSmartNotify",
   rewards:"StudentRewards",gameMap:"StudentGameMap",friends:"StudentFriends",aiQuestion:"StudentAIQuestion",ocrScan:"StudentOCRScan",
   advancedDashboard:"StudentAdvancedDashboard",parentLock:"StudentParentLock",certificate:"StudentCertificate",helpFeedback:"StudentHelpFeedback",
