@@ -26,7 +26,7 @@ test("student result can be exported to xlsx",async()=>{
   assert.equal(out.status,200);assert.match(out.headers.get("content-type"),/spreadsheetml/);assert.ok((await out.arrayBuffer()).byteLength>100);
 });
 test("admin user and storage APIs are protected and functional",async()=>{
-  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"Demo1234!"})});
+  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
   const lj=await login.json(),token=lj.token;
   const users=await fetch(base+"/api/admin/users",{headers:{Authorization:"Bearer "+token}});
   assert.equal(users.status,200);assert.ok((await users.json()).users.length>=4);
