@@ -1,5 +1,5 @@
 window.OfflineSyncQueue=(()=>{
- const KEY="bt_offline_queue_v1",DRAFT="bt_exam_draft_v1";let flushing=false;
+ const KEY="bt_offline_queue_v1",DRAFT="bt_exam_draft_v1";let flushing=false,draftTimer=null,lastDraftId="";
  function list(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return []}}
  function save(a){localStorage.setItem(KEY,JSON.stringify(a.slice(-100)))}
  function id(){return crypto?.randomUUID?.()||("q-"+Date.now()+"-"+Math.random().toString(36).slice(2))}
@@ -15,9 +15,13 @@ window.OfflineSyncQueue=(()=>{
    save(keep);window.dispatchEvent(new CustomEvent("bt:sync-flushed",{detail:{remaining:keep.length}}))
   }finally{flushing=false}
  }
- function saveDraft(draft){localStorage.setItem(DRAFT,JSON.stringify({...draft,savedAt:new Date().toISOString()}))}
+ function examId(d){const q=d?.quiz||d||{};return String(q?.meta?.examId||q?.examId||q?.lessonId||q?.customTitle||q?.title||"current-exam").slice(0,160)}
+ function saveDraft(draft){
+  const payload={...draft,savedAt:new Date().toISOString()};localStorage.setItem(DRAFT,JSON.stringify(payload));lastDraftId=examId(draft);
+  clearTimeout(draftTimer);draftTimer=setTimeout(async()=>{if(!navigator.onLine||!API.token)return;try{await API.post("/api/exam-drafts",{clientExamId:lastDraftId,payload},{cancelPrevious:true,key:"exam-draft",timeout:8000})}catch{}},1100)
+ }
  function loadDraft(){try{return JSON.parse(localStorage.getItem(DRAFT)||"null")}catch{return null}}
- function clearDraft(){localStorage.removeItem(DRAFT)}
+ function clearDraft(){localStorage.removeItem(DRAFT);clearTimeout(draftTimer);const id=lastDraftId;lastDraftId="";if(id&&API.token&&navigator.onLine)API.delete("/api/exam-drafts",{body:JSON.stringify({clientExamId:id}),headers:{"Content-Type":"application/json"},cancelPrevious:false,key:"draft-clear:"+id,retries:0}).catch(()=>{})}
  function count(){return list().length}
  window.addEventListener("online",()=>flush());
  return {enqueueResult,flush,saveDraft,loadDraft,clearDraft,count}
