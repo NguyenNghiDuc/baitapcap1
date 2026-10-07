@@ -43,7 +43,7 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 
 async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
- if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor}))return;
+ if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor}))return;
  if(await handleCaptcha(req,res,p,{send,parseBody}))return;
  if(await handleStorageMeta(req,res,p,{send,parseBody,requireUser,load,save,monitor}))return;
