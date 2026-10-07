@@ -130,13 +130,7 @@ async function handler(req,res){
  try{
   const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket?.remoteAddress||req.headers?.["x-forwarded-for"]||"unknown";
   if(p.startsWith("/api/"))return await api(req,res,p,ip);
-  let file=p==="/"?"index.html":decodeURIComponent(p.slice(1));file=path.normalize(file).replace(/^(\.\.(\/|\\|$))+/,"");const abs=path.join(ROOT,file);
-  if(!abs.startsWith(ROOT)){res.writeHead(403);return res.end("Forbidden")}
-  return await new Promise(resolve=>fs.stat(abs,(err,st)=>{
-   if(err||!st.isFile()){res.writeHead(404);res.end("Not found");return resolve()}
-   res.writeHead(200,{"Content-Type":mime(abs),"Cache-Control":file.endsWith(".html")?"no-cache":"public, max-age=3600","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin","Content-Security-Policy":"default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: wss:; worker-src 'self' blob:; manifest-src 'self'"});
-   const rs=fs.createReadStream(abs);rs.on("close",resolve);rs.on("error",()=>resolve());rs.pipe(res)
-  }))
+  return await staticServer.serve(req,res,ROOT,p)
  }catch(e){
   monitor.error("request_failed",{message:e.message,url:req.url});errorTracking.capture(e,{url:req.url});
   if(!res.headersSent)send(res,500,{error:"Lỗi máy chủ"});else try{res.end()}catch{}
