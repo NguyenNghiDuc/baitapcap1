@@ -97,23 +97,24 @@ function handwriting(){return window.StudentHandwriting?.render()||errorBox("Stu
 function sync(){return window.StudentSync?.render()||errorBox("StudentSync chưa tải")}
 function targetScore(){return window.StudentTargetScore?.render()||errorBox("StudentTargetScore chưa tải")}
 function topics(){return window.StudentTopics?.render()||errorBox("StudentTopics chưa tải")}
-function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMathWork chưa tải")}
 function targetScore(){return window.StudentTargetScore?.render()||errorBox("StudentTargetScore chưa tải")}
 function topics(){return window.StudentTopics?.render()||errorBox("StudentTopics chưa tải")}
 function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMathWork chưa tải")}
 
 function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync,targetScore,topics,mathWork};$("#content").innerHTML=(map[state.route]||home)();bind()}
 async function render(){
- shell();
- $("#content").innerHTML='<div class="perf-skeleton"><span></span><span></span><span></span></div>';
- try{await window.PerfLoader?.ensureRoute(state.route)}catch(e){$("#content").innerHTML=errorBox(e.message);return}
- if(window.StudentRegistry?.has(state.route)){
-  $("#content").innerHTML=await window.StudentRegistry.render(state.route,{user:state.user});bind();
-  window.StudentRegistry.bind(state.route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
- }
- const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,questionBank,examRooms,adminUsers,storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
- if(asyncMap[state.route]){$("#content").innerHTML=await asyncMap[state.route]();bind()}else renderSync();
- window.StudentI18n?.apply?.();shell()
+ try{
+  shell();
+  $("#content").innerHTML='<div class="perf-skeleton"><span></span><span></span><span></span></div>';
+  await window.PerfLoader?.ensureRoute(state.route);
+  if(window.StudentRegistry?.has(state.route)){
+   $("#content").innerHTML=await window.StudentRegistry.render(state.route,{user:state.user});bind();
+   window.StudentRegistry.bind(state.route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
+  }
+  const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,questionBank,examRooms,adminUsers,storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
+  if(asyncMap[state.route]){$("#content").innerHTML=await asyncMap[state.route]();bind()}else renderSync();
+  window.StudentI18n?.apply?.();shell()
+ }catch(e){window.RuntimeGuard?.renderError?.(e,state.route)||($("#content").innerHTML=errorBox(e.message))}
 }
 function filterLessons(){const q=norm($("#lessonSearch")?.value),g=$("#gradeFilter")?.value||"",lv=$("#levelFilter")?.value||"",s=state.subjectFilter;const a=D.lessons.filter(l=>(!q||norm(l.title+" "+subj(l.subject).name+" "+(l.topic||"")).includes(q))&&(!g||String(l.grade)===g)&&(!lv||l.level===lv)&&(!s||l.subject===s));$("#lessonResults").innerHTML=a.map(lessonRow).join("")||'<div class="empty">Không tìm thấy.</div>';bind()}
 function startCustom(qs,title="Luyện tập cá nhân"){if(!Array.isArray(qs)||!qs.length){toast("Chưa có câu phù hợp");return}const grade=qs.find(q=>q.grade)?.grade||state.user?.grade||4;state.quiz={subject:"mixed",grade,assignmentId:null,lessonId:"",examId:"",customTitle:title,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};localStorage.setItem("bt_quiz",JSON.stringify(state.quiz));quiz()}
