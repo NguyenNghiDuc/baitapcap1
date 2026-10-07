@@ -6,11 +6,18 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "check": "node --check server.js && node --check js/api.js && node --check js/app.js && node --check js/data.js",
+    "check": "node --check server.js && node --check js/api.js && node --check js/app.js && node --check js/data.js && node --check js/math-bank.js && node --check lib/postgres.js && node --check lib/redis-session.js",
     "test": "node --test tests/*.test.js"
   },
   "engines": {
     "node": ">=18"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "xlsx": "^0.18.5",
+    "pdfkit": "^0.15.2",
+    "pg": "^8.13.1",
+    "ioredis": "^5.4.1",
+    "web-push": "^3.6.7"
+  }
 }
