@@ -131,7 +131,7 @@ async function handler(req,res){
  try{
   const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket?.remoteAddress||req.headers?.["x-forwarded-for"]||"unknown";
   if(p.startsWith("/api/"))return await api(req,res,p,ip);
-  return await staticServer.serve(req,res,ROOT,p)
+  return await staticServer.serve(req,res,STATIC_ROOT,p)
  }catch(e){
   monitor.error("request_failed",{message:e.message,url:req.url});errorTracking.capture(e,{url:req.url});
   if(!res.headersSent)send(res,500,{error:"Lỗi máy chủ"});else try{res.end()}catch{}
