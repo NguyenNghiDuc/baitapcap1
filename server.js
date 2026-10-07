@@ -2,7 +2,7 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
-const pgStore=require("./lib/postgres"),sessionStore=require("./lib/redis-session");
+const pgStore=require("./lib/postgres"),sessionStore=require("./lib/redis-session"),handleStudent=require("./routes/student");
 
 function defaultDb(){return {users:[],classes:[],assignments:[],submissions:[],results:[],notifications:[],materials:[],audit:[],subscriptions:[],feedback:[],questionBank:[],examRooms:[],pushSubscriptions:[]}}
 function load(){try{return Object.assign(defaultDb(),JSON.parse(fs.readFileSync(DB_PATH,"utf8")))}catch{return defaultDb()}}
@@ -30,7 +30,7 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword("Demo1234!"),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
 seedAdmin();
 
-async function api(req,res,p,ip){
+async function api(req,res,p,ip){\n if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(!rate(ip,"api",120))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&p==="/api/register"){if(!rate(ip,"auth",10,10*60e3))return send(res,429,{error:"Thử lại sau"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
   const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),role=["student","parent","teacher"].includes(d.role)?d.role:"student";
