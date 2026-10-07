@@ -1,50 +1,94 @@
-# PostgreSQL setup
+# Supabase PostgreSQL setup
 
-## Cách dễ nhất trên máy Windows
+App này dùng PostgreSQL trực tiếp, nên Supabase Database dùng được ngay.
 
-1. Cài Docker Desktop.
-2. Trong thư mục dự án chạy:
-   ```bash
-   docker compose up -d postgres
-   ```
-3. Copy `.env.example` thành `.env`.
-4. Dùng DATABASE_URL:
-   ```env
-   DATABASE_URL=postgresql://baitapcap1:baitapcap1_dev_password@127.0.0.1:5432/baitapcap1
-   PGSSL=0
-   ```
-5. Cài package:
-   ```bash
-   npm install
-   ```
-6. Tạo bảng:
-   ```bash
-   npm run db:migrate
-   ```
-7. Tạo tài khoản demo:
-   ```bash
-   npm run db:seed
-   ```
-8. Nếu đang có dữ liệu trong `data/db.json`, chuyển sang PostgreSQL:
-   ```bash
-   npm run db:import-json
-   ```
-9. Kiểm tra kết nối:
-   ```bash
-   npm run db:check
-   ```
+## Cách nên dùng trên laptop Windows
 
-Admin demo sau seed:
+Supabase Dashboard -> mở project -> bấm **Connect** -> chọn **Session pooler** -> copy nguyên connection string.
+
+Session pooler phù hợp khi máy/network local chỉ có IPv4. Không tự ghép host pooler vì host được Supabase cấp theo project.
+
+Tạo file `.env` từ `.env.example`, sau đó dán:
+
+```env
+DATABASE_URL=<CONNECTION STRING COPY TỪ SUPABASE>
+PGSSL=1
+PG_POOL_MAX=5
+```
+
+## Lệnh chạy ngày mai
+
+```bash
+git pull origin main
+npm install
+copy .env.example .env
+```
+
+Sau khi dán DATABASE_URL Supabase vào `.env`:
+
+```bash
+npm run db:check
+npm run db:migrate
+npm run db:seed
+npm run db:check
+```
+
+Nếu cần chuyển dữ liệu hiện tại từ `data/db.json` lên Supabase:
+
+```bash
+npm run db:import-json
+```
+
+Sau đó chạy app:
+
+```bash
+npm start
+```
+
+## Kiểm tra trong Supabase
+
+Mở **Table Editor**. Sau migration sẽ có các bảng:
+
+- users
+- classes
+- class_students
+- assignments
+- submissions
+- results
+- notifications
+- materials
+- audit_logs
+- question_bank
+- exam_rooms
+- exam_settings
+- push_subscriptions
+- feedback
+- student_works
+- schema_migrations
+
+Admin seed:
+
 - email: `admin@demo.vn`
 - password: `27032006`
 
-## Dùng database cloud
+## Direct connection hay pooler?
 
-Nếu dùng Render PostgreSQL, Neon, Supabase hoặc Railway PostgreSQL, chỉ cần thay `DATABASE_URL` bằng connection string của dịch vụ đó. Với cloud PostgreSQL thường để `PGSSL=1`.
+- **Session pooler**: lựa chọn dễ dùng cho laptop/IPv4.
+- **Direct connection**: phù hợp backend chạy lâu dài khi môi trường có IPv6 hoặc IPv4 add-on.
+- **Transaction pooler**: hữu ích cho serverless/horizontal scaling; không phải lựa chọn đầu tiên để chạy migration trên laptop.
 
-## Lưu ý
+## SSL
 
-- Không commit file `.env`.
-- Không dùng password dev ở production.
-- Trước khi import dữ liệu thật nên backup `data/db.json`.
-- Script import dùng UPSERT/ON CONFLICT để có thể chạy lại an toàn hơn.
+Supabase hỗ trợ SSL cho Postgres. Repo đặt `PGSSL=1` cho kết nối Supabase. Production nên luôn dùng SSL.
+
+## An toàn
+
+- Không commit `.env`.
+- Không gửi database password vào chat/GitHub.
+- Nếu password có ký tự đặc biệt, dùng connection string do Supabase Dashboard cung cấp.
+- Trước khi import JSON thật, backup `data/db.json`.
+- Có thể chạy `npm run db:import-json` lại; các bảng chính dùng UPSERT/ON CONFLICT để giảm trùng dữ liệu.
+
+## Docker local
+
+Docker PostgreSQL vẫn còn trong `docker-compose.yml` nhưng chỉ là phương án phụ. Nếu dùng Supabase thì không cần chạy Docker PostgreSQL.
