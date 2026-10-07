@@ -78,7 +78,11 @@
     "/js/teacher/material-storage.js",
     "/css/performance.css",
     "/js/perf/loader.js",
-    "/js/perf/offline-queue.js"
+    "/js/perf/offline-queue.js",
+    "/js/perf/runtime-guard.js",
+    "/js/perf/list-tools.js",
+    "/js/perf/web-vitals.js",
+    "/js/perf/image-opt.js"
   ],
   "coreAssets": [
     "/",
@@ -109,6 +113,9 @@
     "/js/student/accessibility.js",
     "/js/student/parent-lock.js",
     "/js/student/registry.js",
-    "/js/app.js"
+    "/js/app.js",
+    "/js/perf/runtime-guard.js",
+    "/js/perf/list-tools.js",
+    "/js/perf/web-vitals.js"
   ]
 }
