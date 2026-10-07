@@ -1,12 +1,13 @@
-const fs=require("fs"),path=require("path"),crypto=require("crypto");
+const fs=require("fs"),path=require("path"),crypto=require("crypto"),cache=require("../lib/cache");
 module.exports=async function handleStudent(req,res,p,ctx){
  const {send,parseBody,requireUser,load,save,ROOT}=ctx;
  if(req.method==="GET"&&p==="/api/student/leaderboard"){
   const u=await requireUser(req,res);if(!u)return true;
-  const db=load(),scores=new Map();
-  for(const r of db.results){const s=scores.get(r.userId)||{attempts:0,points:0,avg:0,sum:0};s.attempts++;s.sum+=Number(r.score)||0;s.points+=(Number(r.correct)||0)*10;s.avg=Math.round(s.sum/s.attempts);scores.set(r.userId,s)}
-  const rows=[...scores.entries()].map(([userId,s])=>{const x=db.users.find(v=>v.id===userId);return {userId,name:x?.name||"Học sinh",grade:x?.grade||null,points:s.points,avg:s.avg,attempts:s.attempts}}).filter(x=>!u.grade||!x.grade||x.grade===u.grade).sort((a,b)=>b.points-a.points||b.avg-a.avg).slice(0,50);
-  return send(res,200,{leaderboard:rows}),true;
+  const key="leaderboard:g"+(u.grade||"all"),rows=await cache.remember(key,30000,async()=>{const db=load(),scores=new Map();
+   for(const r of db.results){const s=scores.get(r.userId)||{attempts:0,points:0,avg:0,sum:0};s.attempts++;s.sum+=Number(r.score)||0;s.points+=(Number(r.correct)||0)*10;s.avg=Math.round(s.sum/s.attempts);scores.set(r.userId,s)}
+   return [...scores.entries()].map(([userId,s])=>{const x=db.users.find(v=>v.id===userId);return {userId,name:x?.name||"Học sinh",grade:x?.grade||null,points:s.points,avg:s.avg,attempts:s.attempts}}).filter(x=>!u.grade||!x.grade||x.grade===u.grade).sort((a,b)=>b.points-a.points||b.avg-a.avg).slice(0,50)
+  });
+  return send(res,200,{leaderboard:rows,cached:true}),true;
  }
  if(req.method==="GET"&&p==="/api/student/sync"){
   const u=await requireUser(req,res,["student"]);if(!u)return true;const db=load();
