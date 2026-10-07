@@ -49,6 +49,7 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 
 async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
+ if(["/api/metrics","/api/client-errors"].includes(p)&&!rate(ip,"telemetry",30,60e3))return send(res,429,{error:"Too many metrics"});
  if(await handleMetrics(req,res,p,{send,parseBody,monitor}))return;
  if(!rate(ip,"api",180,60e3))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&["/api/ai","/api/ai/analyze-wrong"].includes(p)&&!rate(ip,"ai",24,60e3))return send(res,429,{error:"AI đang bận, thử lại sau"});
