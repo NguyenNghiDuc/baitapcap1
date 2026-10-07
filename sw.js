@@ -1,4 +1,4 @@
-const CACHE="btcap1-v3.1.1";
+const CACHE="btcap1-v4.0.0";
 async function assetList(){try{const r=await fetch("/offline-manifest.json",{cache:"no-store"});if(r.ok){const j=await r.json();return j.assets||[]}}catch{}return ["/","/index.html","/css/style.css","/js/app.js"];}
 self.addEventListener("install",e=>e.waitUntil((async()=>{const c=await caches.open(CACHE),assets=await assetList();await Promise.allSettled(assets.map(a=>c.add(a)));self.skipWaiting()})()));
 self.addEventListener("activate",e=>e.waitUntil((async()=>{const ks=await caches.keys();await Promise.all(ks.filter(k=>k.startsWith("btcap1-")&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})()));
