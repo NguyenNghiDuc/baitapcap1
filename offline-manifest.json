@@ -1,5 +1,5 @@
 {
-  "version": "4.0.0",
+  "version": "4.1.0",
   "assets": [
     "/",
     "/index.html",
@@ -75,6 +75,40 @@
     "/js/supabase/storage.js",
     "/js/supabase/realtime.js",
     "/js/teacher/live-classroom.js",
-    "/js/teacher/material-storage.js"
+    "/js/teacher/material-storage.js",
+    "/css/performance.css",
+    "/js/perf/loader.js",
+    "/js/perf/offline-queue.js"
+  ],
+  "coreAssets": [
+    "/",
+    "/index.html",
+    "/manifest.webmanifest",
+    "/css/style.css",
+    "/css/student.css",
+    "/css/exams.css",
+    "/css/auth.css",
+    "/css/performance.css",
+    "/js/data.js",
+    "/js/math-bank.js",
+    "/js/exam-bank.js",
+    "/js/advanced-bank.js",
+    "/js/api.js",
+    "/js/auth/supabase-client.js",
+    "/js/auth/auth-ui.js",
+    "/js/perf/loader.js",
+    "/js/perf/offline-queue.js",
+    "/js/student/quiz-tools.js",
+    "/js/student/review.js",
+    "/js/student/adaptive.js",
+    "/js/student/bookmarks.js",
+    "/js/student/exam-proctor.js",
+    "/js/student/rewards.js",
+    "/js/student/mastery.js",
+    "/js/student/i18n.js",
+    "/js/student/accessibility.js",
+    "/js/student/parent-lock.js",
+    "/js/student/registry.js",
+    "/js/app.js"
   ]
 }
