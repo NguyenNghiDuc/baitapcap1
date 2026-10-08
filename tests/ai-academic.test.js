@@ -37,3 +37,12 @@ test("math word skills solve percentage average geometry motion and proportion",
  assert.equal(skills.solveWordProblem("Tìm quãng đường khi vận tốc 45 km/h thời gian 2 giờ").answer,"90 km");
  assert.equal(skills.solveWordProblem("3 quyển 45 nghìn, 5 quyển hết bao nhiêu").answer,"75");
 });
+
+test("local tutor answers common school explanations without provider",()=>{
+ const tutor=require("../lib/ai/local-tutor");
+ for(const q of ["Giải thích phép nhân lớp 4 từng bước","Hướng dẫn phép chia lớp 4","Cách quy đồng hai phân số","Công thức hình tam giác","Thì hiện tại đơn","Chủ ngữ vị ngữ"]){
+  const out=tutor.answer(q);assert.ok(out&&out.answer.length>30,q)
+ }
+ assert.match(tutor.answer("Giải thích phép nhân lớp 4 từng bước").answer,/324 × 6/);
+ assert.match(tutor.answer("Cách quy đồng hai phân số").answer,/4\/12/);
+});
