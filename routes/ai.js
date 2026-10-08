@@ -2,6 +2,7 @@ const ai=require("../lib/ai-provider");
 const mathEngine=require("../lib/ai/math-engine");
 const mathSkills=require("../lib/ai/math-skills");
 const mathNatural=require("../lib/ai/math-natural");
+const localTutor=require("../lib/ai/local-tutor");
 const subjectRouter=require("../lib/ai/subject-router");
 const {SUBJECT,VERIFY}=require("../lib/ai/prompts");
 
@@ -37,6 +38,7 @@ module.exports=async function handleAI(req,res,p,ctx){
   try{
    if(subject==="math"){
     if(!ai.enabled()){
+     const local=localTutor.answer(prompt,"math");if(local)return send(res,200,{...local,provider:false,subject:"math"}),true;
      const ctx=mathContext(prompt);
      if(ctx.natural)return send(res,200,{answer:mathNatural.answer(ctx.natural),provider:false,subject,verified:true,engine:"math-natural",skill:ctx.natural.kind}),true;
      if(ctx.direct){
@@ -48,7 +50,7 @@ module.exports=async function handleAI(req,res,p,ctx){
     }
     const out=await verifiedMath(prompt);monitor.info("ai_math",{userId:u.id,engine:out.engine});return send(res,200,{...out,provider:true,subject}),true
    }
-   if(!ai.enabled())return send(res,200,{answer:"AI provider chưa được cấu hình.",provider:false,subject}),true;
+   if(!ai.enabled()){const local=localTutor.answer(prompt,subject);if(local)return send(res,200,{...local,provider:false,subject:local.subject||subject}),true;return send(res,200,{answer:"Mình chưa có đủ kiến thức local cho câu này. Hãy cấu hình AI provider để xử lý câu hỏi mở/nâng cao hơn.",provider:false,subject}),true}
    const answer=await ai.chat(prompt,SUBJECT[subject]||SUBJECT.general);monitor.info("ai_chat",{userId:u.id,subject});return send(res,200,{answer,provider:true,subject,verified:subject!=="general"}),true
   }catch(e){return send(res,502,{error:e.message,subject}),true}
  }
