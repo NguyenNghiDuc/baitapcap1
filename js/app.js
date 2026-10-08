@@ -8,7 +8,7 @@ const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLo
 const subj=id=>D.subjects.find(x=>x.id===id)||{id,name:id,icon:"📘",color:"blue"};
 function toast(t){const e=$("#toast");if(!e)return;e.textContent=t;e.classList.add("show");clearTimeout(window._tt);window._tt=setTimeout(()=>e.classList.remove("show"),2200)}
 function saveLocal(){localStorage.setItem("bt_results",JSON.stringify(state.results));localStorage.setItem("bt_favs",JSON.stringify(state.favorites))}
-function nav(r){if(window.ExamLock?.isActive?.()){window.ExamLock.restoreRoute();window.dispatchEvent(new CustomEvent("bt:exam-locked-click"));return}state.route=r;location.hash=r;render();$("#sidebar")?.classList.remove("open");scrollTo({top:0,behavior:"smooth"})}
+function nav(r){if(window.ExamLock?.isActive?.()&&!state.quiz)window.ExamLock.exit();if(window.ExamLock?.isActive?.()){window.ExamLock.restoreRoute();window.dispatchEvent(new CustomEvent("bt:exam-locked-click"));return}state.route=r;location.hash=r;render();$("#sidebar")?.classList.remove("open");scrollTo({top:0,behavior:"smooth"})}
 function metric(i,n,l){return `<div class="metric"><span>${i}</span><div><b>${n}</b><small>${l}</small></div></div>`}
 async function downloadProtected(path,name){try{const r=await fetch(path,{headers:API.token?{Authorization:"Bearer "+API.token}:{}});if(!r.ok){let j={};try{j=await r.json()}catch{}throw new Error(j.error||"Không tải được file")}const b=await r.blob(),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}catch(e){toast(e.message)}}
 async function restore(){if(!API.token)return;try{const j=await API.get("/api/me");state.user=j.user}catch{API.setToken("")}}
@@ -131,7 +131,7 @@ function startQuiz(subject,grade,assignmentId=null,lessonId=""){
 }
 function quiz(){
  const z=state.quiz,q=z.questions[z.i],set=z.examId?(D.examSets||[]).find(t=>t.examId===z.examId):null,timeMin=Number(set?.time||z.time||15);
- window.ExamLock?.enter({title:z.customTitle||set?.title||"Bài kiểm tra"});
+ if(z.examId)window.ExamLock?.enter({title:z.customTitle||set?.title||"Bài kiểm tra"});else window.ExamLock?.exit();
  const body=`<h2>${esc(q.q)}</h2><div class="options">${q.options.map((o,i)=>`<button class="${z.answers[q.id]===i?"selected":""}" data-answer="${i}"><span>${String.fromCharCode(65+i)}</span>${esc(o)}</button>`).join("")}</div>`;
  $("#content").innerHTML=window.LockedExamUI.render({
   title:z.customTitle||set?.title||(z.lessonId?(D.lessons.find(l=>l.lessonId===z.lessonId)?.title||`Bài kiểm tra lớp ${z.grade}`):`Đề kiểm tra lớp ${z.grade}`),
@@ -200,7 +200,7 @@ function bind(){
 $("#menuBtn")?.addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 $("#themeBtn")?.addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";document.documentElement.dataset.theme=state.theme;localStorage.setItem("bt_theme",state.theme)});
 $("#authBtn")?.addEventListener("click",async()=>{if(state.user){await window.AuthUI?.logout();state.user=null;nav("home")}else openAuth()});
-window.addEventListener("hashchange",()=>{if(window.ExamLock?.isActive?.()){window.ExamLock.restoreRoute();return}window.PerfLoader?.cleanupRoute?.();state.route=location.hash.slice(1)||"home";render();window.PerfLoader?.prefetch?.(state.route==="home"?"tests":"home")});
+window.addEventListener("hashchange",()=>{if(window.ExamLock?.isActive?.()&&!state.quiz)window.ExamLock.exit();if(window.ExamLock?.isActive?.()){window.ExamLock.restoreRoute();return}window.PerfLoader?.cleanupRoute?.();state.route=location.hash.slice(1)||"home";render();window.PerfLoader?.prefetch?.(state.route==="home"?"tests":"home")});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 const qp=new URLSearchParams(location.search);if(qp.get("auth_token")){API.setToken(qp.get("auth_token"));history.replaceState(null,"",location.pathname+location.hash)}const savedQuiz=localStorage.getItem("bt_quiz");if(savedQuiz){try{state.quiz=JSON.parse(savedQuiz)}catch{}}window.AuthUI?.setBridge(window.AppAuthBridge);
 (async()=>{try{await window.SupabaseApp?.init(u=>{state.user=u;shell()})}catch{}if(!state.user)await restore();render()})();
