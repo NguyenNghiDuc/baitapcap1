@@ -1,3 +1,6 @@
+body.exam-mode-active .topbar,body.exam-mode-active #sidebar{position:relative}
+.exam-click-shield{position:absolute;inset:0;z-index:9999;display:block;cursor:not-allowed;background:rgba(255,255,255,.001)}
+body.exam-mode-active .topbar .exam-click-shield,body.exam-mode-active #sidebar .exam-click-shield{pointer-events:auto}
 body.exam-mode-active{overflow-x:hidden}
 body.exam-mode-active .topbar{position:sticky;top:0;z-index:30}
 body.exam-mode-active .topnav,
