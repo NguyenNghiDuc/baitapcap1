@@ -17,3 +17,10 @@ test("settings and update center are exposed",()=>{assert.match(html,/href="#set
 test("advanced bank and registry load before app",()=>{assert.ok(html.indexOf("js/advanced-bank.js")>0&&html.indexOf("js/advanced-bank.js")<html.indexOf("js/app.js"));assert.ok(html.indexOf("js/student/registry.js")>0&&html.indexOf("js/student/registry.js")<html.indexOf("js/app.js"));});
 test("offline manifest lists every student module",()=>{const m=JSON.parse(fs.readFileSync(path.join(root,"offline-manifest.json"),"utf8"));for(const x of modules)assert.ok(m.assets.includes("/js/student/"+x+".js"),x);assert.equal(m.version,"4.1.0");});
 test("term exam modules are route-lazy-loadable",()=>{for(const x of ["interaction","term-exams","runner","catalog"])assert.ok(loader.includes("/js/exams/"+x+".js"),x)});
+
+test("sync routes must not return Promise placeholders",()=>{
+ const app=fs.readFileSync(path.join(root,"js","app.js"),"utf8");
+ assert.equal(/async function ai\(/.test(app),false);
+ assert.match(app,/function ai\(\)\{return pageHead/);
+ assert.equal(app.includes("[object Promise]"),false);
+});
