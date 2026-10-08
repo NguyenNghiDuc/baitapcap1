@@ -9,6 +9,9 @@ window.ExamLock=(()=>{
   if(active)return;
   active=true;lockedHash=location.hash||"#tests";leaveCount=0;
   document.body.classList.add("exam-mode-active");
+  for(const sel of [".topbar","#sidebar"]){
+   const host=document.querySelector(sel);if(host&&!host.querySelector(":scope > .exam-click-shield")){const shield=document.createElement("div");shield.className="exam-click-shield";shield.setAttribute("aria-hidden","true");host.appendChild(shield)}
+  }
   document.body.dataset.examTitle=meta.title||"Bài kiểm tra";
   history.replaceState({examLocked:true},"",location.pathname+location.search+lockedHash);
   history.pushState({examLocked:true},"",location.pathname+location.search+lockedHash);
@@ -24,7 +27,7 @@ window.ExamLock=(()=>{
    if(!active)return;
    const target=e.target.closest?.("a,button,[role=tab],[data-route]");
    if(!target)return;
-   if(target.closest("#content"))return;
+   if(target.closest(".locked-exam-shell"))return;
    e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();
    restoreRoute();
    window.dispatchEvent(new CustomEvent("bt:exam-locked-click"))
@@ -64,7 +67,7 @@ window.ExamLock=(()=>{
   if(visibilityGuard)document.removeEventListener("visibilitychange",visibilityGuard,true);
   if(beforeUnload)window.removeEventListener("beforeunload",beforeUnload);
   clickGuard=hashGuard=popGuard=keyGuard=visibilityGuard=beforeUnload=null;
-  sideNotice?.remove();sideNotice=null;
+  sideNotice?.remove();sideNotice=null;document.querySelectorAll(".exam-click-shield").forEach(x=>x.remove());
  }
  function isActive(){return active}
  function route(){return lockedHash}
