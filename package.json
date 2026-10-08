@@ -20,7 +20,8 @@
     "supabase:seed-auth": "node scripts/supabase-seed-auth.js",
     "build": "node scripts/build-production.js",
     "perf:load": "node scripts/load-test.js",
-    "perf:lighthouse": "node scripts/lighthouse-audit.js"
+    "perf:lighthouse": "node scripts/lighthouse-audit.js",
+    "ai:math-eval": "node scripts/math-eval.js"
   },
   "engines": {
     "node": ">=18"
