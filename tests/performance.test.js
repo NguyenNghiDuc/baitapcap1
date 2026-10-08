@@ -26,7 +26,7 @@ test("static server supports compression ETag and differentiated caching",()=>{
 
 test("service worker precaches only core and runtime caches routes",()=>{
  const m=JSON.parse(read("offline-manifest.json")),sw=read("sw.js");
- assert.equal(m.version,"4.1.2");
+ assert.equal(m.version,"4.1.3");
  assert.ok(m.coreAssets.length<m.assets.length);
  for(const x of ["staleWhileRevalidate","networkFirst","cacheFirst",'pathname.startsWith("/api/")'])assert.ok(sw.includes(x),x);
 });
