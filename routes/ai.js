@@ -1,10 +1,12 @@
 const ai=require("../lib/ai-provider");
 const mathEngine=require("../lib/ai/math-engine");
+const mathSkills=require("../lib/ai/math-skills");
 const subjectRouter=require("../lib/ai/subject-router");
 const {SUBJECT,VERIFY}=require("../lib/ai/prompts");
 
 function mathContext(prompt){
  const direct=mathEngine.deterministic(prompt);if(direct)return {direct};
+ const skill=mathSkills.solveWordProblem(prompt);if(skill)return {skill};
  const ctx={};
  const exprs=String(prompt).match(/(?:\d+(?:[.,]\d+)?\s*(?:[+\-*/^×÷])\s*)+\d+(?:[.,]\d+)?/g)||[];
  if(exprs.length){ctx.calculations=[];for(const e of exprs.slice(0,8)){try{ctx.calculations.push(mathEngine.calculate(e))}catch{}}}
@@ -16,6 +18,7 @@ async function verifiedMath(prompt){
   if(ctx.direct.kind==="calculation")return {answer:`Kết quả: ${ctx.direct.value}`,verified:true,engine:"deterministic"};
   if(ctx.direct.kind==="equation")return {answer:`Nghiệm: ${ctx.direct.variable} = ${ctx.direct.solutions.join(", ")}`,verified:true,engine:"symbolic"};
  }
+ if(ctx.skill)return {answer:ctx.skill.explain.join("\n")+"\nĐáp số: "+ctx.skill.answer,verified:true,engine:"math-skill",skill:ctx.skill.kind};
  const contextText=ctx.calculations?.length?"\n\nCONTEXT TÍNH TOÁN ĐÃ KIỂM TRA BẰNG MÁY:\n"+JSON.stringify(ctx.calculations):"";
  const draft=await ai.chat(prompt+contextText,SUBJECT.math);
  const checked=await ai.chat("ĐỀ GỐC:\n"+prompt+"\n\nLỜI GIẢI CẦN KIỂM TRA:\n"+draft+contextText,VERIFY);
@@ -36,6 +39,7 @@ module.exports=async function handleAI(req,res,p,ctx){
       const out=ctx.direct.kind==="calculation"?`Kết quả: ${ctx.direct.value}`:`Nghiệm: ${ctx.direct.variable} = ${ctx.direct.solutions.join(", ")}`;
       return send(res,200,{answer:out,provider:false,subject,verified:true,engine:ctx.direct.kind==="calculation"?"deterministic":"symbolic"}),true
      }
+     if(ctx.skill)return send(res,200,{answer:ctx.skill.explain.join("\n")+"\nĐáp số: "+ctx.skill.answer,provider:false,subject,verified:true,engine:"math-skill",skill:ctx.skill.kind}),true;
      return send(res,200,{answer:"AI provider chưa cấu hình. Phép tính trực tiếp vẫn dùng math engine; bài toán lời văn/nâng cao cần AI provider.",provider:false,subject}),true
     }
     const out=await verifiedMath(prompt);monitor.info("ai_math",{userId:u.id,engine:out.engine});return send(res,200,{...out,provider:true,subject}),true
