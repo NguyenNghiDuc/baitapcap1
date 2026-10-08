@@ -83,7 +83,10 @@
     "/js/perf/list-tools.js",
     "/js/perf/web-vitals.js",
     "/js/perf/image-opt.js",
-    "/css/speech.css"
+    "/css/speech.css",
+    "/css/exam-mode.css",
+    "/js/exams/exam-lock.js",
+    "/js/exams/locked-ui.js"
   ],
   "coreAssets": [
     "/",
@@ -118,6 +121,9 @@
     "/js/perf/runtime-guard.js",
     "/js/perf/list-tools.js",
     "/js/perf/web-vitals.js",
-    "/css/speech.css"
+    "/css/speech.css",
+    "/css/exam-mode.css",
+    "/js/exams/exam-lock.js",
+    "/js/exams/locked-ui.js"
   ]
 }
