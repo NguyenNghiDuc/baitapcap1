@@ -11,7 +11,7 @@ test("core scripts load before app and advanced modules are lazy-loadable",()=>{
 test("index has no literal escaped newline artifacts",()=>assert.equal(html.includes("\\n  <"),false));
 test("student CSS is loaded",()=>assert.match(html,/css\/student\.css/));
 test("app uses collection selectors for forEach",()=>{assert.equal(/(^|[^$])\$\("[^"]+"\)\.forEach/m.test(app),false)});
-test("quiz integrates navigator, wrong-bank, similar practice and autosave timestamp",()=>{assert.match(app,/StudentQuizTools/);assert.match(app,/StudentReview\?\.add/);assert.match(app,/similarWrong/);assert.match(app,/isoDate:new Date\(\)\.toISOString/);});
+test("quiz integrates locked navigator, wrong-bank, similar practice and autosave timestamp",()=>{assert.match(app,/LockedExamUI\.render/);assert.match(app,/StudentReview\?\.add/);assert.match(app,/similarWrong/);assert.match(app,/isoDate:new Date\(\)\.toISOString/);});
 test("student backend is modularized",()=>{assert.ok(fs.existsSync(path.join(root,"routes","student.js")));const server=fs.readFileSync(path.join(root,"server.js"),"utf8");assert.match(server,/handleStudent/)});
 test("settings and update center are exposed",()=>{assert.match(html,/href="#settings"/);assert.match(html,/href="#updateCenter"/);assert.match(html,/href="#featureHub"/);});
 test("advanced bank and registry load before app",()=>{assert.ok(html.indexOf("js/advanced-bank.js")>0&&html.indexOf("js/advanced-bank.js")<html.indexOf("js/app.js"));assert.ok(html.indexOf("js/student/registry.js")>0&&html.indexOf("js/student/registry.js")<html.indexOf("js/app.js"));});
