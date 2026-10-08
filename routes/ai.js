@@ -52,7 +52,7 @@ module.exports=async function handleAI(req,res,p,ctx){
   const u=await requireUser(req,res);if(!u)return true;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
   try{
    const op=String(d.op||"calculate"),expr=String(d.expression||"").slice(0,500),variable=String(d.variable||"x");
-   const result=op==="solve"?mathEngine.solve(expr,variable):op==="simplify"?mathEngine.simplify(expr):op==="factor"?mathEngine.factor(expr):op==="derive"?mathEngine.derive(expr,variable):mathEngine.calculate(expr);
+   const result=op==="solve"?mathEngine.solve(expr,variable):op==="simplify"?mathEngine.simplify(expr):op==="factor"?mathEngine.factor(expr):op==="derive"?mathEngine.derive(expr,variable):op==="gcd"?{value:String(mathEngine.gcd(d.values||[]))}:op==="lcm"?{value:String(mathEngine.lcm(d.values||[]))}:op==="stats"?mathEngine.stats(d.values||[]):op==="solveSystem"?mathEngine.solveSystem(d.equations||[],d.variables||["x","y"]):op==="combination"?{value:mathEngine.combination(d.n,d.r)}:op==="permutation"?{value:mathEngine.permutation(d.n,d.r)}:mathEngine.calculate(expr);
    return send(res,200,{result,engine:"deterministic"}),true
   }catch(e){return send(res,400,{error:e.message}),true}
  }
