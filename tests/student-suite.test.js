@@ -24,3 +24,13 @@ test("sync routes must not return Promise placeholders",()=>{
  assert.match(app,/function ai\(\)\{return pageHead/);
  assert.equal(app.includes("[object Promise]"),false);
 });
+
+test("locked exam mode blocks app navigation until submit",()=>{
+ const lock=fs.readFileSync(path.join(root,"js","exams","exam-lock.js"),"utf8");
+ const ui=fs.readFileSync(path.join(root,"js","exams","locked-ui.js"),"utf8");
+ const runner=fs.readFileSync(path.join(root,"js","exams","runner.js"),"utf8");
+ assert.match(lock,/exam-mode-active/);assert.match(lock,/beforeunload/);assert.match(lock,/hashchange/);
+ assert.match(ui,/lockedSubmit/);assert.match(ui,/Danh sách câu hỏi/);assert.match(ui,/Thời gian còn lại/);
+ assert.match(app,/ExamLock\?\.enter/);assert.match(app,/ExamLock\?\.exit/);assert.match(app,/LockedExamUI\.render/);
+ assert.match(runner,/ExamLock\?\.enter/);assert.match(runner,/ExamLock\?\.exit/);assert.match(runner,/LockedExamUI\.render/);
+});
