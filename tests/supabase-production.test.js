@@ -21,8 +21,8 @@ test("runtime uses Supabase token validation and normalized profile upsert",()=>
 });
 test("backup restore verify and seed scripts are present",()=>{for(const f of ["db-backup.js","db-restore.js","supabase-verify.js","supabase-seed-auth.js"])assert.ok(fs.existsSync(path.join(root,"scripts",f)),f)});
 test("serverless adapter reuses shared server handler",()=>{assert.match(read("api/index.js"),/require\("\.\.\/server"\)/);assert.match(read("server.js"),/module\.exports=\{handler,bootstrap\}/)});
-test("PWA v4.1 manifests auth storage and realtime assets",()=>{
- const m=JSON.parse(read("offline-manifest.json"));assert.equal(m.version,"4.1.0");
+test("PWA v4.1.1 manifests auth storage and realtime assets",()=>{
+ const m=JSON.parse(read("offline-manifest.json"));assert.equal(m.version,"4.1.1");
  for(const a of ["/css/auth.css","/js/auth/supabase-client.js","/js/supabase/storage.js","/js/supabase/realtime.js"])assert.ok(m.assets.includes(a),a);
  assert.ok(m.coreAssets.includes("/js/auth/supabase-client.js"));assert.equal(m.coreAssets.includes("/js/supabase/storage.js"),false);
 });
