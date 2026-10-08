@@ -1,10 +1,12 @@
 const ai=require("../lib/ai-provider");
 const mathEngine=require("../lib/ai/math-engine");
 const mathSkills=require("../lib/ai/math-skills");
+const mathNatural=require("../lib/ai/math-natural");
 const subjectRouter=require("../lib/ai/subject-router");
 const {SUBJECT,VERIFY}=require("../lib/ai/prompts");
 
 function mathContext(prompt){
+ const natural=mathNatural.solve(prompt);if(natural)return {natural};
  const direct=mathEngine.deterministic(prompt);if(direct)return {direct};
  const skill=mathSkills.solveWordProblem(prompt);if(skill)return {skill};
  const ctx={};
@@ -14,6 +16,7 @@ function mathContext(prompt){
 }
 async function verifiedMath(prompt){
  const ctx=mathContext(prompt);
+ if(ctx.natural)return {answer:mathNatural.answer(ctx.natural),verified:true,engine:"math-natural",skill:ctx.natural.kind};
  if(ctx.direct){
   if(ctx.direct.kind==="calculation")return {answer:`Kết quả: ${ctx.direct.value}`,verified:true,engine:"deterministic"};
   if(ctx.direct.kind==="equation")return {answer:`Nghiệm: ${ctx.direct.variable} = ${ctx.direct.solutions.join(", ")}`,verified:true,engine:"symbolic"};
@@ -35,6 +38,7 @@ module.exports=async function handleAI(req,res,p,ctx){
    if(subject==="math"){
     if(!ai.enabled()){
      const ctx=mathContext(prompt);
+     if(ctx.natural)return send(res,200,{answer:mathNatural.answer(ctx.natural),provider:false,subject,verified:true,engine:"math-natural",skill:ctx.natural.kind}),true;
      if(ctx.direct){
       const out=ctx.direct.kind==="calculation"?`Kết quả: ${ctx.direct.value}`:`Nghiệm: ${ctx.direct.variable} = ${ctx.direct.solutions.join(", ")}`;
       return send(res,200,{answer:out,provider:false,subject,verified:true,engine:ctx.direct.kind==="calculation"?"deterministic":"symbolic"}),true
