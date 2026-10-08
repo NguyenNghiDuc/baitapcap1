@@ -56,3 +56,12 @@ test("natural math commands use deterministic advanced solvers",()=>{
  const sys=natural.solve("Hệ phương trình: x+y=10; x-y=2");assert.equal(sys.solutions.x,"6");assert.equal(sys.solutions.y,"4");
  assert.equal(natural.answer(natural.solve("Tổ hợp 2 từ 10")),"C(10, 2) = 45");
 });
+
+test("extended percentage geometry and conversion benchmark",()=>{
+ assert.equal(skills.solveWordProblem("50 là 20% của số bao nhiêu").answer,"250");
+ assert.equal(skills.solveWordProblem("25 trên 200 là bao nhiêu phần trăm").answer,"12.5%");
+ assert.equal(skills.solveWordProblem("Tính thể tích hình lập phương cạnh 4 cm").answer,"64 cm³");
+ assert.equal(skills.solveWordProblem("Tính diện tích hình tròn đường kính 10 cm").answer,"78.5 cm²");
+ assert.equal(skills.solveWordProblem("2.5 km bằng bao nhiêu m").answer,"2500 m");
+ assert.equal(skills.solveWordProblem("750 g bằng bao nhiêu kg").answer,"0.75 kg");
+});
