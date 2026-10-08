@@ -1,6 +1,7 @@
 (()=>{
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],D=window.APP_DATA||{subjects:[],lessons:[],questions:[],tests:[],materials:[]};
 const state={user:null,route:location.hash.slice(1)||"home",theme:localStorage.getItem("bt_theme")||"light",results:JSON.parse(localStorage.getItem("bt_results")||"[]"),favorites:JSON.parse(localStorage.getItem("bt_favs")||"[]"),quiz:null,lastWrong:[]};
+let renderSequence=0;
 window.AppAuthBridge={setUser(u){state.user=u;render()},toast,render};
 document.documentElement.dataset.theme=state.theme;
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -103,31 +104,57 @@ function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMa
 
 function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync,targetScore,topics,mathWork};$("#content").innerHTML=(map[state.route]||home)();bind()}
 async function render(){
+ const sequence=++renderSequence,route=state.route;
  try{
   shell();
   $("#content").innerHTML='<div class="perf-skeleton"><span></span><span></span><span></span></div>';
-  await window.PerfLoader?.ensureRoute(state.route);
-  if(window.StudentRegistry?.has(state.route)){
-   $("#content").innerHTML=await window.StudentRegistry.render(state.route,{user:state.user});bind();
-   window.StudentRegistry.bind(state.route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
+  await window.PerfLoader?.ensureRoute(route);
+  if(sequence!==renderSequence||route!==state.route)return;
+  if(route==="practice"){
+   if(state.quiz?.questions?.length)quiz();
+   else{
+    $("#content").innerHTML=pageHead("BÀI TẬP","Chưa có bài tập đang làm","Hãy chọn bài trong Môn học để bắt đầu.")+
+      '<div class="panel"><button class="primary" data-route="subjects">📚 Chọn bài tập</button></div>';
+    bind()
+   }
+   return
+  }
+  if(window.StudentRegistry?.has(route)){
+   const content=await window.StudentRegistry.render(route,{user:state.user});
+   if(sequence!==renderSequence||route!==state.route)return;
+   $("#content").innerHTML=content;bind();
+   window.StudentRegistry.bind(route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
   }
   const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,questionBank,examRooms,adminUsers,storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
-  if(asyncMap[state.route]){$("#content").innerHTML=await asyncMap[state.route]();bind()}else renderSync();
+  if(asyncMap[route]){
+   const content=await asyncMap[route]();
+   if(sequence!==renderSequence||route!==state.route)return;
+   $("#content").innerHTML=content;bind()
+  }else renderSync();
   window.StudentI18n?.apply?.();shell()
- }catch(e){window.RuntimeGuard?.renderError?.(e,state.route)||($("#content").innerHTML=errorBox(e.message))}
+ }catch(e){
+  if(sequence===renderSequence&&route===state.route)
+   window.RuntimeGuard?.renderError?.(e,route)||($("#content").innerHTML=errorBox(e.message))
+ }
 }
 function filterLessons(){const q=norm($("#lessonSearch")?.value),g=$("#gradeFilter")?.value||"",lv=$("#levelFilter")?.value||"",s=state.subjectFilter;const a=D.lessons.filter(l=>(!q||norm(l.title+" "+subj(l.subject).name+" "+(l.topic||"")).includes(q))&&(!g||String(l.grade)===g)&&(!lv||l.level===lv)&&(!s||l.subject===s));$("#lessonResults").innerHTML=a.map(lessonRow).join("")||'<div class="empty">Không tìm thấy.</div>';bind()}
 function persistQuiz(){if(!state.quiz)return;localStorage.setItem("bt_quiz",JSON.stringify(state.quiz));window.OfflineSyncQueue?.saveDraft?.({kind:"quiz",quiz:state.quiz})}
-function startCustom(qs,title="Luyện tập cá nhân"){if(!Array.isArray(qs)||!qs.length){toast("Chưa có câu phù hợp");return}const grade=qs.find(q=>q.grade)?.grade||state.user?.grade||4;state.quiz={subject:"mixed",grade,assignmentId:null,lessonId:"",examId:"",customTitle:title,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};persistQuiz();quiz()}
+function openPractice(){
+ if(!state.quiz?.questions?.length)return toast("Không tìm thấy câu hỏi của bài tập.");
+ state.route="practice";renderSequence++;
+ if(location.hash.slice(1)!=="practice")location.hash="practice";
+ else render()
+}
+function startCustom(qs,title="Luyện tập cá nhân"){if(!Array.isArray(qs)||!qs.length){toast("Chưa có câu phù hợp");return}const grade=qs.find(q=>q.grade)?.grade||state.user?.grade||4;state.quiz={subject:"mixed",grade,assignmentId:null,lessonId:"",examId:"",customTitle:title,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};persistQuiz();openPractice()}
 function shuffleExamQuestion(q){const pairs=q.options.map((o,i)=>({o,ok:i===q.answer})).sort(()=>Math.random()-.5);return {...q,options:pairs.map(x=>x.o),answer:pairs.findIndex(x=>x.ok)}}
-function startExam(examId){const t=(D.examSets||[]).find(x=>x.examId===examId),raw=D.questions.filter(q=>q.examId===examId);if(!t||raw.length!==30){toast("Đề thi chưa đủ 30 câu");return}const qs=raw.map(shuffleExamQuestion).sort(()=>Math.random()-.5);state.quiz={subject:"mixed",grade:t.grade,assignmentId:null,lessonId:"",examId,questions:qs,i:0,answers:{},marked:[],start:Date.now()};window.StudentExamProctor?.start(t.time||60);persistQuiz();quiz()}
+function startExam(examId){const t=(D.examSets||[]).find(x=>x.examId===examId),raw=D.questions.filter(q=>q.examId===examId);if(!t||raw.length!==30){toast("Đề thi chưa đủ 30 câu");return}const qs=raw.map(shuffleExamQuestion).sort(()=>Math.random()-.5);state.quiz={subject:"mixed",grade:t.grade,assignmentId:null,lessonId:"",examId,questions:qs,i:0,answers:{},marked:[],start:Date.now()};window.StudentExamProctor?.start(t.time||60);persistQuiz();openPractice()}
 function startQuiz(subject,grade,assignmentId=null,lessonId=""){
  let qs=lessonId?D.questions.filter(q=>q.lessonId===lessonId):D.questions.filter(q=>q.subject===subject&&q.grade===grade);
  if(!qs.length)qs=D.questions.filter(q=>q.subject===subject&&q.grade===grade);
  if(!qs.length)qs=D.questions.filter(q=>q.subject===subject);
  if(!qs.length)qs=D.questions.slice(0,30);
  state.quiz={subject,grade,assignmentId,lessonId,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};
- persistQuiz();quiz()
+ persistQuiz();openPractice()
 }
 function quiz(){
  const z=state.quiz,q=z.questions[z.i],set=z.examId?(D.examSets||[]).find(t=>t.examId===z.examId):null,timeMin=Number(set?.time||z.time||15);
