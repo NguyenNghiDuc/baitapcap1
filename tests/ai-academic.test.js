@@ -1,5 +1,5 @@
 const test=require("node:test"),assert=require("node:assert/strict");
-const math=require("../lib/ai/math-engine"),router=require("../lib/ai/subject-router"),prompts=require("../lib/ai/prompts");
+const math=require("../lib/ai/math-engine"),skills=require("../lib/ai/math-skills"),router=require("../lib/ai/subject-router"),prompts=require("../lib/ai/prompts");
 
 test("math engine calculates arithmetic with high precision",()=>{
  assert.equal(math.calculate("125*48+360/9").value,"6040");
@@ -28,4 +28,12 @@ test("specialized prompts require verification and explanations",()=>{
  assert.match(prompts.SUBJECT.english,/giải thích/i);
  assert.match(prompts.SUBJECT.vietnamese,/bằng chứng|giải thích/i);
  assert.match(prompts.VERIFY,/kiểm tra/i);
+});
+
+test("math word skills solve percentage average geometry motion and proportion",()=>{
+ assert.equal(skills.solveWordProblem("Tính 25% của 360").answer,"90");
+ assert.equal(skills.solveWordProblem("Trung bình cộng của 8, 10, 12").answer,"10");
+ assert.equal(skills.solveWordProblem("Tính diện tích hình chữ nhật dài 8 cm rộng 5 cm").answer,"40 cm²");
+ assert.equal(skills.solveWordProblem("Tìm quãng đường khi vận tốc 45 km/h thời gian 2 giờ").answer,"90 km");
+ assert.equal(skills.solveWordProblem("3 quyển 45 nghìn, 5 quyển hết bao nhiêu").answer,"75");
 });
