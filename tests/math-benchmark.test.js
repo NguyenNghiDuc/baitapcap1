@@ -1,5 +1,5 @@
 const test=require("node:test"),assert=require("node:assert/strict");
-const math=require("../lib/ai/math-engine"),skills=require("../lib/ai/math-skills");
+const math=require("../lib/ai/math-engine"),skills=require("../lib/ai/math-skills"),natural=require("../lib/ai/math-natural");
 
 const calc=[
  ["1+2*3","7"],["(1+2)*3","9"],["1000/8","125"],["2^16","65536"],["sqrt(625)","25"],
@@ -48,4 +48,11 @@ test("word problem benchmark",()=>{
   ["3 quyển 45 nghìn, 8 quyển hết bao nhiêu","120"]
  ];
  for(const [q,a] of cases){const out=skills.solveWordProblem(q);assert.ok(out,q);assert.equal(out.answer,a,q)}
+});
+
+test("natural math commands use deterministic advanced solvers",()=>{
+ assert.equal(natural.answer(natural.solve("UCLN của 84, 126")),"UCLN(84, 126) = 42");
+ assert.equal(natural.answer(natural.solve("BCNN của 12, 18")),"BCNN(12, 18) = 36");
+ const sys=natural.solve("Hệ phương trình: x+y=10; x-y=2");assert.equal(sys.solutions.x,"6");assert.equal(sys.solutions.y,"4");
+ assert.equal(natural.answer(natural.solve("Tổ hợp 2 từ 10")),"C(10, 2) = 45");
 });
