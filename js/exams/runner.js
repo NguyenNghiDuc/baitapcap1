@@ -29,7 +29,7 @@ window.ExamRunner=(()=>{
   let correct=0;const wrong=[],correctIds=[];
   for(const q of quiz.questions){if(window.ExamInteraction.isCorrect(q,quiz.answers[q.id])){correct++;correctIds.push(q.id)}else wrong.push(q)}
   const score=Math.round(correct/30*100),durationSec=Math.round((Date.now()-quiz.start)/1000),proctor=quiz.meta.time?window.StudentExamProctor?.stop():null;
-  const result={id:Date.now(),title:quiz.title,subject:"mixed",grade:quiz.grade,correct,total:30,score,points:correct*10,durationSec,date:new Date().toLocaleDateString("vi-VN"),isoDate:new Date().toISOString(),proctor,autoSubmitted:!!auto};
+  const result={id:Date.now(),title:quiz.title,subject:quiz.meta?.subject||quiz.questions[0]?.subject||"math",grade:quiz.grade,correct,total:30,score,points:correct*10,durationSec,date:new Date().toLocaleDateString("vi-VN"),isoDate:new Date().toISOString(),proctor,autoSubmitted:!!auto};
   const results=JSON.parse(localStorage.getItem("bt_results")||"[]");results.push(result);localStorage.setItem("bt_results",JSON.stringify(results));
   window.StudentReview?.add(wrong.map(q=>({id:q.id,q:q.q,options:q.options,answer:q.answer,grade:q.grade,subject:q.subject,type:q.type,topic:q.type,explain:q.explain})));
   window.StudentRewards?.earn(score,correct);window.StudentMastery?.record(quiz.questions,correctIds);
