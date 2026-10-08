@@ -1,5 +1,5 @@
 {
-  "version": "4.1.0",
+  "version": "4.1.1",
   "assets": [
     "/",
     "/index.html",
@@ -82,7 +82,8 @@
     "/js/perf/runtime-guard.js",
     "/js/perf/list-tools.js",
     "/js/perf/web-vitals.js",
-    "/js/perf/image-opt.js"
+    "/js/perf/image-opt.js",
+    "/css/speech.css"
   ],
   "coreAssets": [
     "/",
@@ -116,6 +117,7 @@
     "/js/app.js",
     "/js/perf/runtime-guard.js",
     "/js/perf/list-tools.js",
-    "/js/perf/web-vitals.js"
+    "/js/perf/web-vitals.js",
+    "/css/speech.css"
   ]
 }
