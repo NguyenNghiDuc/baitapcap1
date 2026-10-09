@@ -16,7 +16,11 @@ window.ExamAccountGate=(()=>{
   return pending;
  }
  function prompt(container){
-  container.innerHTML='<section class="exam-auth-wall" role="status"><div class="exam-auth-symbol">🔒</div><h2>Đăng nhập để làm bài kiểm tra</h2><p>Em cần có tài khoản Bài Tập Cấp 1 và đăng nhập trước khi bắt đầu. Nếu chưa có tài khoản, hãy đăng ký miễn phí.</p><div class="exam-auth-actions"><a href="/?auth=register">Tạo tài khoản mới</a><a class="secondary" href="/?auth=login">Đã có tài khoản? Đăng nhập</a></div><button type="button" id="examBackToList">← Xem danh sách đề</button></section>';
+  const isPreview=/\.github\.dev$/i.test(location.hostname);
+  const notice=isPreview
+   ? '<p>Bạn đang mở bản chạy thử trên github.dev. Phiên đăng nhập ở baitapcap1.vercel.app không tự chuyển sang đây.</p><p><a href="https://baitapcap1.vercel.app/kiem-tra.html">Mở bài kiểm tra trên website chính →</a></p>'
+   : '<p>Hãy đăng nhập vào Bài Tập Cấp 1 trên cùng địa chỉ website này trước khi bắt đầu.</p>';
+  container.innerHTML='<section class="exam-auth-wall" role="status"><div class="exam-auth-symbol">🔒</div><h2>Đăng nhập để làm bài kiểm tra</h2>'+notice+'<div class="exam-auth-actions"><a href="/?auth=register">Tạo tài khoản mới</a><a class="secondary" href="/?auth=login">Đã có tài khoản? Đăng nhập</a></div><button type="button" id="examBackToList">← Xem danh sách đề</button></section>';
  }
  return {check,prompt};
 })();
