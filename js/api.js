@@ -1,3 +1,18 @@
+// Browser-local identifier for the account's device history. Not an auth credential.
+function getDeviceId(){
+ if(window.__btDeviceId)return window.__btDeviceId;
+ try{
+  const key="bt_client_device_id";
+  let id=localStorage.getItem(key);
+  if(!/^[A-Za-z0-9_-]{12,100}$/.test(id||"")){
+   id="btdev_"+(crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,"0")).join(""));
+   localStorage.setItem(key,id);
+  }
+  return window.__btDeviceId=id;
+ }catch{
+  return window.__btDeviceId="btdev_"+Math.random().toString(36).slice(2)+Date.now().toString(36);
+ }
+}
 window.API={
  token:localStorage.getItem("bt_token")||"",
  inflight:new Map(),
@@ -7,7 +22,7 @@ window.API={
   let lastErr;
   for(let attempt=0;attempt<=retries;attempt++){
    const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);this.inflight.set(key,ctrl);
-   const headers={...(options.body?{"Content-Type":"application/json"}:{}),...(options.headers||{})};if(this.token)headers.Authorization="Bearer "+this.token;
+   const headers={"X-Client-Device-ID":getDeviceId(),...(options.body?{"Content-Type":"application/json"}:{}),...(options.headers||{})};if(this.token)headers.Authorization="Bearer "+this.token;
    try{
     const r=await fetch(path,{...options,headers,signal:options.signal||ctrl.signal});let j={};try{j=await r.json()}catch{}
     if(!r.ok){const e=new Error(j.error||("Yêu cầu thất bại ("+r.status+")"));e.status=r.status;throw e}
