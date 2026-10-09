@@ -41,3 +41,21 @@
  .quick-grades button{font-size:11px}
  .content{padding-left:10px!important;padding-right:10px!important}
 }
+
+/* Compact, non-overflowing mobile navigation */
+@media(max-width:600px){
+ .topbar{display:grid!important;grid-template-columns:34px minmax(0,1fr) auto!important;align-items:center!important;gap:6px!important;padding-inline:10px!important;width:100%!important;overflow:hidden}
+ .topbar #menuBtn{grid-column:1;width:34px!important;min-width:34px!important;padding:4px 0!important;font-size:21px}
+ .topbar .brand{grid-column:2;display:flex!important;min-width:0!important;max-width:none!important;width:auto!important;font-size:clamp(15px,4.5vw,20px)!important;white-space:nowrap;overflow:hidden}
+ .topbar .brand>span:last-child{overflow:hidden;text-overflow:ellipsis}
+ .topbar .top-actions{grid-column:3;display:flex!important;align-items:center;gap:4px!important;margin:0!important;min-width:0}
+ .topbar .top-actions #themeBtn{display:none!important}
+ .topbar .top-actions #registerBtn,.topbar .top-actions #authBtn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;width:auto;max-width:none!important;white-space:nowrap!important;line-height:1!important;font-size:11px!important;padding:0 8px!important;border-radius:9px!important}
+ .topbar .top-actions #registerBtn[hidden]{display:none!important}
+}
+@media(max-width:380px){
+ .topbar{grid-template-columns:30px minmax(0,1fr) auto!important;padding-inline:7px!important;gap:4px!important}
+ .topbar #menuBtn{width:30px!important;min-width:30px!important}
+ .topbar .brand{font-size:15px!important}
+ .topbar .top-actions #registerBtn,.topbar .top-actions #authBtn{padding-inline:6px!important;font-size:10px!important}
+}
