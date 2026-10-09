@@ -17,7 +17,7 @@ module.exports=async function handleProfile(req,res,p,ctx){
  }
  if(req.method==="GET"&&p==="/api/profile/overview"){
   const results=(db.results||[]).filter(r=>r.userId===account.id||(r.studentId===account.id));
-  const scores=results.map(r=>Number(r.score)).filter(Number.isFinite);
+  const scores=results.filter(r=>r.score!==null&&r.score!==undefined&&r.score!=="").map(r=>Number(r.score)).filter(Number.isFinite);
   const parents=(db.users||[]).filter(x=>x.role==="parent"&&Array.isArray(x.children)&&x.children.includes(account.id)).map(x=>({name:x.name||"Phụ huynh",email:x.email||""}));
   const transactions=(db.demoTransactions||[]).filter(x=>x.userId===account.id),balance=transactions.reduce((n,x)=>n+Number(x.amount||0),0);
   const vipUntil=account.demoVipUntil||null;
