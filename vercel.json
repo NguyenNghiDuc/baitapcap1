@@ -7,6 +7,14 @@
   },
   "rewrites": [
     {
+      "source": "/api/ai/status",
+      "destination": "/api/ai-status.js"
+    },
+    {
+      "source": "/api/ai",
+      "destination": "/api/ai-chat.js"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/index.js?route=:path*"
     }
