@@ -1,0 +1,40 @@
+(()=>{
+"use strict";
+const exams=[
+{id:"de1",title:"Đề 1 – Giữa kỳ 1 Toán lớp 4",questions:[
+{n:1,q:"Chữ số 7 trong số 172 938 thuộc hàng là:",o:["Hàng chục","Hàng trăm","Hàng nghìn","Hàng chục nghìn"],a:3,why:"Trong 172 938, chữ số 7 đứng ở hàng chục nghìn."},
+{n:2,q:"Số lẻ bé nhất có 6 chữ số là:",o:["999 999","111 111","100 001","100 000"],a:2,why:"100 000 là số chẵn, nên số lẻ bé nhất có 6 chữ số là 100 001."},
+{n:3,q:"Số 9 875 624 làm tròn đến hàng trăm nghìn là:",o:["9 000 000","9 900 000","9 800 000","10 000 000"],a:1,why:"Chữ số hàng chục nghìn là 7 nên làm tròn lên thành 9 900 000."},
+{n:4,q:"Trong các số sau, số nào bé nhất? (Đề gốc có minh họa đoàn tàu, nhưng các số đã được ghi đầy đủ.)",o:["380 999 999","99 999 999","1 000 000 000","380 000 982"],a:1,why:"99 999 999 có ít chữ số hơn ba số còn lại."},
+{n:5,q:"Số liền trước của số 200 000 là:",o:["100 000","200 001","199 999","100 009"],a:2,why:"200 000 − 1 = 199 999."},
+{n:6,q:"Góc có số đo 60° là góc nào? (Câu này cần hình vẽ của đề gốc.)",o:["Góc đỉnh A; cạnh AB, AD","Góc đỉnh B; cạnh BA, BC","Góc đỉnh C; cạnh CB, CD","Góc đỉnh D; cạnh DC, DA"],a:null,reference:"B",why:"Đáp án tài liệu ghi B, nhưng chưa có hình nên chưa thể kiểm chứng. Câu này không được tính vào điểm tự động."},
+{n:7,q:"Năm 2025 thuộc thế kỉ nào?",o:["XIX","XX","XXI","XXII"],a:2,why:"Các năm 2001–2100 thuộc thế kỉ XXI."},
+{n:8,q:"Giá trị của biểu thức (m + 4) × 3 với m = 21 là:",o:["75","21","25","12"],a:0,why:"(21 + 4) × 3 = 75."},
+{n:9,q:"Đúng ghi Đ, sai ghi S: a) 1 387 000 làm tròn đến hàng trăm nghìn được 1 300 000; b) Số lẻ nhỏ nhất có hai chữ số giống nhau là 33; c) 99 999 999 > 1 000 000 000; d) Chữ số 7 trong 345 678 910 thuộc hàng chục nghìn.",answer:"a) S; b) S; c) S; d) Đ",why:"a) Là 1 400 000; b) Là 11; c) 99 999 999 < 1 000 000 000; d) 7 ở hàng chục nghìn."},
+{n:10,q:"Tính: a) 8 000 × 5 : 4; b) 13 206 × (28 : 7).",answer:"a) 10 000; b) 52 824",why:"a) 40 000 : 4 = 10 000. b) 13 206 × 4 = 52 824."},
+{n:11,q:"Điền số: a) 6 tạ 5 kg = ... kg; b) 9 234 cm² = ... dm² ... cm²; c) 5 phút 48 giây = ... giây; d) 5 thế kỉ = ... năm.",answer:"a) 605 kg; b) 92 dm² 34 cm²; c) 348 giây; d) 500 năm",why:"1 tạ = 100 kg, 1 dm² = 100 cm², 1 phút = 60 giây, 1 thế kỉ = 100 năm."},
+{n:12,q:"Tâm mua 5 quyển vở, mỗi quyển 8 000 đồng, và một hộp bút chì màu 25 000 đồng. Tâm đưa 100 000 đồng. Cô bán hàng trả lại bao nhiêu tiền?",answer:"35 000 đồng",why:"5 × 8 000 = 40 000; tổng tiền 40 000 + 25 000 = 65 000; tiền trả lại 100 000 − 65 000 = 35 000 đồng."},
+{n:13,q:"Từ các chữ số 1, 0, 5, 3, 7, 8, lập số lớn nhất và số bé nhất có 6 chữ số khác nhau.",answer:"Lớn nhất: 875 310; bé nhất: 103 578",why:"Số lớn nhất xếp giảm dần; số bé nhất lấy chữ số khác 0 nhỏ nhất ở đầu, rồi xếp các chữ số còn lại tăng dần."}
+]},
+{id:"de2",title:"Đề 2 – Giữa kỳ 1 Toán lớp 4",questions:[
+{n:1,q:"Làm tròn số 84 672 đến hàng nghìn được:",o:["80 000","85 000","84 000","84 600"],a:1,why:"Chữ số hàng trăm là 6, nên làm tròn lên 85 000."},
+{n:2,q:"Sắp xếp 332 085; 120 796; 87 900; 332 002 theo thứ tự từ bé đến lớn:",o:["332 085; 120 796; 87 900; 332 002","87 900; 120 796; 332 002; 332 085","87 900; 120 796; 332 085; 332 002","332 085; 332 002; 120 796; 87 900"],a:1,why:"87 900 < 120 796 < 332 002 < 332 085."},
+{n:3,q:"Chữ số 2 trong số 162 435 thuộc hàng:",o:["Hàng chục","Hàng trăm","Hàng nghìn","Hàng chục nghìn"],a:2,why:"162 435 có chữ số 2 ở hàng nghìn."},
+{n:4,q:"Số liền sau của số 200 000 là:",o:["100 000","200 001","199 999","100 009"],a:1,why:"200 000 + 1 = 200 001."},
+{n:5,q:"Góc đỉnh I cạnh IA, IB có số đo là bao nhiêu? (Câu này cần hình vẽ của đề gốc.)",o:["90°","120°","60°","40°"],a:null,why:"Không thể xác định số đo chỉ từ tên góc và các cạnh; cần bổ sung hình gốc. Câu này không được chấm tự động."},
+{n:6,q:"Số chẵn bé nhất có 5 chữ số là:",o:["99 999","11 111","10 001","10 000"],a:3,why:"10 000 là số đầu tiên có 5 chữ số và là số chẵn."},
+{n:7,q:"Giá trị của (m + 5) × 4 khi m = 20 là:",o:["75","100","25","50"],a:1,why:"(20 + 5) × 4 = 100."},
+{n:8,q:"Năm 1903 công bố phát minh ra máy bay. Đó là thế kỉ nào?",o:["XIX","XX","IXX","XXI"],a:1,why:"1901–2000 là thế kỉ XX."},
+{n:9,q:"a) Viết hai số chẵn còn thiếu: 250; 252; 254; ...; ...; 260. b) Viết các số lẻ còn thiếu: 2 311; 2 313; ...; ...; 2 319; ...; 2 323.",answer:"a) 256; 258. b) 2 315; 2 317; 2 321",why:"Dãy số chẵn và số lẻ đều tăng thêm 2."},
+{n:10,q:"Tính: a) 2 000 × 8 : 4; b) 12 132 × (24 : 6).",answer:"a) 4 000; b) 48 528",why:"a) 16 000 : 4 = 4 000. b) 12 132 × 4 = 48 528."},
+{n:11,q:"Điền số: a) 5 tạ 7 kg = ... kg; b) 5 134 cm² = ... dm² ... cm²; c) 3 phút 12 giây = ... giây; d) 4 thế kỉ = ... năm.",answer:"a) 507 kg; b) 51 dm² 34 cm²; c) 192 giây; d) 400 năm",why:"Đổi từng đơn vị theo hệ số: 100 kg/tạ, 100 cm²/dm², 60 giây/phút, 100 năm/thế kỉ."},
+{n:12,q:"Chị Hai mua 3 kg cam hết 60 000 đồng. Mẹ mua 2 kg cam cùng loại và 1 kg quýt giá 35 000 đồng. Mẹ hết bao nhiêu tiền?",answer:"75 000 đồng",why:"Một kg cam 60 000 : 3 = 20 000; 2 kg cam là 40 000; cộng 35 000 đồng quýt được 75 000 đồng."},
+{n:13,q:"Tính bằng cách thuận tiện nhất: 5 × 74 × 2.",answer:"740",why:"(5 × 2) × 74 = 10 × 74 = 740."}
+]}];
+const root=document.getElementById("paperExamApp");let selected=null,answers={};
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function list(){selected=null;root.innerHTML='<h2>Toán lớp 4 – Giữa học kỳ 1 (Kết nối tri thức)</h2><p>Hai đề theo tài liệu bạn cung cấp. Mỗi đề gồm 8 câu trắc nghiệm và 5 câu tự luận; hai câu cần hình vẽ chưa được tính vào chấm tự động.</p><div class="grid">'+exams.map((e,i)=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>Trắc nghiệm 4 điểm · Tự luận 6 điểm</p><button data-open="'+i+'">Làm đề '+(i+1)+'</button></article>').join("")+'</div>';root.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>open(exams[Number(b.dataset.open)]));}
+function open(e){selected=e;answers={};root.innerHTML='<button id="backList">← Quay lại danh sách</button><h2>'+esc(e.title)+'</h2><p><b>Phần 1.</b> Trắc nghiệm (4 điểm) · <b>Phần 2.</b> Tự luận (6 điểm)</p><p class="notice">Câu cần hình vẽ chưa đủ dữ liệu; hệ thống không tự chấm các câu này. Phần tự luận được đối chiếu đáp án sau khi nộp.</p>'+e.questions.map(q=>'<section class="card question"><h3>Câu '+q.n+' <small>('+ (q.n<=8?"Trắc nghiệm":"Tự luận")+')</small></h3><p>'+esc(q.q)+'</p>'+(q.o?'<div class="choices">'+q.o.map((o,i)=>'<label><input type="radio" name="q'+q.n+'" value="'+i+'"> '+String.fromCharCode(65+i)+'. '+esc(o)+'</label>').join("")+'</div>': '<textarea rows="4" data-answer="'+q.n+'" placeholder="Nhập lời giải của em..."></textarea>')+'</section>').join("")+'<button id="submitPaper">Nộp bài và xem đáp án</button>';root.querySelector("#backList").onclick=list;root.querySelector("#submitPaper").onclick=finish;}
+function finish(){if(!selected)return;const e=selected;for(const q of e.questions){if(q.o)answers[q.n]=root.querySelector('input[name="q'+q.n+'"]:checked')?.value;else answers[q.n]=root.querySelector('[data-answer="'+q.n+'"]')?.value||"";}let correct=0,eligible=0;for(const q of e.questions.slice(0,8)){if(q.a===null)continue;eligible++;if(Number(answers[q.n])===q.a&&answers[q.n]!==undefined)correct++;}root.innerHTML='<button id="backList">← Danh sách đề</button><h2>Kết quả: '+esc(e.title)+'</h2><p><b>Trắc nghiệm xác định được:</b> '+correct+'/'+eligible+' câu đúng. Đây chưa phải điểm tổng kết /10 vì còn phần tự luận và câu thiếu hình.</p>'+e.questions.map(q=>'<article class="card review"><h3>Câu '+q.n+'</h3><p>'+esc(q.q)+'</p><p><b>Em đã trả lời:</b> '+esc(q.o?(answers[q.n]===undefined?"Chưa chọn":String.fromCharCode(65+Number(answers[q.n]))):answers[q.n]||"Chưa làm")+'</p><p><b>Đáp án:</b> '+esc(q.o?(q.a===null?"Chưa đủ hình để xác minh":String.fromCharCode(65+q.a)+'. '+q.o[q.a]):q.answer)+'</p><p>'+esc(q.why)+'</p></article>').join("");root.querySelector("#backList").onclick=list;}
+list();
+})();
