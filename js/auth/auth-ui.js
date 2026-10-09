@@ -23,11 +23,18 @@ window.AuthUI=(()=>{
   const p=shell("Chào mừng quay lại","");p.innerHTML=tabs("login")+`<form id="sbLoginForm" class="auth-form"><label>Email<div class="auth-input"><span>✉️</span><input name="email" type="email" autocomplete="email" placeholder="ten@email.com" required></div></label><label>Mật khẩu<div class="auth-input"><span>🔒</span><input name="password" type="password" autocomplete="current-password" placeholder="••••••••" required><button type="button" class="eye-btn" data-eye>👁</button></div></label>${captchaBox()}<button class="auth-primary">Đăng nhập</button><button type="button" class="google-btn" id="googleLogin"><span>G</span> Tiếp tục với Google</button><button type="button" class="auth-link" id="forgotAuth">Quên mật khẩu?</button><div class="auth-status" id="authStatus"></div></form>`;bindTabs(p);bindEyes(p);renderCaptcha(p).catch(()=>{});
   p.querySelector("#sbLoginForm").onsubmit=async e=>{e.preventDefault();const st=p.querySelector("#authStatus");try{st.textContent="Đang đăng nhập...";const captchaToken=await captcha(e.currentTarget);const d=Object.fromEntries(new FormData(e.currentTarget));if(window.SupabaseApp.enabled()){const {data,error}=await window.SupabaseApp.client.auth.signInWithPassword({email:d.email,password:d.password,...(captchaToken?{options:{captchaToken}}:{})});if(error)throw error;
    if(!data?.session?.access_token)throw new Error("Chưa nhận được phiên đăng nhập.");
-   // Authentication succeeded: close the dialog immediately. Profile sync may be slow.
+   // Supabase has verified the credentials. Show the signed-in shell immediately,
+   // with minimum privileges until the server returns the authoritative role.
+   const verified=data.user||data.session.user;
+   API.setToken(data.session.access_token);
+   bridge.setUser?.({id:verified.id,email:verified.email||d.email,name:String(verified.user_metadata?.name||verified.email?.split("@")[0]||"Người dùng"),role:"student",grade:Number(verified.user_metadata?.grade)||4,avatar:"👧🏻",pendingProfile:true});
    close();
    if(location.hash!=="#home")location.hash="#home";
    bridge.toast?.("Đăng nhập thành công");
-   window.SupabaseApp.sync(data.session).then(u=>{if(u)bridge.setUser?.(u)}).catch(err=>{console.warn("Profile synchronization delayed:",err?.message||err)});
+   window.SupabaseApp.sync(data.session).then(u=>{
+    if(!u)throw new Error("Chưa nhận được hồ sơ tài khoản");
+    bridge.setUser?.(u);
+   }).catch(err=>{console.warn("Profile synchronization failed:",err?.message||err);bridge.toast?.("Không đồng bộ được hồ sơ. Hãy tải lại trang nếu thiếu quyền tài khoản.")});
 }else{const j=await API.post("/api/login",d);API.setToken(j.token);bridge.setUser?.(j.user);close();bridge.toast?.("Đăng nhập thành công")}}catch(x){st.textContent=x.message||"Đăng nhập thất bại"}};
   p.querySelector("#googleLogin").onclick=async()=>{try{if(!window.SupabaseApp.enabled())throw new Error("Supabase Auth chưa cấu hình");const redirectTo=window.SupabaseApp.config?.appUrl||location.origin+"/";const {error}=await window.SupabaseApp.client.auth.signInWithOAuth({provider:"google",options:{redirectTo}});if(error)throw error}catch(x){p.querySelector("#authStatus").textContent=x.message}};
   p.querySelector("#forgotAuth").onclick=forgot
