@@ -141,9 +141,8 @@ function filterLessons(){const q=norm($("#lessonSearch")?.value),g=$("#gradeFilt
 function persistQuiz(){if(!state.quiz)return;localStorage.setItem("bt_quiz",JSON.stringify(state.quiz));window.OfflineSyncQueue?.saveDraft?.({kind:"quiz",quiz:state.quiz})}
 function openPractice(){
  if(!state.quiz?.questions?.length)return toast("Không tìm thấy câu hỏi của bài tập.");
- state.route="practice";renderSequence++;
  if(location.hash.slice(1)!=="practice")location.hash="practice";
- else render()
+ else{state.route="practice";render()}
 }
 function startCustom(qs,title="Luyện tập cá nhân"){if(!Array.isArray(qs)||!qs.length){toast("Chưa có câu phù hợp");return}const grade=qs.find(q=>q.grade)?.grade||state.user?.grade||4;state.quiz={subject:"mixed",grade,assignmentId:null,lessonId:"",examId:"",customTitle:title,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};persistQuiz();openPractice()}
 function shuffleExamQuestion(q){const pairs=q.options.map((o,i)=>({o,ok:i===q.answer})).sort(()=>Math.random()-.5);return {...q,options:pairs.map(x=>x.o),answer:pairs.findIndex(x=>x.ok)}}
@@ -157,9 +156,10 @@ function startQuiz(subject,grade,assignmentId=null,lessonId=""){
  persistQuiz();openPractice()
 }
 function quiz(){
- const z=state.quiz,q=z.questions[z.i],set=z.examId?(D.examSets||[]).find(t=>t.examId===z.examId):null,timeMin=Number(set?.time||z.time||15);
+ const z=state.quiz;if(!z?.questions?.length){state.quiz=null;localStorage.removeItem("bt_quiz");nav("subjects");return}z.i=Math.max(0,Math.min(z.questions.length-1,Number(z.i)||0));const q=z.questions[z.i],set=z.examId?(D.examSets||[]).find(t=>t.examId===z.examId):null,timeMin=Number(set?.time||z.time||15);
  if(z.examId)window.ExamLock?.enter({title:z.customTitle||set?.title||"Bài kiểm tra"});else window.ExamLock?.exit();
  const body=`<h2>${esc(q.q)}</h2><div class="options">${q.options.map((o,i)=>`<button class="${z.answers[q.id]===i?"selected":""}" data-answer="${i}"><span>${String.fromCharCode(65+i)}</span>${esc(o)}</button>`).join("")}</div>`;
+ if(!window.LockedExamUI?.render)throw new Error("Giao diện bài tập chưa được tải. Vui lòng cập nhật trang.");
  $("#content").innerHTML=window.LockedExamUI.render({
   title:z.customTitle||set?.title||(z.lessonId?(D.lessons.find(l=>l.lessonId===z.lessonId)?.title||`Bài kiểm tra lớp ${z.grade}`):`Đề kiểm tra lớp ${z.grade}`),
   subject:q.subject||z.subject,grade:z.grade,index:z.i,questions:z.questions,answers:z.answers,timeMin,bodyHtml:body,typeLabel:"Trắc nghiệm"
