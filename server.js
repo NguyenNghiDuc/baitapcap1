@@ -143,7 +143,7 @@ async function handler(req,res){
   const parsed=url.parse(req.url,true);
   let p=parsed.pathname;
   const routeParam=typeof parsed.query?.route==="string"?parsed.query.route:"";
-  if((p==="/api/index.js"||p==="/api/index")&&routeParam&&/^[a-zA-Z0-9_./-]{1,200}$/.test(routeParam)&&!routeParam.split("/").includes(".."))p="/api/"+routeParam.replace(/^\\/+/, "");
+  if((p==="/api/index.js"||p==="/api/index")&&routeParam&&/^[a-zA-Z0-9_./-]{1,200}$/.test(routeParam)&&!routeParam.split("/").includes(".."))p="/api/"+routeParam.split("/").filter(Boolean).join("/");
   if(p==="/api/ai-status.js"||p==="/api/ai-status")p="/api/ai/status";
   if(p==="/api/ai-chat.js"||p==="/api/ai-chat")p="/api/ai";
   const ip=req.socket?.remoteAddress||req.headers?.["x-forwarded-for"]||"unknown";
