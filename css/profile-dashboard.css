@@ -59,3 +59,23 @@
 @media(max-width:1250px){.profile-top{grid-template-columns:1fr}.profile-columns{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-columns>div:last-child{grid-column:1/-1}}
 @media(max-width:760px){.profile-dashboard{gap:14px}.profile-dashboard .profile-panel,.profile-dashboard .profile-hero{padding:17px;border-radius:16px}.profile-top,.profile-columns{grid-template-columns:1fr;gap:14px}.profile-columns>div{gap:14px}.profile-columns>div:last-child{grid-column:auto}.profile-hero{align-items:flex-start;flex-wrap:wrap;min-height:0}.profile-verified{width:100%;padding:12px 0 0;border-left:0;border-top:1px solid var(--line,var(--pd-stroke))}.profile-hero-main h2{font-size:23px}.profile-photo{height:76px;width:76px;font-size:36px}.profile-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-wallet{grid-template-columns:1fr;gap:9px}.profile-fields{grid-template-columns:1fr}.profile-form-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){.profile-dashboard *,.profile-dashboard *:before{transition:none!important}}
+
+
+/* Private signed-in device history */
+.profile-devices{scroll-margin-top:90px}
+.profile-device-hint{font-size:12px;line-height:1.65;margin:0 0 14px;overflow-wrap:anywhere}
+.profile-device-item{border:1px solid var(--line,#dfebf6);background:var(--surface2,#f8fbff);border-radius:14px;padding:14px;margin:10px 0;min-width:0}
+.profile-device-name{display:flex;gap:10px;align-items:center;flex-wrap:wrap;line-height:1.5}
+.profile-device-name>span{font-size:24px}
+.profile-device-name>div{flex:1;min-width:0}
+.profile-device-name b{font-size:14px;margin-right:7px;color:var(--text,#163a60)}
+.profile-device-name small{display:block;color:var(--muted,#7185a1);font-size:12px}
+.profile-device-current{display:inline-block;border-radius:99px;background:rgba(24,167,110,.13);color:#118258;font-size:11px;padding:3px 8px;font-weight:700}
+.profile-device-meta{display:grid;gap:10px;grid-template-columns:1fr 1fr;padding-top:11px;margin-top:11px;border-top:1px solid var(--line,#e4ecf6)}
+.profile-device-meta>div{min-width:0}
+.profile-device-meta>div:first-child{grid-column:1/-1}
+.profile-device-meta span{display:block;color:var(--muted,#7185a1);font-size:11px;margin-bottom:3px}
+.profile-device-meta strong{display:block;font-size:13px;font-weight:650;color:var(--text,#163a60);overflow-wrap:anywhere}
+@media(max-width:520px){.profile-device-meta{grid-template-columns:1fr}.profile-device-meta>div:first-child{grid-column:auto}}
+:root[data-theme="dark"] .profile-device-item{background:#1b2d44;border-color:#33455e}
+:root[data-theme="dark"] .profile-device-current{color:#8ce4c1}
