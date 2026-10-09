@@ -16,7 +16,7 @@ window.AuthUI=(()=>{
   }
   window.turnstile.render(slot,{sitekey:key,theme:"auto",callback:token=>{const i=root.querySelector('[name="cf-turnstile-response"]');if(i)i.value=token},"expired-callback":()=>{const i=root.querySelector('[name="cf-turnstile-response"]');if(i)i.value=""}})
  }
- async function open(mode="login"){await window.SupabaseApp.ready();mode==="register"?register():login()}
+ function open(mode="login"){mode==="register"?register():login();window.SupabaseApp?.ready().catch(e=>console.warn("Auth configuration delayed",e?.message||e))}
  function tabs(active){return `<div class="auth-tabs"><button class="${active==="login"?"active":""}" data-auth-tab="login">Đăng nhập</button><button class="${active==="register"?"active":""}" data-auth-tab="register">Đăng ký</button></div>`}
  function bindTabs(p){p.querySelectorAll("[data-auth-tab]").forEach(b=>b.onclick=()=>b.dataset.authTab==="login"?login():register())}
  function login(){
