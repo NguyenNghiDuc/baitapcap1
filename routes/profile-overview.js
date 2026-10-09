@@ -9,7 +9,7 @@ module.exports=async function handleProfile(req,res,p,ctx){
   if(!d||typeof d!=="object"||Array.isArray(d))return send(res,400,{error:"Dữ liệu không hợp lệ"}),true;
   if(d.name!==undefined&&(typeof d.name!=="string"||!d.name.trim()||d.name.length>80))return send(res,400,{error:"Họ tên từ 1–80 ký tự"}),true;
   if(d.phone!==undefined){const phone=String(d.phone).normalize("NFKC").replace(/[\u200B-\u200D\uFEFF]/g,"").trim();if(!/^(?:\+?[0-9][0-9 ()-]{0,21})?$/.test(phone))return send(res,400,{error:"Số điện thoại không hợp lệ"}),true;d.phone=phone;}
-  if(d.birthday!==undefined&&d.birthday!==""&&(!/^\d{4}-\d{2}-\d{2}$/.test(String(d.birthday))||isNaN(Date.parse(d.birthday))||Date.parse(d.birthday)>Date.now()))return send(res,400,{error:"Ngày sinh không hợp lệ"}),true;
+  if(d.birthday!==undefined&&d.birthday!==""){const date=String(d.birthday),valid=/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date+"T00:00:00.000Z").toISOString().slice(0,10)===date&&Date.parse(date)<=Date.now();if(!valid)return send(res,400,{error:"Ngày sinh không hợp lệ"}),true;}
   if(d.gender!==undefined&&!["","female","male","other"].includes(d.gender))return send(res,400,{error:"Giới tính không hợp lệ"}),true;
   if(d.grade!==undefined&&(!Number.isInteger(Number(d.grade))||Number(d.grade)<1||Number(d.grade)>5))return send(res,400,{error:"Lớp phải từ 1 đến 5"}),true;
   for(const k of editable){if(d[k]===undefined)continue;account[k]=k==="grade"?Number(d[k]):text(d[k],k==="address"?180:k==="school"?120:80)}
