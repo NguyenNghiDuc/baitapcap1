@@ -1,43 +1,405 @@
 {
   "users": [
     {
-      "id": "admin-created",
+      "id": "demo-student",
+      "name": "Bé Minh Anh",
+      "email": "hocsinh@demo.vn",
+      "password": "1f7359bbdae6778ee69078c32197b178:a7f78a1750cc6cd26f807851fdf1f25aa7006a31a5564d26c6e14c5cd9ec9213fb4f180dd1ff072318d0f4e6d1ad58e0aad3b7f38fd62060945d103c2bd5b698",
+      "role": "student",
+      "grade": 3,
+      "avatar": "👧🏻",
+      "emailVerified": true,
+      "createdAt": "2026-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "demo-teacher",
+      "name": "Cô Lan",
+      "email": "giaovien@demo.vn",
+      "password": "1f7359bbdae6778ee69078c32197b178:a7f78a1750cc6cd26f807851fdf1f25aa7006a31a5564d26c6e14c5cd9ec9213fb4f180dd1ff072318d0f4e6d1ad58e0aad3b7f38fd62060945d103c2bd5b698",
+      "role": "teacher",
+      "grade": null,
+      "avatar": "👩🏻‍🏫",
+      "emailVerified": true,
+      "createdAt": "2026-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "demo-parent",
+      "name": "Phụ huynh Minh Anh",
+      "email": "phuhuynh@demo.vn",
+      "password": "1f7359bbdae6778ee69078c32197b178:a7f78a1750cc6cd26f807851fdf1f25aa7006a31a5564d26c6e14c5cd9ec9213fb4f180dd1ff072318d0f4e6d1ad58e0aad3b7f38fd62060945d103c2bd5b698",
+      "role": "parent",
+      "grade": null,
+      "avatar": "👩🏻",
+      "children": [
+        "demo-student"
+      ],
+      "emailVerified": true,
+      "createdAt": "2026-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "demo-admin",
       "name": "Quản trị viên",
       "email": "admin@demo.vn",
-      "password": "e18566b86f05e7ae3e85b73beaf292b1:aecddcbee8d691f68a0bd309bc4effc64133e9fed9614dd08dcb2f8ea5b84bb534fb4035ee0e840f3321a06c3b9ec2cd70b223fa204b19e88b987ba5dc69060b",
+      "password": "542cd403281e172ec5ad4f9034edd535:0c3469afb0875dd5132b28f4163c788bcff16e904b391fec5eaf16882206837094ea03f000bd1feb27d6c4efd89e18a8428c96d490850cda05033478ef88d52e",
       "role": "admin",
       "grade": null,
       "avatar": "🧑🏻‍💻",
       "emailVerified": true,
       "createdAt": "2026-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "demo-admin-2",
+      "name": "Quản trị viên 2",
+      "email": "admin2@demo.vn",
+      "password": "03a114eed2817f976901638732d04314:fae001dde267163ffd4485fe0d3bc7c49151a4a5cbf8b75534f2b08b9127730e63fe80b42af3d4c6c58132aafbc3c93f2f8f0ff8c4ea0e1de96350a38518266c",
+      "role": "admin",
+      "grade": null,
+      "avatar": "🧑🏻‍💻",
+      "emailVerified": true,
+      "createdAt": "2026-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "997be09f-38d0-46a4-95bc-3eb703133cb7",
+      "name": "Quản trị viên mới",
+      "email": "admin-1791584662018@demo.vn",
+      "password": "3fc0fe603a045cab118851f43d32db15:caa89f03979c6046cb4d186bce3cbe472c9154f51b41ae2b2e1205444d4bfde73d9d3b2901998bf1e8a58f7977a2623a1ddad09288f774372695e8b23bc6bd77",
+      "role": "admin",
+      "grade": null,
+      "avatar": "🧑🏻‍💻",
+      "emailVerified": true,
+      "createdAt": "2026-10-09T22:24:22.053Z"
     }
   ],
   "classes": [],
   "assignments": [],
   "submissions": [],
-  "results": [],
+  "results": [
+    {
+      "id": "bcf9ff0d-e96b-4bed-b6d4-9a59d249ce0d",
+      "clientSubmissionId": null,
+      "userId": "demo-student",
+      "subject": "math",
+      "grade": 4,
+      "title": "Nhan so tu nhien",
+      "score": 90,
+      "correct": 27,
+      "total": 30,
+      "verified": false,
+      "gradingStatus": "self_reported",
+      "wrongQuestionIds": [
+        1,
+        2,
+        3
+      ],
+      "durationSec": 1200,
+      "proctor": null,
+      "createdAt": "2026-10-09T22:23:57.167Z"
+    },
+    {
+      "id": "777b4f31-6acc-4bed-8132-1fd7c384409a",
+      "clientSubmissionId": null,
+      "userId": "demo-student",
+      "subject": "math",
+      "grade": 4,
+      "title": "Nhan so tu nhien",
+      "score": 90,
+      "correct": 27,
+      "total": 30,
+      "verified": false,
+      "gradingStatus": "self_reported",
+      "wrongQuestionIds": [
+        1,
+        2,
+        3
+      ],
+      "durationSec": 1200,
+      "proctor": null,
+      "createdAt": "2026-10-09T22:24:21.963Z"
+    }
+  ],
   "notifications": [],
   "materials": [],
   "audit": [
     {
-      "id": "1688053d-f2cf-4aee-8c65-f03250098979",
-      "userId": "admin-created",
-      "action": "login",
-      "meta": {},
-      "at": "2026-10-09T22:18:06.422Z"
+      "id": "cdbf0fdb-eaf8-42e0-8ac7-c57791a36927",
+      "userId": "demo-teacher",
+      "action": "exam_settings_updated",
+      "meta": {
+        "examId": "term-g4-s1-p1-math-v1",
+        "dailyMin": 30,
+        "grade4Min": 50,
+        "grade5Min": 70
+      },
+      "at": "2026-10-09T22:24:22.191Z"
     },
     {
-      "id": "a1594f3d-1e2b-41cc-a2a2-f0baf5f231dc",
-      "userId": "admin-created",
+      "id": "7a048b5b-e3a6-41a7-b6ad-0f5debda0127",
+      "userId": "demo-teacher",
+      "action": "exam_settings_updated",
+      "meta": {
+        "examId": null,
+        "dailyMin": 30,
+        "grade4Min": 50,
+        "grade5Min": 70
+      },
+      "at": "2026-10-09T22:24:22.190Z"
+    },
+    {
+      "id": "a5180deb-d3ac-4d45-825b-f8c63a7c276b",
+      "userId": "demo-teacher",
       "action": "login",
       "meta": {},
-      "at": "2026-10-09T22:16:53.311Z"
+      "at": "2026-10-09T22:24:22.187Z"
+    },
+    {
+      "id": "31fc6026-3cef-4a00-8a8e-6075c93a082f",
+      "userId": "demo-admin",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:24:22.140Z"
+    },
+    {
+      "id": "5108e650-797f-4802-8d7c-4a117e2317a3",
+      "userId": "997be09f-38d0-46a4-95bc-3eb703133cb7",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:24:22.095Z"
+    },
+    {
+      "id": "c64bd8bd-daa0-43dd-8682-0e264f0b6df2",
+      "userId": "demo-admin",
+      "action": "user_created",
+      "meta": {
+        "target": "997be09f-38d0-46a4-95bc-3eb703133cb7",
+        "role": "admin"
+      },
+      "at": "2026-10-09T22:24:22.054Z"
+    },
+    {
+      "id": "5f8fa73b-c922-4a7b-88af-1001e4a4a922",
+      "userId": "demo-admin",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:24:22.017Z"
+    },
+    {
+      "id": "f2c46585-3a02-4360-b55b-68a4ce084ec0",
+      "userId": "demo-student",
+      "action": "result_saved",
+      "meta": {
+        "score": 90,
+        "verified": false,
+        "clientSubmissionId": null
+      },
+      "at": "2026-10-09T22:24:21.963Z"
+    },
+    {
+      "id": "112dd094-c395-4bc9-8896-601eea736cb8",
+      "userId": "demo-student",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:24:21.961Z"
+    },
+    {
+      "id": "7f55688d-e7d1-4a66-a456-59b4015a8be4",
+      "userId": "demo-teacher",
+      "action": "exam_room_created",
+      "meta": {
+        "roomId": "6ec7624f-c813-41ea-9618-35891e11ad8e"
+      },
+      "at": "2026-10-09T22:24:21.919Z"
+    },
+    {
+      "id": "c46f135f-08ba-4720-a37c-30ec9a4abc3d",
+      "userId": "demo-teacher",
+      "action": "questions_imported",
+      "meta": {
+        "count": 1
+      },
+      "at": "2026-10-09T22:24:21.916Z"
+    },
+    {
+      "id": "fbf2ce58-f2fa-475f-aa85-074c504cf733",
+      "userId": "demo-teacher",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:24:21.779Z"
+    },
+    {
+      "id": "7726bada-3fe0-435b-8535-1dd48e2998fa",
+      "userId": "demo-student",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:24:21.731Z"
+    },
+    {
+      "id": "444ca7fe-ef34-44b6-9e49-30ab2124b00e",
+      "userId": "demo-teacher",
+      "action": "exam_settings_updated",
+      "meta": {
+        "examId": "term-g4-s1-p1-math-v1",
+        "dailyMin": 30,
+        "grade4Min": 50,
+        "grade5Min": 70
+      },
+      "at": "2026-10-09T22:23:57.352Z"
+    },
+    {
+      "id": "d263f147-8a5f-460d-afb5-8d421c958c27",
+      "userId": "demo-teacher",
+      "action": "exam_settings_updated",
+      "meta": {
+        "examId": null,
+        "dailyMin": 30,
+        "grade4Min": 50,
+        "grade5Min": 70
+      },
+      "at": "2026-10-09T22:23:57.349Z"
+    },
+    {
+      "id": "b013b3ea-01df-444f-9813-c14ba40932f3",
+      "userId": "demo-teacher",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:23:57.346Z"
+    },
+    {
+      "id": "a99d238f-b360-4e94-a67b-ada6fb6c03bb",
+      "userId": "demo-admin",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:23:57.269Z"
+    },
+    {
+      "id": "7868ce5e-4889-446e-b8fe-31239c926448",
+      "userId": "demo-admin",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:23:57.220Z"
+    },
+    {
+      "id": "bf7a6672-b8b5-4c97-a7a3-15bf164128df",
+      "userId": "demo-student",
+      "action": "result_saved",
+      "meta": {
+        "score": 90,
+        "verified": false,
+        "clientSubmissionId": null
+      },
+      "at": "2026-10-09T22:23:57.167Z"
+    },
+    {
+      "id": "fcf445c0-0265-46cf-b7a8-4dc7f07c0f0b",
+      "userId": "demo-student",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:23:57.164Z"
+    },
+    {
+      "id": "d95429db-02ee-4bf2-9037-6d9f3f9cd7cd",
+      "userId": "demo-teacher",
+      "action": "exam_room_created",
+      "meta": {
+        "roomId": "d679b88d-afb9-486f-97ac-7616097bbb84"
+      },
+      "at": "2026-10-09T22:23:57.121Z"
+    },
+    {
+      "id": "2d1c615f-3386-4a6a-9a50-b79753947162",
+      "userId": "demo-teacher",
+      "action": "questions_imported",
+      "meta": {
+        "count": 1
+      },
+      "at": "2026-10-09T22:23:57.118Z"
+    },
+    {
+      "id": "2e5347fd-0d30-435a-ab3e-cfda8bdaa3a5",
+      "userId": "demo-teacher",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:23:56.990Z"
+    },
+    {
+      "id": "df898ba4-2034-4415-bd16-658b9a0d1862",
+      "userId": "demo-student",
+      "action": "login",
+      "meta": {},
+      "at": "2026-10-09T22:23:56.937Z"
     }
   ],
   "subscriptions": [],
   "feedback": [],
-  "questionBank": [],
-  "examRooms": [],
+  "questionBank": [
+    {
+      "id": "8af09577-a412-49ea-95f9-2a331892904c",
+      "subject": "math",
+      "grade": 4,
+      "lessonId": "g4-mul",
+      "level": "Dá»",
+      "q": "12 x 5 bang bao nhieu?",
+      "options": [
+        "50",
+        "60",
+        "70",
+        "80"
+      ],
+      "answer": 1,
+      "explain": "12 x 5 = 60"
+    },
+    {
+      "id": "13dc83e9-670c-4794-a57c-a758082069bf",
+      "subject": "math",
+      "grade": 4,
+      "lessonId": "g4-mul",
+      "level": "Dá»",
+      "q": "12 x 5 bang bao nhieu?",
+      "options": [
+        "50",
+        "60",
+        "70",
+        "80"
+      ],
+      "answer": 1,
+      "explain": "12 x 5 = 60"
+    }
+  ],
+  "examRooms": [
+    {
+      "id": "d679b88d-afb9-486f-97ac-7616097bbb84",
+      "code": "7F3998",
+      "title": "Thi Toan 4",
+      "teacherId": "demo-teacher",
+      "grade": 4,
+      "lessonId": "g4-mul",
+      "durationMin": 45,
+      "startsAt": null,
+      "endsAt": null,
+      "participants": [],
+      "createdAt": "2026-10-09T22:23:57.121Z"
+    },
+    {
+      "id": "6ec7624f-c813-41ea-9618-35891e11ad8e",
+      "code": "510EC4",
+      "title": "Thi Toan 4",
+      "teacherId": "demo-teacher",
+      "grade": 4,
+      "lessonId": "g4-mul",
+      "durationMin": 45,
+      "startsAt": null,
+      "endsAt": null,
+      "participants": [],
+      "createdAt": "2026-10-09T22:24:21.919Z"
+    }
+  ],
   "pushSubscriptions": [],
-  "examDrafts": []
+  "examDrafts": [],
+  "examSettings": {
+    "dailyMin": 30,
+    "grade4Min": 50,
+    "grade5Min": 70,
+    "overrides": {
+      "term-g4-s1-p1-math-v1": 35
+    }
+  }
 }
