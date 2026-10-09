@@ -29,7 +29,7 @@ Mật khẩu demo học sinh / giáo viên / phụ huynh: `Demo1234!`
 - Học sinh: `hocsinh@demo.vn`
 - Giáo viên: `giaovien@demo.vn`
 - Phụ huynh: `phuhuynh@demo.vn`
-- Admin: `admin@demo.vn` — mật khẩu: `27032006`
+- Admin: không tạo sẵn trên production; cấp tài khoản qua quy trình quản trị an toàn.
 
 ## Các phần đã code
 
