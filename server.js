@@ -141,6 +141,12 @@ function bootstrap(){
 async function handler(req,res){
  try{
   const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket?.remoteAddress||req.headers?.["x-forwarded-for"]||"unknown";
+  if(p==="/api/ai/status"&&req.method==="GET"){
+   const configured=!!(process.env.AI_API_URL&&process.env.AI_API_KEY);
+   let endpointValid=false;
+   try{const x=new URL(process.env.AI_API_URL||"");endpointValid=x.protocol==="https:"&&x.pathname.endsWith("/chat/completions")}catch{}
+   return send(res,200,{configured,endpointValid,modelConfigured:!!process.env.AI_MODEL,authRequired:true,provider:"openai-compatible",databaseCheck:"not_performed",message:!configured?"Thiếu cấu hình AI_API_URL hoặc AI_API_KEY":!endpointValid?"AI_API_URL cần trỏ đến endpoint HTTPS /chat/completions":"Đã nhận cấu hình AI. Chưa xác minh khóa hoặc quyền truy cập API."});
+  }
   if(p.startsWith("/api/")){
    try{await bootstrap()}catch(e){safeMonitorError("database_startup_failed",{message:e.message});return send(res,503,{error:"Cơ sở dữ liệu chưa sẵn sàng. Kiểm tra DATABASE_URL và migrations."})}
    return await api(req,res,p,ip)
