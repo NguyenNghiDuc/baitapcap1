@@ -25,6 +25,15 @@ test("student result can be exported to xlsx",async()=>{
   const out=await fetch(base+"/api/export/results.xlsx",{headers:{Authorization:"Bearer "+token}});
   assert.equal(out.status,200);assert.match(out.headers.get("content-type"),/spreadsheetml/);assert.ok((await out.arrayBuffer()).byteLength>100);
 });
+test("admin can create another admin account with a different email",async()=>{
+  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
+  assert.equal(login.status,200);const lj=await login.json(),token=lj.token;
+  const created=await fetch(base+"/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({name:"Quản trị viên 2",email:"admin2@demo.vn",password:"Admin1234!",role:"admin",grade:5})});
+  assert.equal(created.status,201);const cj=await created.json();assert.equal(cj.user.role,"admin");assert.equal(cj.user.email,"admin2@demo.vn");
+  const second=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin2@demo.vn",password:"Admin1234!"})});
+  assert.equal(second.status,200);const sj=await second.json();assert.equal(sj.user.role,"admin");
+});
+
 test("admin user and storage APIs are protected and functional",async()=>{
   const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
   const lj=await login.json(),token=lj.token;
