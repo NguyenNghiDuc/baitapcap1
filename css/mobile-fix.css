@@ -1,0 +1,43 @@
+/* Mobile layout repair: loaded after all existing styles. */
+@media(max-width:900px){
+ html,body{width:100%;max-width:100%;overflow-x:clip}
+ .topbar{height:64px;min-height:64px;padding:0 12px;gap:8px;width:100%;min-width:0}
+ .mobile-only{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}
+ .topbar .brand{min-width:0;max-width:calc(100% - 214px);flex:1 1 auto;font-size:21px;line-height:1;overflow:hidden;text-overflow:ellipsis}
+ .topbar .brand>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .brand-mark{display:none}
+ .topnav{display:none!important}
+ .top-actions{margin-left:auto;flex:0 0 auto;display:flex;align-items:center;gap:5px;min-width:0}
+ .top-actions .ghost,.top-actions .primary{padding:10px 9px;border-radius:10px;white-space:nowrap;font-size:12px;line-height:1.25}
+ .top-actions #themeBtn{width:36px;min-width:36px;padding:8px 0}
+ .top-actions .register-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+ .top-actions [hidden]{display:none!important}
+ .sidebar{top:64px;z-index:59;width:min(85vw,320px);max-width:320px}
+ .content{margin:0!important;padding:80px 14px 30px!important;width:100%;max-width:none;min-width:0}
+ .hero{width:100%;max-width:100%;grid-template-columns:minmax(0,1fr)!important;min-height:0;padding:28px 22px;border-radius:22px;gap:12px}
+ .hero-art{display:none!important}
+ .hero h1{font-size:clamp(31px,8vw,46px);line-height:1.12;overflow-wrap:break-word}
+ .hero h2{font-size:clamp(18px,4.6vw,23px);line-height:1.4}
+ .hero p{font-size:14px;line-height:1.75}
+ .hero-search{width:100%;max-width:100%}
+ .hero-search input{min-width:0;width:0;flex:1 1 0;font-size:13px}
+ .hero-search button{flex:0 0 auto;white-space:nowrap;padding:10px 12px;font-size:12px}
+ .quick-grades{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;width:100%}
+ .quick-grades button{min-width:0;width:100%;padding:8px 2px;font-size:12px;white-space:normal;line-height:1.25}
+ .metrics,.cards-3,.subject-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .split,.admin-grid,.ai-layout,.form-grid{grid-template-columns:minmax(0,1fr)}
+ .section-head{flex-wrap:wrap;gap:8px}
+ .section-head h2,.page-head h1{font-size:clamp(21px,5.5vw,27px)}
+ .chat-input input,.chat-card,.panel,.test-card,.subject-card{min-width:0}
+ .modal{max-height:calc(100dvh - 28px);overflow:auto}
+}
+@media(max-width:370px){
+ .topbar{gap:5px;padding:0 8px}
+ .topbar .brand{font-size:17px;max-width:calc(100% - 191px)}
+ .top-actions .ghost,.top-actions .primary{font-size:11px;padding:8px 6px}
+ .top-actions #themeBtn{width:30px;min-width:30px}
+ .hero{padding:24px 17px}
+ .quick-grades{gap:4px}
+ .quick-grades button{font-size:11px}
+ .content{padding-left:10px!important;padding-right:10px!important}
+}
