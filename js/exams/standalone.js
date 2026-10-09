@@ -39,7 +39,15 @@
   host.querySelectorAll("[data-daily]").forEach(b=>b.onclick=()=>{const [g,t]=b.dataset.daily.split(":");const e=B.daily(Number(g),t);start(e,e.questions,45);});
  }
  function navPages(count){host.insertAdjacentHTML("beforeend",'<div class="actions"><button id="prevPage">← Trước</button><button id="nextPage">Tiếp →</button></div>');const prev=host.querySelector("#prevPage"),next=host.querySelector("#nextPage");prev.disabled=page===0;next.disabled=(page+1)*30>=count;prev.onclick=()=>{page--;list()};next.onclick=()=>{page++;list()};}
- function start(info,questions,minutes){
+ async function start(info,questions,minutes){
+  const gate=window.ExamAccountGate;
+  if(!gate||!(await gate.check())){
+   stop();exam=null;
+   if(gate)gate.prompt(host);
+   else host.innerHTML='<section class="panel"><h2>Đăng nhập để làm bài</h2><a href="/?auth=register">Đăng ký</a> · <a href="/?auth=login">Đăng nhập</a></section>';
+   const back=host.querySelector("#examBackToList");if(back)back.onclick=list;
+   return;
+  }
   if(!Array.isArray(questions)||questions.length<1){err("Đề không có câu hỏi hợp lệ.");return;}
   stop();exam={info,questions,i:0,answers:{},started:Date.now(),duration:minutes};seconds=minutes*60;
   try{paint();timer=setInterval(()=>{seconds=Math.max(0,seconds-1);const el=document.querySelector("#countdown");if(el)el.textContent=clock();if(seconds===0)finish(true);},1000);}catch(e){err(e);}
