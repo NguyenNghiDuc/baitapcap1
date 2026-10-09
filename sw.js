@@ -1,4 +1,4 @@
-const VERSION="4.1.3-exercise-hotfix-2",CORE="btcap1-core-"+VERSION,RUNTIME="btcap1-runtime-"+VERSION;
+const VERSION="4.1.3-exercise-recovery-3",CORE="btcap1-core-"+VERSION,RUNTIME="btcap1-runtime-"+VERSION;
 async function manifest(){try{const r=await fetch("/offline-manifest.json",{cache:"no-store"});if(r.ok)return await r.json()}catch{}return {coreAssets:["/","/index.html","/css/style.css","/js/app.js"],assets:[]}}
 async function put(cacheName,req,res){if(!res||!res.ok)return res;const c=await caches.open(cacheName);await c.put(req,res.clone());return res}
 async function networkFirst(req,{fallback="/index.html",timeout=3500}={}){
