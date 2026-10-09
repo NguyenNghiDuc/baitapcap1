@@ -138,10 +138,12 @@ function bootstrap(){
  return bootPromise
 }
 async function handler(req,res){
- await bootstrap();
  try{
   const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket?.remoteAddress||req.headers?.["x-forwarded-for"]||"unknown";
-  if(p.startsWith("/api/"))return await api(req,res,p,ip);
+  if(p.startsWith("/api/")){
+   try{await bootstrap()}catch(e){monitor.error("database_startup_failed",{message:e.message});return send(res,503,{error:"Cơ sở dữ liệu chưa sẵn sàng. Kiểm tra DATABASE_URL và migrations."})}
+   return await api(req,res,p,ip)
+  }
   return await staticServer.serve(req,res,STATIC_ROOT,p)
  }catch(e){
   monitor.error("request_failed",{message:e.message,url:req.url});errorTracking.capture(e,{url:req.url});
