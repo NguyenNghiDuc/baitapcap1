@@ -153,4 +153,6 @@ async function handler(req,res){
 if(require.main===module){
  bootstrap().then(()=>http.createServer((req,res)=>handler(req,res)).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT))).catch(e=>{monitor.error("startup_failed",{message:e.message});errorTracking.capture(e,{phase:"startup"});console.error("[startup]",e);process.exit(1)})
 }
-module.exports={handler,bootstrap};
+module.exports=handler;
+module.exports.handler=handler;
+module.exports.bootstrap=bootstrap;
