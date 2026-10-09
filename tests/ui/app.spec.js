@@ -38,3 +38,12 @@ test("practice route without a saved quiz offers a way back",async({page})=>{
  await page.locator('[data-route="subjects"]').click();
  await expect(page).toHaveURL(/#subjects$/);
 });
+
+test("exercise fallback still works if primary renderer is unavailable",async({page})=>{
+ await page.goto("/#subjects");await expect(page.locator("#lessonResults")).toBeVisible();
+ await page.evaluate(()=>{delete window.LockedExamUI});
+ await page.locator("#lessonResults [data-start]").first().click();
+ await expect(page.locator("[data-fallback-answer]")).toHaveCount(4);
+ await page.locator("[data-fallback-answer]").first().click();
+ await expect(page.locator("[data-fallback-answer].selected")).toHaveCount(1);
+});
