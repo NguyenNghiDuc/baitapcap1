@@ -2,8 +2,8 @@ const fs=require("fs"),path=require("path");
 module.exports=async function handleApp(req,res,p,ctx){
  const {send,parseBody,requireUser,ROOT}=ctx;
  if(req.method==="GET"&&p==="/api/app/version"){
-  let pkg={version:"0.0.0"};try{pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"package.json"),"utf8"))}catch{}
-  return send(res,200,{version:pkg.version,build:process.env.APP_BUILD||"main",updatedAt:process.env.APP_UPDATED_AT||null}),true;
+  const version=require("../package.json").version;
+  return send(res,200,{version,build:process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,7)||process.env.APP_BUILD||"local",updatedAt:process.env.APP_UPDATED_AT||null}),true;
  }
  if(req.method==="POST"&&p==="/api/student/ocr"){
   const u=await requireUser(req,res,["student"]);if(!u)return true;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
