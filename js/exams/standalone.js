@@ -1,8 +1,7 @@
 (() => {
  "use strict";
- const host=document.querySelector("#examApp"),B=window.TermExamBank,I=window.ExamInteraction;
+ const host=document.querySelector("#examApp"),advancedMode=document.body.dataset.examMode==="advanced",B=advancedMode?window.AdvancedExamBank:window.TermExamBank,I=window.ExamInteraction;
  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- const advancedMode=document.body.dataset.examMode==="advanced";
  let exam=null,seconds=0,timer=null,filters={grade:advancedMode?"5":"",subject:"",semester:"",stage:advancedMode?"2":""};
  const names={math:"Toán",vietnamese:"Tiếng Việt",english:"Tiếng Anh"};
  const types=["math","vietnamese","english"];
@@ -11,7 +10,16 @@
  function list(){
   stop();exam=null;
   if(!B?.exams?.length){err("Ngân hàng đề chưa tải. Vui lòng tải lại trang.");return;}
-  const today=advancedMode?[]:[4,5].flatMap(g=>types.map(t=>B.daily(g,t)));
+  if(advancedMode){
+   const items=B.exams.filter(e=>(!filters.grade||String(e.grade)===filters.grade)&&(!filters.subject||e.subject===filters.subject));
+   host.innerHTML='<h2>🌟 Bộ đề nâng cao riêng</h2><p>Các câu hỏi được lấy từ ngân hàng nâng cao, không trộn đề kiểm tra thông thường.</p><div class="filters"><select id="g"><option value="">Tất cả lớp</option><option value="4">Lớp 4</option><option value="5">Lớp 5</option></select><select id="s"><option value="">Tất cả môn</option><option value="math">Toán</option><option value="vietnamese">Tiếng Việt</option><option value="english">Tiếng Anh</option></select></div><p>'+items.length+' đề nâng cao</p><div class="grid">'+items.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu nâng cao · 60 phút</p><button data-exam="'+e.id+'">Bắt đầu đề nâng cao</button></article>').join("")+'</div>';
+   document.querySelector("#g").value=filters.grade;
+   document.querySelector("#s").value=filters.subject;
+   for(const [id,key] of [["g","grade"],["s","subject"]])document.querySelector("#"+id).onchange=e=>{filters[key]=e.target.value;list();};
+   host.querySelectorAll("[data-exam]").forEach(b=>b.onclick=()=>{const e=B.exams.find(x=>x.id===b.dataset.exam);if(e)start(e,B.questions(e.id),e.time);});
+   return;
+  }
+  const today=[4,5].flatMap(g=>types.map(t=>B.daily(g,t)));
   const options=(values,labels,selected)=>values.map((v,i)=>'<option value="'+v+'" '+(String(v)===String(selected)?'selected':'')+'>'+labels[i]+'</option>').join("");
   const items=B.exams.filter(e=>(!filters.grade||String(e.grade)===filters.grade)&&(!filters.subject||e.subject===filters.subject)&&(!filters.semester||String(e.semester)===filters.semester)&&(!filters.stage||String(e.stage)===filters.stage));
   host.innerHTML=(advancedMode?'<h2>🌟 Thử sức với đề nâng cao</h2><p>Đã chọn sẵn lớp 5 và đề cuối kỳ. Bạn có thể thay đổi bộ lọc để chọn đề khác.</p>':'<h2>Ôn luyện mỗi ngày</h2><div class="grid">')+today.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu · 45 phút</p><button data-daily="'+e.grade+':'+e.subject+'">Làm đề hôm nay</button></article>').join("")+(advancedMode?'':'</div><h2>Đề theo học kỳ</h2>')+'<div class="filters"><select id="g">'+options(["","4","5"],["Tất cả lớp","Lớp 4","Lớp 5"],filters.grade)+'</select><select id="s">'+options(["",...types],["Tất cả môn","Toán","Tiếng Việt","Tiếng Anh"],filters.subject)+'</select><select id="se">'+options(["","1","2"],["Cả hai học kỳ","Học kỳ 1","Học kỳ 2"],filters.semester)+'</select><select id="st">'+options(["","0","1","2"],["Mọi giai đoạn","Đầu kỳ","Giữa kỳ","Cuối kỳ"],filters.stage)+'</select></div><p>'+items.length+' đề kiểm tra</p><div class="grid">'+items.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu · 60 phút</p><button data-exam="'+e.id+'">Bắt đầu</button></article>').join("")+'</div>';
