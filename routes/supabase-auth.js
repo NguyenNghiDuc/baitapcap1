@@ -9,13 +9,18 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
   const token=String(d.accessToken||"");const su=await supabase.getUserFromToken(token);if(!su)return send(res,401,{error:"Supabase session không hợp lệ"}),true;
   const db=load();let u=db.users.find(x=>x.authUserId===su.id||String(x.email||"").toLowerCase()===String(su.email||"").toLowerCase());
   const md=su.user_metadata||{};
+  // Admin provisioning must be tied to the exact Supabase Auth user UUID,
+  // configured by the site owner. Never trust email or user_metadata.role.
+  const adminUid=String(process.env.ADMIN_SUPABASE_UID||"").trim();
+  const isConfiguredAdmin=Boolean(adminUid&&su.id===adminUid);
   if(!u){
-   u={id:"sb-"+crypto.randomUUID(),authUserId:su.id,email:su.email||"",name:String(md.name||md.full_name||su.email?.split("@")[0]||"Học sinh"),role:["student","parent","teacher"].includes(md.role)?md.role:"student",grade:Number(md.grade)||4,avatar:String(md.avatar||"👧🏻"),emailVerified:!!su.email_confirmed_at,children:[],createdAt:new Date().toISOString()};
+   u={id:"sb-"+crypto.randomUUID(),authUserId:su.id,email:su.email||"",name:String(md.name||md.full_name||su.email?.split("@")[0]||"Học sinh"),role:isConfiguredAdmin?"admin":(["student","parent"].includes(md.role)?md.role:"student"),grade:Number(md.grade)||4,avatar:String(md.avatar||"👧🏻"),emailVerified:!!su.email_confirmed_at,children:[],createdAt:new Date().toISOString()};
    db.users.push(u);
   }else{
    u.authUserId=su.id;u.email=su.email||u.email;u.emailVerified=!!su.email_confirmed_at;
    if(md.name||md.full_name)u.name=String(md.name||md.full_name);
-   if(["student","parent","teacher"].includes(md.role)&&u.role!=="admin")u.role=md.role;
+   if(isConfiguredAdmin)u.role="admin";
+   else if(u.role!=="admin"&&["student","parent"].includes(md.role))u.role=md.role;
    if(Number(md.grade)>=1&&Number(md.grade)<=5)u.grade=Number(md.grade);
   }
   save(db);await pg.upsertUser(u).catch(e=>monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id}));monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
