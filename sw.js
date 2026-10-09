@@ -1,4 +1,4 @@
-const VERSION="4.1.4-exam-route-fix",CORE="btcap1-core-"+VERSION,RUNTIME="btcap1-runtime-"+VERSION;
+const VERSION="4.1.5-navigation-network-fix",CORE="btcap1-core-"+VERSION,RUNTIME="btcap1-runtime-"+VERSION;
 async function manifest(){try{const r=await fetch("/offline-manifest.json",{cache:"no-store"});if(r.ok)return await r.json()}catch{}return {coreAssets:["/","/index.html","/css/style.css","/js/app.js"],assets:[]}}
 async function put(cacheName,req,res){if(!res||!res.ok)return res;const c=await caches.open(cacheName);await c.put(req,res.clone());return res}
 async function networkFirst(req,{fallback="/index.html",timeout=3500}={}){
@@ -18,7 +18,7 @@ self.addEventListener("activate",e=>e.waitUntil((async()=>{const ks=await caches
 self.addEventListener("fetch",e=>{
  const req=e.request;if(req.method!=="GET")return;const u=new URL(req.url);if(u.origin!==location.origin)return;
  if(u.pathname.startsWith("/api/"))return;
- if(req.mode==="navigate"){e.respondWith(networkFirst(req));return}
+ if(req.mode==="navigate")return; // Let the browser fetch pages and show real server errors instead of cached HTTP 504.
  const dest=req.destination;
  if(dest==="script"||dest==="style"){e.respondWith(networkFirst(req,{fallback:null,timeout:6000}));return}
  if(u.pathname.endsWith(".json")||u.pathname.endsWith(".webmanifest")){e.respondWith(staleWhileRevalidate(req));return}
