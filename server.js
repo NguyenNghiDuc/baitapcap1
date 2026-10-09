@@ -59,6 +59,7 @@ async function api(req,res,p,ip){
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor,audit:auditStore}))return;
+ if(await require("./routes/profile-overview")(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleCaptcha(req,res,p,{send,parseBody}))return;
  if(await handleStorageMeta(req,res,p,{send,parseBody,requireUser,load,save,monitor,audit:auditStore}))return;
  if(await handleApp(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
