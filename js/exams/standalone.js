@@ -2,7 +2,8 @@
  "use strict";
  const host=document.querySelector("#examApp"),B=window.TermExamBank,I=window.ExamInteraction;
  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- let exam=null,seconds=0,timer=null,filters={grade:"",subject:"",semester:"",stage:""};
+ const advancedMode=document.body.dataset.examMode==="advanced";
+ let exam=null,seconds=0,timer=null,filters={grade:advancedMode?"5":"",subject:"",semester:"",stage:advancedMode?"2":""};
  const names={math:"Toán",vietnamese:"Tiếng Việt",english:"Tiếng Anh"};
  const types=["math","vietnamese","english"];
  function stop(){if(timer){clearInterval(timer);timer=null;}}
@@ -10,10 +11,10 @@
  function list(){
   stop();exam=null;
   if(!B?.exams?.length){err("Ngân hàng đề chưa tải. Vui lòng tải lại trang.");return;}
-  const today=[4,5].flatMap(g=>types.map(t=>B.daily(g,t)));
+  const today=advancedMode?[]:[4,5].flatMap(g=>types.map(t=>B.daily(g,t)));
   const options=(values,labels,selected)=>values.map((v,i)=>'<option value="'+v+'" '+(String(v)===String(selected)?'selected':'')+'>'+labels[i]+'</option>').join("");
   const items=B.exams.filter(e=>(!filters.grade||String(e.grade)===filters.grade)&&(!filters.subject||e.subject===filters.subject)&&(!filters.semester||String(e.semester)===filters.semester)&&(!filters.stage||String(e.stage)===filters.stage));
-  host.innerHTML='<h2>Ôn luyện mỗi ngày</h2><div class="grid">'+today.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu · 45 phút</p><button data-daily="'+e.grade+':'+e.subject+'">Làm đề hôm nay</button></article>').join("")+'</div><h2>Đề theo học kỳ</h2><div class="filters"><select id="g">'+options(["","4","5"],["Tất cả lớp","Lớp 4","Lớp 5"],filters.grade)+'</select><select id="s">'+options(["",...types],["Tất cả môn","Toán","Tiếng Việt","Tiếng Anh"],filters.subject)+'</select><select id="se">'+options(["","1","2"],["Cả hai học kỳ","Học kỳ 1","Học kỳ 2"],filters.semester)+'</select><select id="st">'+options(["","0","1","2"],["Mọi giai đoạn","Đầu kỳ","Giữa kỳ","Cuối kỳ"],filters.stage)+'</select></div><p>'+items.length+' đề kiểm tra</p><div class="grid">'+items.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu · 60 phút</p><button data-exam="'+e.id+'">Bắt đầu</button></article>').join("")+'</div>';
+  host.innerHTML=(advancedMode?'<h2>🌟 Thử sức với đề nâng cao</h2><p>Đã chọn sẵn lớp 5 và đề cuối kỳ. Bạn có thể thay đổi bộ lọc để chọn đề khác.</p>':'<h2>Ôn luyện mỗi ngày</h2><div class="grid">')+today.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu · 45 phút</p><button data-daily="'+e.grade+':'+e.subject+'">Làm đề hôm nay</button></article>').join("")+'</div><h2>Đề theo học kỳ</h2><div class="filters"><select id="g">'+options(["","4","5"],["Tất cả lớp","Lớp 4","Lớp 5"],filters.grade)+'</select><select id="s">'+options(["",...types],["Tất cả môn","Toán","Tiếng Việt","Tiếng Anh"],filters.subject)+'</select><select id="se">'+options(["","1","2"],["Cả hai học kỳ","Học kỳ 1","Học kỳ 2"],filters.semester)+'</select><select id="st">'+options(["","0","1","2"],["Mọi giai đoạn","Đầu kỳ","Giữa kỳ","Cuối kỳ"],filters.stage)+'</select></div><p>'+items.length+' đề kiểm tra</p><div class="grid">'+items.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu · 60 phút</p><button data-exam="'+e.id+'">Bắt đầu</button></article>').join("")+'</div>';
   for(const [id,key] of [["g","grade"],["s","subject"],["se","semester"],["st","stage"]])document.querySelector("#"+id).onchange=e=>{filters[key]=e.target.value;list();};
   host.querySelectorAll("[data-exam]").forEach(b=>b.onclick=()=>{const e=B.exams.find(x=>x.id===b.dataset.exam);if(e)start(e,B.questions(e.id),60);});
   host.querySelectorAll("[data-daily]").forEach(b=>b.onclick=()=>{const [g,t]=b.dataset.daily.split(":");const e=B.daily(Number(g),t);start(e,e.questions,45);});
