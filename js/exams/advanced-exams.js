@@ -1,7 +1,7 @@
 window.AdvancedExamBank=(() => {
  const D=window.APP_DATA||{},subjects={math:"Toán",vietnamese:"Tiếng Việt",english:"Tiếng Anh"};
  const exams=[];
- for(const grade of [4,5])for(const subject of Object.keys(subjects))for(let variant=1;variant<=3;variant++){
+ for(const grade of [4,5])for(const subject of Object.keys(subjects))for(let variant=1;variant<=30;variant++){
   exams.push({id:`adv-${grade}-${subject}-${variant}`,grade,subject,variant,title:`Nâng cao ${subjects[subject]} lớp ${grade} – Đề ${variant}`,time:60,advanced:true});
  }
  function questions(id){
