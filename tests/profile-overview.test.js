@@ -23,6 +23,7 @@ test("profile overview reads only authenticated student's real results",async()=
 });
 test("profile update rejects invalid birthdate and phone",async()=>{
  assert.equal((await call("/api/profile/details","PATCH",{birthday:"bad-date"})).status,400);
+ assert.equal((await call("/api/profile/details","PATCH",{birthday:"2025-02-30"})).status,400);
  assert.equal((await call("/api/profile/details","PATCH",{phone:"abc"})).status,400);
 });
 test("profile update stores supported fields but not forged role or email",async()=>{
