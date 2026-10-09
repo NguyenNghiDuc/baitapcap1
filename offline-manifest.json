@@ -86,7 +86,8 @@
     "/css/speech.css",
     "/css/exam-mode.css",
     "/js/exams/exam-lock.js",
-    "/js/exams/locked-ui.js"
+    "/js/exams/locked-ui.js",
+    "/js/exams/practice-fallback.js"
   ],
   "coreAssets": [
     "/",
@@ -124,6 +125,7 @@
     "/css/speech.css",
     "/css/exam-mode.css",
     "/js/exams/exam-lock.js",
-    "/js/exams/locked-ui.js"
+    "/js/exams/locked-ui.js",
+    "/js/exams/practice-fallback.js"
   ]
 }
