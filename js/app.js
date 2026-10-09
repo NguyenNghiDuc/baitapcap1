@@ -133,8 +133,15 @@ async function render(){
   }else renderSync();
   window.StudentI18n?.apply?.();shell()
  }catch(e){
-  if(sequence===renderSequence&&route===state.route)
-   window.RuntimeGuard?.renderError?.(e,route)||($("#content").innerHTML=errorBox(e.message))
+  if(sequence===renderSequence&&route===state.route){
+   if(route==="practice"&&state.quiz?.questions?.length&&window.PracticeFallback?.mount){
+    const z=state.quiz;window.PracticeFallback.mount(z,{
+     onAnswer:answer=>{z.answers[z.questions[z.i].id]=answer;persistQuiz();quiz()},
+     onNext:delta=>{z.i=Math.max(0,Math.min(z.questions.length-1,z.i+delta));persistQuiz();quiz()},
+     onSubmit:()=>{if(confirm("Bạn chắc chắn muốn nộp bài?"))finishQuiz()}
+    });
+   }else window.RuntimeGuard?.renderError?.(e,route)||($("#content").innerHTML=errorBox(e.message))
+  }
  }
 }
 function filterLessons(){const q=norm($("#lessonSearch")?.value),g=$("#gradeFilter")?.value||"",lv=$("#levelFilter")?.value||"",s=state.subjectFilter;const a=D.lessons.filter(l=>(!q||norm(l.title+" "+subj(l.subject).name+" "+(l.topic||"")).includes(q))&&(!g||String(l.grade)===g)&&(!lv||l.level===lv)&&(!s||l.subject===s));$("#lessonResults").innerHTML=a.map(lessonRow).join("")||'<div class="empty">Không tìm thấy.</div>';bind()}
@@ -159,7 +166,13 @@ function quiz(){
  const z=state.quiz;if(!z?.questions?.length){state.quiz=null;localStorage.removeItem("bt_quiz");nav("subjects");return}z.i=Math.max(0,Math.min(z.questions.length-1,Number(z.i)||0));const q=z.questions[z.i],set=z.examId?(D.examSets||[]).find(t=>t.examId===z.examId):null,timeMin=Number(set?.time||z.time||15);
  if(z.examId)window.ExamLock?.enter({title:z.customTitle||set?.title||"Bài kiểm tra"});else window.ExamLock?.exit();
  const body=`<h2>${esc(q.q)}</h2><div class="options">${q.options.map((o,i)=>`<button class="${z.answers[q.id]===i?"selected":""}" data-answer="${i}"><span>${String.fromCharCode(65+i)}</span>${esc(o)}</button>`).join("")}</div>`;
- if(!window.LockedExamUI?.render)throw new Error("Giao diện bài tập chưa được tải. Vui lòng cập nhật trang.");
+ if(!window.LockedExamUI?.render){
+  window.PracticeFallback?.mount?.(z,{
+   onAnswer:answer=>{z.answers[q.id]=answer;persistQuiz();quiz()},
+   onNext:delta=>{z.i=Math.max(0,Math.min(z.questions.length-1,z.i+delta));persistQuiz();quiz()},
+   onSubmit:()=>{if(confirm("Bạn chắc chắn muốn nộp bài?"))finishQuiz()}
+  });return
+ }
  $("#content").innerHTML=window.LockedExamUI.render({
   title:z.customTitle||set?.title||(z.lessonId?(D.lessons.find(l=>l.lessonId===z.lessonId)?.title||`Bài kiểm tra lớp ${z.grade}`):`Đề kiểm tra lớp ${z.grade}`),
   subject:q.subject||z.subject,grade:z.grade,index:z.i,questions:z.questions,answers:z.answers,timeMin,bodyHtml:body,typeLabel:"Trắc nghiệm"
