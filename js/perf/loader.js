@@ -10,7 +10,7 @@ window.PerfLoader=(()=>{
   schedule:["/js/student/schedule.js"],worksheet:["/js/student/worksheet.js"],profileStats:["/js/student/profile-stats.js"],missions:["/js/student/missions.js"],
   leaderboard:["/js/student/leaderboard.js"],bookmarks:["/js/student/bookmarks.js"],prepPlan:["/js/student/prep-plan.js"],writing:["/js/student/writing.js"],
   handwriting:["/js/perf/image-opt.js","/js/supabase/storage.js","/js/student/handwriting.js"],sync:["/js/student/sync.js"],targetScore:["/js/student/target-score.js"],
-  topics:["/js/student/topics.js"],mathWork:["/js/student/math-work.js"],settings:["/js/student/settings.js"],updateCenter:["/js/student/update-center.js"],
+  topics:["/js/student/topics.js"],mathWork:["/js/student/math-work.js"],premium:["/js/student/demo-wallet.js"],settings:["/js/student/settings.js"],updateCenter:["/js/student/update-center.js"],
   offlineCenter:["/js/student/offline-center.js"],smartNotify:["/js/student/smart-notify.js"],rewards:["/js/student/rewards.js"],gameMap:["/js/student/parent-lock.js","/js/student/game-map.js"],
   friends:["/js/student/friends.js"],aiQuestion:["/js/student/ai-question.js"],ocrScan:["/js/student/ocr-scan.js"],advancedDashboard:["/js/student/advanced-dashboard.js"],
   parentLock:["/js/student/parent-lock.js"],certificate:["/js/student/certificate.js"],helpFeedback:["/js/student/help-feedback.js"],personalExam:["/js/student/personal-exam.js"],
