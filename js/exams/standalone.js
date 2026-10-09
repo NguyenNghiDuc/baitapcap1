@@ -45,7 +45,7 @@
    stop();exam=null;
    if(gate)gate.prompt(host);
    else host.innerHTML='<section class="panel"><h2>Đăng nhập để làm bài</h2><a href="/?auth=register">Đăng ký</a> · <a href="/?auth=login">Đăng nhập</a></section>';
-   const back=host.querySelector("#examBackToList");if(back)back.onclick=list;
+   const back=host.querySelector("#examBackToList");if(back)back.onclick=list;const retry=host.querySelector("#examRetryLogin");if(retry)retry.onclick=()=>start(info,questions,minutes);
    return;
   }
   if(!Array.isArray(questions)||questions.length<1){err("Đề không có câu hỏi hợp lệ.");return;}
