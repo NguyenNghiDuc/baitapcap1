@@ -7,7 +7,7 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
  if(req.method==="POST"&&p==="/api/auth/sync"){
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
   const token=String(d.accessToken||"");const su=await supabase.getUserFromToken(token);if(!su)return send(res,401,{error:"Supabase session không hợp lệ"}),true;
-  const db=load();let u=db.users.find(x=>x.authUserId===su.id||String(x.email||"").toLowerCase()===String(su.email||"").toLowerCase());
+  const db=load();let u=db.users.find(x=>x.authUserId===su.id);
   const md=su.user_metadata||{};
   // Admin provisioning must be tied to the exact Supabase Auth user UUID,
   // configured by the site owner. Never trust email or user_metadata.role.
@@ -18,12 +18,10 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
    db.users.push(u);
   }else{
    u.authUserId=su.id;u.email=su.email||u.email;u.emailVerified=!!su.email_confirmed_at;
-   if(md.name||md.full_name)u.name=String(md.name||md.full_name);
    if(isConfiguredAdmin)u.role="admin";
    else if(u.role!=="admin"&&["student","parent"].includes(md.role))u.role=md.role;
-   if(Number(md.grade)>=1&&Number(md.grade)<=5)u.grade=Number(md.grade);
   }
-  save(db);await pg.upsertUser(u).catch(e=>monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id}));monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
+  await save(db);await pg.upsertUser(u).catch(e=>monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id}));monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
   return send(res,200,{user:{id:u.id,email:u.email,name:u.name,role:u.role,grade:u.grade,avatar:u.avatar,emailVerified:!!u.emailVerified}}),true;
  }
  return false;
