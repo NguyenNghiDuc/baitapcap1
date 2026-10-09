@@ -18,7 +18,7 @@ window.PerfLoader=(()=>{
   historyCompare:["/js/student/history-compare.js"],performanceMode:["/js/student/performance-mode.js"],chapterAchievements:["/js/student/chapter-achievements.js"],
   materials:["/js/perf/image-opt.js","/js/supabase/storage.js","/js/teacher/material-storage.js"]
  };
- async function versioned(src){if(!hashPromise)hashPromise=fetch("/asset-hashes.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null);const m=await hashPromise,h=m?.hashes?.[src];return h?src+"?h="+h:src}
+ async function versioned(src){if(!hashPromise)hashPromise=Promise.race([fetch("/asset-hashes.json",{cache:"force-cache"}).then(r=>r.ok?r.json():null).catch(()=>null),new Promise(resolve=>setTimeout(()=>resolve(null),350))]);const m=await hashPromise,h=m?.hashes?.[src];return h?src+"?h="+h:src}
  async function script(src){
   if(loaded.has(src))return loaded.get(src);
   if(document.querySelector(`script[data-lazy-src="${src}"]`))return Promise.resolve();
@@ -28,9 +28,10 @@ window.PerfLoader=(()=>{
  async function ensureRoute(route){
   // Exam modules are preloaded in index.html. Do not block exams on config or asset-hash requests.
   if(route==="tests"&&window.TermExamBank&&window.TermExamCatalog&&window.ExamRunner&&window.ExamInteraction)return;
-  if(route!=="tests")await window.RuntimeGuard?.ready?.();
+  // Feature flags are fetched in the background; do not hold every page on this API.
+  if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
-  for(const src of routeFiles[route]||[])await script(src)
+  await Promise.all((routeFiles[route]||[]).map(src=>script(src)))
  }
  function prefetch(route){const files=routeFiles[route]||[];const run=()=>files.forEach(async src=>{if(loaded.has(src))return;const l=document.createElement("link");l.rel="prefetch";l.as="script";l.href=await versioned(src);document.head.appendChild(l)});("requestIdleCallback" in window)?requestIdleCallback(run,{timeout:2500}):setTimeout(run,1200)}
  function cleanupRoute(){window.API?.abortAll?.();window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.();try{window.speechSynthesis?.cancel?.()}catch{}try{window._btSpeechRecognition?.abort?.()}catch{}if(window._btBreak){clearTimeout(window._btBreak);window._btBreak=null}}
