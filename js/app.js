@@ -243,5 +243,7 @@ $("#authBtn")?.addEventListener("click",async()=>{if(state.user){await window.Au
 window.addEventListener("hashchange",()=>{if(window.ExamLock?.isActive?.()&&!state.quiz)window.ExamLock.exit();if(window.ExamLock?.isActive?.()){window.ExamLock.restoreRoute();return}const next=location.hash.slice(1)||"home";if(!(next==="practice"&&state.quiz?.questions?.length))window.PerfLoader?.cleanupRoute?.();state.route=next;render();window.PerfLoader?.prefetch?.(state.route==="home"?"tests":"home")});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 const qp=new URLSearchParams(location.search);if(qp.get("auth_token")){API.setToken(qp.get("auth_token"));history.replaceState(null,"",location.pathname+location.hash)}const savedQuiz=localStorage.getItem("bt_quiz");if(savedQuiz){try{state.quiz=JSON.parse(savedQuiz)}catch{}}window.AuthUI?.setBridge(window.AppAuthBridge);
-(async()=>{try{await window.SupabaseApp?.init(u=>{state.user=u;shell()})}catch{}if(!state.user)await restore();render()})();
+// Display the requested page immediately, even if authentication services are slow.
+render();
+(async()=>{try{await window.SupabaseApp?.init(u=>{state.user=u;shell()})}catch{}if(!state.user)await restore();shell();if(state.user)render()})();
 })();
