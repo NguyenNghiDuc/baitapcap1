@@ -24,8 +24,23 @@ window.SupabaseApp=(()=>{
  async function sync(sessionObj){if(!sessionObj?.access_token)return null;API.setToken(sessionObj.access_token);const j=await API.post("/api/auth/sync",{accessToken:sessionObj.access_token});currentAppUser=j.user;return j.user}
  async function init(onUser){
   await ready();if(!client)return null;
-  const s=await session();if(s){const u=await sync(s).catch(()=>null);if(u)onUser?.(u)}
-  client.auth.onAuthStateChange((event,sess)=>{setTimeout(async()=>{if(sess){const u=await sync(sess).catch(()=>null);if(u)onUser?.(u)}else if(event==="SIGNED_OUT"){API.setToken("");onUser?.(null)}},0)});
+  const showSession=sess=>{
+   if(!sess?.access_token)return;
+   API.setToken(sess.access_token);
+   const su=sess.user||{},md=su.user_metadata||{};
+   onUser?.({id:su.id,email:su.email||"",name:String(md.name||md.full_name||su.email?.split("@")[0]||"Người dùng"),role:"student",grade:Number(md.grade)||4,avatar:"👧🏻",pendingProfile:true});
+  };
+  const updateProfile=async sess=>{if(!sess?.access_token)return;const u=await sync(sess).catch(e=>{console.warn("Profile sync pending",e?.message||e);return null});if(u)onUser?.(u)};
+  // Session restoration is instant after SDK reads persisted credentials;
+  // never block the visible signed-in state on the separate profile request.
+  client.auth.onAuthStateChange((event,sess)=>{
+   if(event==="SIGNED_OUT"){currentAppUser=null;API.setToken("");onUser?.(null);return}
+   if(!sess)return;
+   if(event==="INITIAL_SESSION"||event==="SIGNED_IN"){showSession(sess);setTimeout(()=>updateProfile(sess),0)}
+   else if(event==="USER_UPDATED"||event==="TOKEN_REFRESHED"){API.setToken(sess.access_token);setTimeout(()=>updateProfile(sess),0)}
+  });
+  const s=await session();
+  if(s){showSession(s);updateProfile(s)}
   return s
  }
  return {ready,session,sync,init,get client(){return client},get config(){return config},get user(){return currentAppUser},enabled:()=>!!client}
