@@ -47,26 +47,31 @@
  function clock(){return Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");}
  function persistAnswer(){
   const q=exam.questions[exam.i],t=q.examType||"mcq";
-  if(t==="fill")exam.answers[q.id]=document.querySelector("#fill")?.value.trim()||"";
+  if(t==="fill"||t==="essay")exam.answers[q.id]=document.querySelector("#fill")?.value.trim()||"";
   if(t==="matching"){const vals={};host.querySelectorAll("[data-pair]").forEach(el=>{vals[el.dataset.pair]=el.value});exam.answers[q.id]=vals;}
  }
  function paint(){
   if(!exam)return;const q=exam.questions[exam.i],v=exam.answers[q.id],t=q.examType||"mcq";
   let answer="";
   if(t==="truefalse")answer='<div class="choices">'+["true","false"].map((x,i)=>'<button class="answer '+(v===x?"selected":"")+'" data-choice="'+x+'">'+(i?"Sai":"Đúng")+'</button>').join("")+'</div>';
+  else if(t==="essay")answer='<label class="essay-label" for="fill">✍️ Bài làm tự luận</label><textarea id="fill" class="essay-input" rows="8" placeholder="Viết các bước giải, phép tính và đáp số của em...">'+esc(v||"")+'</textarea><p class="essay-note">Bài tự luận cần giáo viên đánh giá; hệ thống chỉ tự chấm trắc nghiệm và Đúng/Sai.</p>';
   else if(t==="fill")answer='<label>Nhập câu trả lời<input id="fill" type="text" value="'+esc(v||"")+'"></label>';
   else if(t==="matching")answer='<div class="matches">'+q.pairs.map((p,i)=>'<label>'+esc(p[0])+'<select data-pair="'+i+'"><option value="">Chọn đáp án</option>'+q.pairs.map(other=>'<option value="'+esc(other[1])+'" '+((v||{})[i]===other[1]?"selected":"")+'>'+esc(other[1])+'</option>').join("")+'</select></label>').join("")+'</div>';
   else answer='<div class="choices">'+(q.options||[]).map((o,i)=>'<button class="answer '+(v===i?"selected":"")+'" data-choice="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>').join("")+'</div>';
-  host.innerHTML='<section class="panel"><div class="exam-top"><strong>'+esc(exam.info.title)+'</strong><strong>⏱ <span id="countdown">'+clock()+'</span></strong></div><p>Câu '+(exam.i+1)+' / '+exam.questions.length+'</p><h2>'+esc(q.q)+'</h2>'+answer+'<div class="actions"><button id="prev" '+(exam.i===0?"disabled":"")+'>← Trước</button><button id="next" '+(exam.i===exam.questions.length-1?"disabled":"")+'>Tiếp →</button><button id="submit" class="submit">Nộp bài</button></div><div class="numbers">'+exam.questions.map((q,i)=>'<button class="'+(i===exam.i?"current":"")+'" data-index="'+i+'">'+(i+1)+'</button>').join("")+'</div></section>';
+  const groups=[{name:"Phần I · Trắc nghiệm",type:"mcq"},{name:"Phần II · Đúng / Sai",type:"truefalse"},{name:"Phần III · Tự luận",type:"essay"}];
+  const kind=t==="truefalse"?"truefalse":t==="essay"||t==="fill"?"essay":"mcq";
+  const groupButtons=groups.map(g=>{const count=exam.questions.filter(x=>(x.examType==="truefalse"?"truefalse":x.examType==="essay"||x.examType==="fill"?"essay":"mcq")===g.type).length;const first=exam.questions.findIndex(x=>(x.examType==="truefalse"?"truefalse":x.examType==="essay"||x.examType==="fill"?"essay":"mcq")===g.type);return count?'<button type="button" class="section-tab '+(kind===g.type?'active':'')+'" data-section="'+first+'">'+g.name+' <small>('+count+')</small></button>':""}).join("");
+  host.innerHTML='<section class="panel"><div class="exam-sections">'+groupButtons+'</div><div class="exam-top"><strong>'+esc(exam.info.title)+'</strong><strong>⏱ <span id="countdown">'+clock()+'</span></strong></div><p>Câu '+(exam.i+1)+' / '+exam.questions.length+'</p><h2>'+esc(q.q)+'</h2>'+answer+'<div class="actions"><button id="prev" '+(exam.i===0?"disabled":"")+'>← Trước</button><button id="next" '+(exam.i===exam.questions.length-1?"disabled":"")+'>Tiếp →</button><button id="submit" class="submit">Nộp bài</button></div><div class="numbers">'+exam.questions.map((q,i)=>'<button class="'+(i===exam.i?"current":"")+'" data-index="'+i+'">'+(i+1)+'</button>').join("")+'</div></section>';
   host.querySelectorAll("[data-choice]").forEach(b=>b.onclick=()=>{exam.answers[q.id]=t==="truefalse"?b.dataset.choice:Number(b.dataset.choice);paint();});
   host.querySelector("#prev").onclick=()=>move(exam.i-1);host.querySelector("#next").onclick=()=>move(exam.i+1);
+  host.querySelectorAll("[data-section]").forEach(b=>b.onclick=()=>move(Number(b.dataset.section)));
   host.querySelectorAll("[data-index]").forEach(b=>b.onclick=()=>move(Number(b.dataset.index)));
   host.querySelector("#submit").onclick=()=>{persistAnswer();if(confirm("Nộp bài kiểm tra?"))finish(false);};
  }
  function move(i){persistAnswer();exam.i=Math.max(0,Math.min(exam.questions.length-1,i));paint();}
- function finish(auto){if(!exam)return;persistAnswer();stop();const done=exam;exam=null;const correct=done.questions.filter(q=>I.isCorrect(q,done.answers[q.id])).length,score=Math.round(correct/done.questions.length*100);
-  try{const old=JSON.parse(localStorage.getItem("bt_results")||"[]");old.push({id:Date.now(),title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total:done.questions.length,score,points:correct/done.questions.length*100,durationSec:Math.round((Date.now()-done.started)/1000),date:new Date().toLocaleDateString("vi-VN")});localStorage.setItem("bt_results",JSON.stringify(old));}catch{}
-  host.innerHTML='<section class="panel"><h1>'+(auto?"Hết giờ!":"Đã nộp bài!")+'</h1><h2>Điểm: '+score+'% ('+correct+'/'+done.questions.length+' câu đúng)</h2><button id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+done.questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+'</section>';host.querySelector("#back").onclick=list;
+ function finish(auto){if(!exam)return;persistAnswer();stop();const done=exam;exam=null;const objective=done.questions.filter(q=>q.examType!=="essay"&&q.examType!=="fill"),correct=objective.filter(q=>I.isCorrect(q,done.answers[q.id])).length,score=objective.length?Math.round(correct/objective.length*100):0;
+  try{const old=JSON.parse(localStorage.getItem("bt_results")||"[]");old.push({id:Date.now(),title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total:objective.length,score,points:0,gradingStatus:'practice_objective_only',durationSec:Math.round((Date.now()-done.started)/1000),date:new Date().toLocaleDateString("vi-VN")});localStorage.setItem("bt_results",JSON.stringify(old));}catch{}
+  host.innerHTML='<section class="panel"><h1>'+(auto?"Hết giờ!":"Đã nộp bài!")+'</h1><h2>Điểm: '+score+'% ('+correct+'/'+done.questions.length+' câu đúng)</h2><button id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+done.questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(q.examType==='essay'?'Gợi ý: '+(q.answerText||'Xem hướng dẫn') : I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+'</section>';host.querySelector("#back").onclick=list;
  }
  try{list();}catch(e){err(e);}
 })();
