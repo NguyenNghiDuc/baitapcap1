@@ -1,26 +1,39 @@
-/* Client-side access gate for standalone practice exams.
-   Production exam submissions must additionally verify user identity on the server. */
+/* Standalone exams use the same Supabase Auth origin and project as the home page.
+   A cached UI identity or a token from another origin is not authentication. */
 window.ExamAccountGate=(()=>{
- let pending=null;
+ let pending=null,lastReason="missing";
  async function check(){
   if(pending)return pending;
   pending=(async()=>{
-   if(!window.SupabaseApp)return false;
+   if(!window.SupabaseApp){lastReason="sdk";return false}
    await window.SupabaseApp.ready();
-   if(!window.SupabaseApp.enabled())return false;
-   const session=await window.SupabaseApp.session();
-   if(!session?.access_token)return false;
-   const result=await window.SupabaseApp.client.auth.getUser(session.access_token);
-   return Boolean(result?.data?.user?.id&&!result.error);
-  })().catch(()=>false).finally(()=>{pending=null});
+   if(!window.SupabaseApp.enabled()){lastReason="config";return false}
+   const client=window.SupabaseApp.client;
+   let session=(await client.auth.getSession()).data?.session;
+   if(!session){lastReason="missing";return false}
+   let result=await client.auth.getUser();
+   if(result.error||!result.data?.user?.id){
+    // Refresh expired access tokens once instead of showing a false logout.
+    const refreshed=await client.auth.refreshSession();
+    if(refreshed.error||!refreshed.data?.session){lastReason="expired";return false}
+    session=refreshed.data.session;
+    result=await client.auth.getUser();
+   }
+   const ok=!!result.data?.user?.id&&!result.error;
+   lastReason=ok?"ok":"expired";
+   return ok;
+  })().catch(e=>{console.warn("Exam account check:",e?.message||e);lastReason="network";return false})
+    .finally(()=>{pending=null});
   return pending;
  }
  function prompt(container){
-  const isPreview=/\.github\.dev$/i.test(location.hostname);
-  const notice=isPreview
-   ? '<p>Bạn đang mở bản chạy thử trên github.dev. Phiên đăng nhập ở baitapcap1.vercel.app không tự chuyển sang đây.</p><p><a href="https://baitapcap1.vercel.app/kiem-tra.html">Mở bài kiểm tra trên website chính →</a></p>'
-   : '<p>Hãy đăng nhập vào Bài Tập Cấp 1 trên cùng địa chỉ website này trước khi bắt đầu.</p>';
-  container.innerHTML='<section class="exam-auth-wall" role="status"><div class="exam-auth-symbol">🔒</div><h2>Đăng nhập để làm bài kiểm tra</h2>'+notice+'<div class="exam-auth-actions"><a href="/?auth=register">Tạo tài khoản mới</a><a class="secondary" href="/?auth=login">Đã có tài khoản? Đăng nhập</a></div><button type="button" id="examBackToList">← Xem danh sách đề</button></section>';
+  const preview=/\\.github\\.dev$/i.test(location.hostname);
+  const notice=preview
+   ? '<p>Bạn đang mở bản chạy thử trên github.dev. Phiên đăng nhập trên Vercel không được chia sẻ với địa chỉ này.</p><p><a href="https://baitapcap1.vercel.app/kiem-tra.html">Mở đề trên website chính →</a></p>'
+   : lastReason==="config"||lastReason==="sdk"||lastReason==="network"
+    ? '<p>Không kiểm tra được phiên đăng nhập do kết nối hoặc cấu hình Supabase. Hãy tải lại trang và thử lại.</p>'
+    : '<p>Trang kiểm tra chưa nhận được phiên đăng nhập hợp lệ trên <b>'+location.host.replace(/[&<>"']/g,"")+'</b>. Hãy đăng nhập ở cùng địa chỉ này rồi trở lại làm bài.</p>';
+  container.innerHTML='<section class="exam-auth-wall" role="status"><div class="exam-auth-symbol">🔒</div><h2>Chưa xác nhận được đăng nhập</h2>'+notice+'<div class="exam-auth-actions"><a href="/?auth=login">Đăng nhập tại đây</a><a class="secondary" href="/?auth=register">Tạo tài khoản</a></div><button type="button" id="examRetryLogin">↻ Kiểm tra lại đăng nhập</button><button type="button" id="examBackToList">← Xem danh sách đề</button></section>';
  }
- return {check,prompt};
+ return {check,prompt,get reason(){return lastReason}};
 })();
