@@ -25,7 +25,7 @@ window.ProfilePage=(()=>{
   document.querySelector("#profileEdit")?.addEventListener("click",()=>document.querySelector('#profileDetailsForm [name="name"]')?.focus());
   document.querySelector("#profileDetailsForm")?.addEventListener("submit",async e=>{
    e.preventDefault();const b=e.currentTarget.querySelector('[type="submit"]');b.disabled=true;
-   try{const d=Object.fromEntries(new FormData(e.currentTarget));d.grade=Number(d.grade);await API.patch("/api/profile/details",d);toast("Đã lưu thông tin hồ sơ");refresh()}catch(err){toast(err.message)}finally{b.disabled=false}
+   try{const d=Object.fromEntries(new FormData(e.currentTarget));d.grade=Number(d.grade);await API.patch("/api/profile/details",d);window.AppAuthBridge?.updateProfile?.(d);toast("Đã lưu thông tin hồ sơ");refresh()}catch(err){toast(err.message)}finally{b.disabled=false}
   });
   document.querySelectorAll("[data-profile-pref]").forEach(el=>el.addEventListener("change",async()=>{
    const prefs=Object.fromEntries([...document.querySelectorAll("[data-profile-pref]")].map(x=>[x.dataset.profilePref,x.checked]));
