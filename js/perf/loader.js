@@ -31,7 +31,7 @@ window.PerfLoader=(()=>{
   // Feature flags are fetched in the background; do not hold every page on this API.
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
-  await Promise.all((routeFiles[route]||[]).map(src=>script(src)))
+  for(const src of routeFiles[route]||[])await script(src)
  }
  function prefetch(route){const files=routeFiles[route]||[];const run=()=>files.forEach(async src=>{if(loaded.has(src))return;const l=document.createElement("link");l.rel="prefetch";l.as="script";l.href=await versioned(src);document.head.appendChild(l)});("requestIdleCallback" in window)?requestIdleCallback(run,{timeout:2500}):setTimeout(run,1200)}
  function cleanupRoute(){window.API?.abortAll?.();window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.();try{window.speechSynthesis?.cancel?.()}catch{}try{window._btSpeechRecognition?.abort?.()}catch{}if(window._btBreak){clearTimeout(window._btBreak);window._btBreak=null}}
