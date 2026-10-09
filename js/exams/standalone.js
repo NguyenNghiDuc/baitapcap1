@@ -12,7 +12,7 @@
   if(!B?.exams?.length){err("Ngân hàng đề chưa tải. Vui lòng tải lại trang.");return;}
   if(advancedMode){
    const items=B.exams.filter(e=>(!filters.grade||String(e.grade)===filters.grade)&&(!filters.subject||e.subject===filters.subject));
-   host.innerHTML='<h2>🌟 Bộ đề nâng cao riêng</h2><p>Các câu hỏi được lấy từ ngân hàng nâng cao, không trộn đề kiểm tra thông thường.</p><div class="filters"><select id="g"><option value="">Tất cả lớp</option><option value="4">Lớp 4</option><option value="5">Lớp 5</option></select><select id="s"><option value="">Tất cả môn</option><option value="math">Toán</option><option value="vietnamese">Tiếng Việt</option><option value="english">Tiếng Anh</option></select></div><p>'+items.length+' đề nâng cao</p><div class="grid">'+items.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>30 câu nâng cao · 60 phút</p><button data-exam="'+e.id+'">Bắt đầu đề nâng cao</button></article>').join("")+'</div>';
+   host.innerHTML='<h2>🌟 Bộ đề nâng cao riêng</h2><p>Các câu hỏi được lấy từ ngân hàng nâng cao, không trộn đề kiểm tra thông thường.</p><div class="filters"><select id="g"><option value="">Tất cả lớp</option><option value="4">Lớp 4</option><option value="5">Lớp 5</option></select><select id="s"><option value="">Tất cả môn</option><option value="math">Toán</option><option value="vietnamese">Tiếng Việt</option><option value="english">Tiếng Anh</option></select></div><p>'+items.length+' đề nâng cao</p><div class="grid">'+items.map(e=>'<article class="card"><h3>'+esc(e.title)+'</h3><p>'+(e.challenge?'20 câu · 5 điểm/câu · 45 phút':'30 câu nâng cao · 60 phút')+'</p><button data-exam="'+e.id+'">Bắt đầu đề nâng cao</button></article>').join("")+'</div>';
    document.querySelector("#g").value=filters.grade;
    document.querySelector("#s").value=filters.subject;
    for(const [id,key] of [["g","grade"],["s","subject"]])document.querySelector("#"+id).onchange=e=>{filters[key]=e.target.value;list();};
@@ -28,7 +28,7 @@
   host.querySelectorAll("[data-daily]").forEach(b=>b.onclick=()=>{const [g,t]=b.dataset.daily.split(":");const e=B.daily(Number(g),t);start(e,e.questions,45);});
  }
  function start(info,questions,minutes){
-  if(!Array.isArray(questions)||questions.length!==30){err("Đề không đủ 30 câu.");return;}
+  if(!Array.isArray(questions)||questions.length<1){err("Đề không có câu hỏi hợp lệ.");return;}
   stop();exam={info,questions,i:0,answers:{},started:Date.now(),duration:minutes};seconds=minutes*60;
   try{paint();timer=setInterval(()=>{seconds=Math.max(0,seconds-1);const el=document.querySelector("#countdown");if(el)el.textContent=clock();if(seconds===0)finish(true);},1000);}catch(e){err(e);}
  }
@@ -45,16 +45,16 @@
   else if(t==="fill")answer='<label>Nhập câu trả lời<input id="fill" type="text" value="'+esc(v||"")+'"></label>';
   else if(t==="matching")answer='<div class="matches">'+q.pairs.map((p,i)=>'<label>'+esc(p[0])+'<select data-pair="'+i+'"><option value="">Chọn đáp án</option>'+q.pairs.map(other=>'<option value="'+esc(other[1])+'" '+((v||{})[i]===other[1]?"selected":"")+'>'+esc(other[1])+'</option>').join("")+'</select></label>').join("")+'</div>';
   else answer='<div class="choices">'+(q.options||[]).map((o,i)=>'<button class="answer '+(v===i?"selected":"")+'" data-choice="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>').join("")+'</div>';
-  host.innerHTML='<section class="panel"><div class="exam-top"><strong>'+esc(exam.info.title)+'</strong><strong>⏱ <span id="countdown">'+clock()+'</span></strong></div><p>Câu '+(exam.i+1)+' / 30</p><h2>'+esc(q.q)+'</h2>'+answer+'<div class="actions"><button id="prev" '+(exam.i===0?"disabled":"")+'>← Trước</button><button id="next" '+(exam.i===29?"disabled":"")+'>Tiếp →</button><button id="submit" class="submit">Nộp bài</button></div><div class="numbers">'+exam.questions.map((q,i)=>'<button class="'+(i===exam.i?"current":"")+'" data-index="'+i+'">'+(i+1)+'</button>').join("")+'</div></section>';
+  host.innerHTML='<section class="panel"><div class="exam-top"><strong>'+esc(exam.info.title)+'</strong><strong>⏱ <span id="countdown">'+clock()+'</span></strong></div><p>Câu '+(exam.i+1)+' / '+exam.questions.length</p><h2>'+esc(q.q)+'</h2>'+answer+'<div class="actions"><button id="prev" '+(exam.i===0?"disabled":"")+'>← Trước</button><button id="next" '+(exam.i===exam.questions.length-1?"disabled":"")+'>Tiếp →</button><button id="submit" class="submit">Nộp bài</button></div><div class="numbers">'+exam.questions.map((q,i)=>'<button class="'+(i===exam.i?"current":"")+'" data-index="'+i+'">'+(i+1)+'</button>').join("")+'</div></section>';
   host.querySelectorAll("[data-choice]").forEach(b=>b.onclick=()=>{exam.answers[q.id]=t==="truefalse"?b.dataset.choice:Number(b.dataset.choice);paint();});
   host.querySelector("#prev").onclick=()=>move(exam.i-1);host.querySelector("#next").onclick=()=>move(exam.i+1);
   host.querySelectorAll("[data-index]").forEach(b=>b.onclick=()=>move(Number(b.dataset.index)));
   host.querySelector("#submit").onclick=()=>{persistAnswer();if(confirm("Nộp bài kiểm tra?"))finish(false);};
  }
- function move(i){persistAnswer();exam.i=Math.max(0,Math.min(29,i));paint();}
- function finish(auto){if(!exam)return;persistAnswer();stop();const done=exam;exam=null;const correct=done.questions.filter(q=>I.isCorrect(q,done.answers[q.id])).length,score=Math.round(correct/30*100);
-  try{const old=JSON.parse(localStorage.getItem("bt_results")||"[]");old.push({id:Date.now(),title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total:30,score,points:correct*10,durationSec:Math.round((Date.now()-done.started)/1000),date:new Date().toLocaleDateString("vi-VN")});localStorage.setItem("bt_results",JSON.stringify(old));}catch{}
-  host.innerHTML='<section class="panel"><h1>'+(auto?"Hết giờ!":"Đã nộp bài!")+'</h1><h2>Điểm: '+score+'% ('+correct+'/30 câu đúng)</h2><button id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+done.questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+'</section>';host.querySelector("#back").onclick=list;
+ function move(i){persistAnswer();exam.i=Math.max(0,Math.min(exam.questions.length-1,i));paint();}
+ function finish(auto){if(!exam)return;persistAnswer();stop();const done=exam;exam=null;const correct=done.questions.filter(q=>I.isCorrect(q,done.answers[q.id])).length,score=Math.round(correct/done.questions.length*100);
+  try{const old=JSON.parse(localStorage.getItem("bt_results")||"[]");old.push({id:Date.now(),title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total:done.questions.length,score,points:correct*10,durationSec:Math.round((Date.now()-done.started)/1000),date:new Date().toLocaleDateString("vi-VN")});localStorage.setItem("bt_results",JSON.stringify(old));}catch{}
+  host.innerHTML='<section class="panel"><h1>'+(auto?"Hết giờ!":"Đã nộp bài!")+'</h1><h2>Điểm: '+score+'% ('+correct+'/'+done.questions.length+' câu đúng)</h2><button id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+done.questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+'</section>';host.querySelector("#back").onclick=list;
  }
  try{list();}catch(e){err(e);}
 })();
