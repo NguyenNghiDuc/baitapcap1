@@ -64,6 +64,7 @@ async function api(req,res,p,ip){
  if(await handleApp(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(await handleExamSettings(req,res,p,{send,parseBody,requireUser,load,save,ROOT,audit:auditStore}))return;
  if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
+ if(await require("./routes/demo-wallet")(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(req.method==="POST"&&p==="/api/register"){if(!rate(ip,"auth",10,10*60e3))return send(res,429,{error:"Thử lại sau"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
   const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),role=["student","parent"].includes(d.role)?d.role:"student";
   if(!/^\S+@\S+\.\S+$/.test(email)||password.length<8)return send(res,400,{error:"Email hợp lệ và mật khẩu tối thiểu 8 ký tự"});
