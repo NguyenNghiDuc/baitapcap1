@@ -44,3 +44,14 @@ body{background:#f4f7fc;color:#172b49}
 #examApp>.actions{justify-content:center}
 @media(max-width:900px){.exam-section .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.exam-filter-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-icon{font-size:70px}}
 @media(max-width:600px){.site-header{padding:12px 16px;gap:10px}.site-header .header-logo{font-size:16px}.site-header a{font-size:12px}#examApp{margin:16px auto 50px;padding:0 12px}.exam-hero{padding:26px 22px;border-radius:18px;min-height:190px}.exam-hero h1{font-size:27px}.exam-hero p{font-size:13px}.hero-icon{display:none}.exam-filter-panel{padding:19px 16px;border-radius:16px}.exam-filter-panel .subject-picker{grid-template-columns:1fr;gap:9px}.exam-filter-panel .subject-choice{padding:10px;justify-content:flex-start}.exam-filter-fields{grid-template-columns:1fr}.exam-section .grid{grid-template-columns:1fr}.exam-section-heading h2{font-size:19px}.exam-card{padding:19px}}
+
+/* Three-part test runner */
+.exam-sections{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 25px;padding:5px;border-radius:15px;background:#f0f5fd}
+.exam-sections .section-tab{flex:1;min-width:180px;background:transparent;color:#3c5778;border:1px solid transparent;border-radius:11px;padding:13px 15px;font-size:14px}
+.exam-sections .section-tab.active{background:#fff;color:#1269d2;border-color:#d5e4fa;box-shadow:0 3px 11px rgba(15,75,155,.09)}
+.exam-sections .section-tab small{font-size:12px;color:#69819e}
+.essay-label{display:block;margin:16px 0 10px;font-size:16px;font-weight:750}
+.essay-input{display:block;resize:vertical;width:100%;min-height:210px;border:1.5px solid #c8d8ee;border-radius:14px;padding:17px;font-size:16px;font-family:inherit;line-height:1.7;color:#173253;background:#fbfdff;outline:none}
+.essay-input:focus{border-color:#1478df;box-shadow:0 0 0 3px rgba(20,120,223,.13)}
+.essay-note{font-size:13px;line-height:1.6;color:#677b94;background:#f3f7fc;border-radius:10px;padding:11px 13px}
+@media(max-width:620px){.exam-sections{display:grid;grid-template-columns:1fr;gap:4px}.exam-sections .section-tab{min-width:0;text-align:left}.essay-input{min-height:230px}}
