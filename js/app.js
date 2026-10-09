@@ -248,9 +248,10 @@ if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.ser
 const qp=new URLSearchParams(location.search);if(qp.get("auth_token")){API.setToken(qp.get("auth_token"));history.replaceState(null,"",location.pathname+location.hash)}const savedQuiz=localStorage.getItem("bt_quiz");if(savedQuiz){try{state.quiz=JSON.parse(savedQuiz)}catch{}}window.AuthUI?.setBridge(window.AppAuthBridge);
 // Display the requested page immediately, even if authentication services are slow.
 render();
-if(qp.get("auth")==="register"){
+if(qp.get("auth")==="register"||qp.get("auth")==="login"){
+ const authMode=qp.get("auth");
  history.replaceState(null,"",location.pathname+(location.hash||""));
- Promise.resolve().then(()=>window.AuthUI?.open("register")).catch(e=>{console.error("Cannot open registration",e);const m=document.querySelector("#toast");if(m)m.textContent="Không mở được biểu mẫu đăng ký. Vui lòng tải lại trang."});
+ Promise.resolve().then(()=>window.AuthUI?.open(authMode)).catch(e=>{console.error("Cannot open registration",e);const m=document.querySelector("#toast");if(m)m.textContent="Không mở được biểu mẫu đăng ký. Vui lòng tải lại trang."});
 }
 (async()=>{try{await window.SupabaseApp?.init(u=>{state.user=u;shell()})}catch{}if(!state.user)await restore();shell();if(state.user)render()})();
 })();
