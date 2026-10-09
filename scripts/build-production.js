@@ -13,7 +13,7 @@ function copyFile(src,dst){ensure(dst);fs.copyFileSync(src,dst)}
    else copyFile(file,dst)
   }
  }
- for(const name of ["index.html","kiem-tra.html","manifest.webmanifest","offline-manifest.json","privacy.html","terms.html","sw.js","favicon.ico"]){const src=path.join(ROOT,name);if(fs.existsSync(src))copyFile(src,path.join(OUT,name))}
+ for(const name of ["index.html","kiem-tra.html","kiem-tra-nang-cao.html","manifest.webmanifest","offline-manifest.json","privacy.html","terms.html","sw.js","favicon.ico"]){const src=path.join(ROOT,name);if(fs.existsSync(src))copyFile(src,path.join(OUT,name))}
  for(const dir of ["assets","images","icons"]){for(const file of walk(path.join(ROOT,dir)))copyFile(file,path.join(OUT,path.relative(ROOT,file)))}
  const hashes={};for(const file of [...walk(path.join(OUT,"js")),...walk(path.join(OUT,"css"))]){const rel="/"+path.relative(OUT,file).replace(/\\/g,"/"),hash=crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex").slice(0,10);hashes[rel]=hash}
  let html=fs.readFileSync(path.join(OUT,"index.html"),"utf8");
