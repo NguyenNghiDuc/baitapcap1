@@ -3,20 +3,26 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 30
+    },
+    "api/ai-status.js": {
+      "maxDuration": 10
+    },
+    "api/ai-chat.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
     {
       "source": "/api/ai/status",
-      "destination": "/api/ai-status.js"
+      "destination": "/api/ai-status"
     },
     {
       "source": "/api/ai",
-      "destination": "/api/ai-chat.js"
+      "destination": "/api/ai-chat"
     },
     {
       "source": "/api/:path*",
-      "destination": "/api/index.js?route=:path*"
+      "destination": "/api/index?route=:path*"
     }
   ],
   "headers": [
