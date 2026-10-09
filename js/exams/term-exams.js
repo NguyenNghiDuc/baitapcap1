@@ -25,14 +25,20 @@ window.TermExamBank=(()=>{
   english:new Set(["present-simple","vocabulary","pronoun","present-continuous","preposition","question-word","plural","can","past-simple","sentence-order","communication","topic-vocab","phonics","grammar","stress","listening"])
  };
  const exams=[];
- for(const grade of [4,5])for(const semester of [1,2])for(let stage=0;stage<3;stage++)for(const subject of subjects)for(let v=1;v<=6;v++){
+ for(const grade of [4,5])for(const semester of [1,2])for(let stage=0;stage<3;stage++)for(const subject of subjects)for(let v=1;v<=30;v++){
   const id=`term-g${grade}-s${semester}-p${stage+1}-${subject}-v${v}`,info=subjectInfo[subject];
   exams.push({id,grade,semester,stage,subject,variant:v,title:`${info.name} lớp ${grade} • HK${semester} • ${stages[stage]} • Mã ${String(v).padStart(2,"0")}`,time:60});
  }
+ const dailyExams=[];
+ for(const grade of [4,5])for(const subject of subjects)for(let v=1;v<=30;v++){
+  const info=subjectInfo[subject];
+  dailyExams.push({id:`daily-set-g${grade}-${subject}-v${v}`,grade,subject,semester:0,stage:-1,variant:v,title:`Luyện hằng ngày • ${info.name} lớp ${grade} • Bài ${String(v).padStart(2,"0")}`,time:45,dailySet:true});
+ }
+ exams.push(...dailyExams);
  function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
  function rnd(seed){return ()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296)}
  function shuffle(a,seed){const r=rnd(seed),x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
- function allowedTypes(exam){const raw=scopes[`${exam.grade}-${exam.semester}-${exam.stage}`]||[];return raw.filter(t=>subjectTypes[exam.subject]?.has(t))}
+ function allowedTypes(exam){const raw=scopes[exam.dailySet?`${exam.grade}-1-1`:`${exam.grade}-${exam.semester}-${exam.stage}`]||[];return raw.filter(t=>subjectTypes[exam.subject]?.has(t))}
  function pool(exam){
   const types=allowedTypes(exam),all=(D.questions||[]).filter(q=>q.grade===exam.grade&&q.subject===exam.subject);
   const scoped=all.filter(q=>types.includes(q.type));
