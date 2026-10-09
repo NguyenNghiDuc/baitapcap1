@@ -5,13 +5,13 @@ window.ExamRunner=(()=>{
  function start(questions,title,meta={}){
   if(!Array.isArray(questions)||questions.length!==30)return alert("Đề chưa đủ 30 câu.");
   quiz={questions,i:0,answers:{},marked:[],title,grade:questions[0]?.grade||meta.grade||4,start:Date.now(),meta};
-  save();window.ExamLock?.enter({title});if(meta.time)window.StudentExamProctor?.start(meta.time);render();
+  try{render();save();if(meta.time)window.StudentExamProctor?.start(meta.time);if(meta.time)window.StudentExamProctor?.attach(document.querySelector("#timer"),()=>finish(true));}catch(error){window.ExamLock?.exit();quiz=null;localStorage.removeItem("bt_term_quiz");throw error;}
  }
  function body(q){
   return `<h2>${esc(q.q)}</h2>${window.ExamInteraction.render(q,quiz.answers[q.id])}`
  }
  function render(){
-  if(!quiz)return;window.ExamLock?.enter({title:quiz.title});
+  if(!quiz)return;
   const q=quiz.questions[quiz.i],subject=q.subject||"mixed",timeMin=Number(quiz.meta.time)||60;
   document.querySelector("#content").innerHTML=window.LockedExamUI.render({
    title:quiz.title,subject,grade:quiz.grade,index:quiz.i,questions:quiz.questions,answers:quiz.answers,timeMin,
@@ -22,7 +22,9 @@ window.ExamRunner=(()=>{
   document.querySelector("#lockedNext").onclick=()=>{if(quiz.i<quiz.questions.length-1){quiz.i++;save();render()}};
   document.querySelector("#lockedSubmit").onclick=()=>{if(confirm("Bạn chắc chắn muốn nộp bài? Sau khi nộp sẽ không thể sửa đáp án."))finish()};
   document.querySelectorAll(".locked-qnav").forEach(b=>b.onclick=()=>{quiz.i=Number(b.dataset.qindex);save();render()});
-  if(quiz.meta.time)window.StudentExamProctor?.attach(document.querySelector("#timer"),()=>finish(true));
+  // Lock only after the exam UI was successfully created.
+  if(!window.ExamLock?.isActive?.())window.ExamLock?.enter({title:quiz.title});
+  if(quiz.meta.time&&window.StudentExamProctor?.state?.started)window.StudentExamProctor.attach(document.querySelector("#timer"),()=>finish(true));
  }
  async function finish(auto=false){
   if(!quiz)return;
