@@ -1,3 +1,4 @@
+const loginDevices=require("../lib/login-devices");
 const editable=["name","phone","birthday","gender","grade","school","address"];
 const text=(v,max)=>String(v??"").trim().slice(0,max);
 module.exports=async function handleProfile(req,res,p,ctx){
@@ -16,13 +17,14 @@ module.exports=async function handleProfile(req,res,p,ctx){
   await save(db);return send(res,200,{ok:true}),true;
  }
  if(req.method==="GET"&&p==="/api/profile/overview"){
+  if(loginDevices.record(db,account,req))await save(db);
   const results=(db.results||[]).filter(r=>r.userId===account.id||(r.studentId===account.id));
   const scores=results.filter(r=>r.score!==null&&r.score!==undefined&&r.score!=="").map(r=>Number(r.score)).filter(Number.isFinite);
   const parents=(db.users||[]).filter(x=>x.role==="parent"&&Array.isArray(x.children)&&x.children.includes(account.id)).map(x=>({name:x.name||"Phụ huynh",email:x.email||""}));
   const transactions=(db.demoTransactions||[]).filter(x=>x.userId===account.id),balance=transactions.reduce((n,x)=>n+Number(x.amount||0),0);
   const vipUntil=account.demoVipUntil||null;
   const notifications=Object.assign({email:true,schedule:true,homework:true,achievements:true},account.notificationPreferences||{});
-  return send(res,200,{profile:{name:account.name,email:account.email,role:account.role,grade:account.grade,avatar:account.avatar,emailVerified:!!account.emailVerified,phone:account.phone||"",birthday:account.birthday||"",gender:account.gender||"",school:account.school||"",address:account.address||""},progress:{completed:results.length,average:scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null,streak:null,badges:null},parents,wallet:{demo:true,enabled:process.env.WALLET_DEMO==="1"||(process.env.NODE_ENV!=="production"&&process.env.WALLET_DEMO!=="0"),balance,active:!!vipUntil&&Date.parse(vipUntil)>Date.now(),until:vipUntil},notifications}),true;
+  return send(res,200,{profile:{name:account.name,email:account.email,role:account.role,grade:account.grade,avatar:account.avatar,emailVerified:!!account.emailVerified,phone:account.phone||"",birthday:account.birthday||"",gender:account.gender||"",school:account.school||"",address:account.address||""},progress:{completed:results.length,average:scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null,streak:null,badges:null},parents,wallet:{demo:true,enabled:process.env.WALLET_DEMO==="1"||(process.env.NODE_ENV!=="production"&&process.env.WALLET_DEMO!=="0"),balance,active:!!vipUntil&&Date.parse(vipUntil)>Date.now(),until:vipUntil},notifications,devices:loginDevices.list(db,account,req)}),true;
  }
  if(req.method==="PATCH"&&p==="/api/profile/overview"){
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
