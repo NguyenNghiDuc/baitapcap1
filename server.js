@@ -132,6 +132,7 @@ async function api(req,res,p,ip){
  return send(res,404,{error:"API không tồn tại"});
 }
 
+function safeMonitorError(event,meta){try{if(typeof monitor.error==="function")monitor.error(event,meta);else console.error("[monitor]",event,meta)}catch(e){console.error("[monitor-fallback]",event,meta,e.message)}}
 let bootPromise=null;
 function bootstrap(){
  if(!bootPromise)bootPromise=storage.init().then(()=>{errorTracking.init();seedAdmin();monitor.info("startup",{storage:storage.status(),supabase:supabase.enabled()});return true});
@@ -141,17 +142,17 @@ async function handler(req,res){
  try{
   const parsed=url.parse(req.url),p=parsed.pathname,ip=req.socket?.remoteAddress||req.headers?.["x-forwarded-for"]||"unknown";
   if(p.startsWith("/api/")){
-   try{await bootstrap()}catch(e){monitor.error("database_startup_failed",{message:e.message});return send(res,503,{error:"Cơ sở dữ liệu chưa sẵn sàng. Kiểm tra DATABASE_URL và migrations."})}
+   try{await bootstrap()}catch(e){safeMonitorError("database_startup_failed",{message:e.message});return send(res,503,{error:"Cơ sở dữ liệu chưa sẵn sàng. Kiểm tra DATABASE_URL và migrations."})}
    return await api(req,res,p,ip)
   }
   return await staticServer.serve(req,res,STATIC_ROOT,p)
  }catch(e){
-  monitor.error("request_failed",{message:e.message,url:req.url});errorTracking.capture(e,{url:req.url});
+  safeMonitorError("request_failed",{message:e.message,url:req.url});errorTracking.capture(e,{url:req.url});
   if(!res.headersSent)send(res,500,{error:"Lỗi máy chủ"});else try{res.end()}catch{}
  }
 }
 if(require.main===module){
- bootstrap().then(()=>http.createServer((req,res)=>handler(req,res)).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT))).catch(e=>{monitor.error("startup_failed",{message:e.message});errorTracking.capture(e,{phase:"startup"});console.error("[startup]",e);process.exit(1)})
+ bootstrap().then(()=>http.createServer((req,res)=>handler(req,res)).listen(PORT,()=>console.log("Bài Tập Cấp 1 running at http://localhost:"+PORT))).catch(e=>{safeMonitorError("startup_failed",{message:e.message});errorTracking.capture(e,{phase:"startup"});console.error("[startup]",e);process.exit(1)})
 }
 module.exports=handler;
 module.exports.handler=handler;
