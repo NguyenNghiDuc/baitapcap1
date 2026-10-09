@@ -62,14 +62,10 @@ window.TermExamBank=(()=>{
   const geo=exam.subject==="math"?shuffle((D.questions||[]).filter(q=>q.grade===exam.grade&&q.subject==="math"&&["geometry","perimeter","chart"].includes(q.type)),seed+9):[];
   const out=[];let n=0,idx=0,next=()=>p[(idx++)%p.length];
   for(let i=0;i<18;i++){const q=next();out.push(cloneMcq(q,`${exam.id}-m${++n}`))}
-  for(let i=0;i<4;i++){const q=next();out.push(trueFalse(q,`${exam.id}-t${++n}`,i%2===0))}
-  for(let i=0;i<4;i++){const q=next();out.push(fill(q,`${exam.id}-f${++n}`))}
-  out.push(matchQuestion(exam.grade,exam.subject,`${exam.id}-x${++n}`,seed+1));
-  out.push(matchQuestion(exam.grade,exam.subject,`${exam.id}-x${++n}`,seed+2));
-  if(exam.subject==="math"){
-   for(let i=0;i<2;i++){const q=geo[i%Math.max(1,geo.length)]||next();out.push(cloneMcq(q,`${exam.id}-g${++n}`))}
-  }else{
-   for(let i=0;i<2;i++){const q=next();out.push(cloneMcq(q,`${exam.id}-e${++n}`))}
+  for(let i=0;i<6;i++){const q=next();out.push(trueFalse(q,`${exam.id}-t${++n}`,i%2===0))}
+  for(let i=0;i<6;i++){
+   const q=next(),answerText=String(q.options?.[q.answer]??"");
+   out.push({...q,id:`${exam.id}-e${++n}`,subject:exam.subject,examType:"essay",q:q.q+" (Trình bày cách làm và giải thích đáp án.)",answerText,options:undefined,answer:undefined,explain:q.explain||""});
   }
   return out.slice(0,30).map(q=>({...q,subject:exam.subject}));
  }
