@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],D=window.APP_DATA||{subjects:[],lessons:[],questions:[],tests:[],materials:[]};
 const state={user:null,route:location.hash.slice(1)||"home",theme:localStorage.getItem("bt_theme")||"light",results:JSON.parse(localStorage.getItem("bt_results")||"[]"),favorites:JSON.parse(localStorage.getItem("bt_favs")||"[]"),quiz:null,lastWrong:[]};
 let renderSequence=0;
-window.AppAuthBridge={setUser(u){state.user=u;render()},toast,render};
+window.AppAuthBridge={setUser(u){state.user=u;render()},updateProfile(data){if(!state.user)return;state.user={...state.user,name:data.name||state.user.name,grade:Number(data.grade)||state.user.grade};shell()},toast,render};
 document.documentElement.dataset.theme=state.theme;
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
