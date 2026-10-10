@@ -257,7 +257,7 @@ function bind(){
  if(state.route==="submissions"){
   const refresh=()=>render();
   $("#refreshSubmissions")?.addEventListener("click",refresh);
-  const tick=()=>$(".live-submission-countdown").forEach(el=>{
+  const tick=()=>document.querySelectorAll(".live-submission-countdown").forEach(el=>{
    const due=Date.parse(el.dataset.examDue),offset=Number(el.dataset.serverOffset)||0;
    if(!Number.isFinite(due)){el.textContent="Không xác định";return}
    const sec=Math.max(0,Math.ceil((due-Date.now()-offset)/1000));
