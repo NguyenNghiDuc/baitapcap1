@@ -72,8 +72,14 @@ async function api(req,res,p,ip){
   if(!/^\S+@\S+\.\S+$/.test(email)||password.length<8)return send(res,400,{error:"Email hợp lệ và mật khẩu tối thiểu 8 ký tự"});
   const db=load();if(db.users.some(x=>x.email===email))return send(res,409,{error:"Email đã tồn tại"});
   const u={id:id(),name:String(d.name||"Người dùng").slice(0,80),email,password:hashPassword(password),role,grade:role==="student"?Number(d.grade)||1:null,avatar:role==="teacher"?"👩🏻‍🏫":role==="parent"?"👩🏻":"👧🏻",emailVerified:false,createdAt:new Date().toISOString()};db.users.push(u);audit(db,u,"register");save(db);pgStore.upsertUser(u).catch(()=>{});return send(res,201,{user:safeUser(u),message:"Đăng ký thành công"})}
- if(req.method==="POST"&&p==="/api/login"){if(!rate(ip,"login",8,60e3))return send(res,429,{error:"Quá nhiều lần đăng nhập sai"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
-  const db=load(),u=db.users.find(x=>x.email===String(d.email||"").trim().toLowerCase());if(!u||!verifyPassword(String(d.password||""),u.password))return send(res,401,{error:"Sai email hoặc mật khẩu"});if(u.locked)return send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."});if(u.totpSecret&&!verifyTotp(u.totpSecret,d.otp))return send(res,401,{error:"Cần mã 2FA hợp lệ",requires2fa:true});
+ if(req.method==="POST"&&p==="/api/login"){
+  if(!rate(ip,"login-requests",30,60e3))return send(res,429,{error:"Thao tác đăng nhập quá nhanh. Vui lòng thử lại sau"});
+  let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
+  const email=String(d.email||"").trim().toLowerCase(),db=load(),u=db.users.find(x=>x.email===email);
+  if(!u||!verifyPassword(String(d.password||""),u.password)){
+   if(!rate(ip+":"+email,"login-failed",8,60e3))return send(res,429,{error:"Quá nhiều lần đăng nhập sai"});
+   return send(res,401,{error:"Sai email hoặc mật khẩu"});
+  }if(u.locked)return send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."});if(u.totpSecret&&!verifyTotp(u.totpSecret,d.otp))return send(res,401,{error:"Cần mã 2FA hợp lệ",requires2fa:true});
   const t=crypto.randomBytes(32).toString("hex");await sessionStore.set(t,{uid:u.id,exp:Date.now()+TOKEN_TTL},TOKEN_TTL);audit(db,u,"login");loginDevices.record(db,u,req);save(db);return send(res,200,{token:t,user:safeUser(u)})}
  if(req.method==="POST"&&p==="/api/logout"){await sessionStore.del(token(req));return send(res,200,{ok:true})}
  if(req.method==="GET"&&p==="/api/me"){const u=await requireUser(req,res);if(!u)return;return send(res,200,{user:safeUser(u)})}
