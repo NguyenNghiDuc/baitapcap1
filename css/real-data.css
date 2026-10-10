@@ -1,0 +1,16 @@
+
+/* Real PostgreSQL dashboards, accessible on small screens and dark themes. */
+.real-data-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;margin:18px 0}
+.real-data-columns>.panel{min-width:0;overflow-wrap:anywhere}
+.real-activity-list>div,.real-log,.real-notice{padding:13px 0;border-bottom:1px solid var(--line,#dce6f1)}
+.real-activity-list>div:last-child,.real-log:last-child,.real-notice:last-child{border-bottom:0}
+.real-activity-list b,.real-log b{display:block;overflow-wrap:anywhere}
+.real-activity-list span,.real-log span,.real-log small,.real-notice small{display:block;color:var(--muted,#667d99);font-size:12px;margin-top:4px}
+.real-notice p{line-height:1.6;overflow-wrap:anywhere}
+.real-notice button{margin-top:8px}
+.real-scroll{max-height:560px;overflow-y:auto;scrollbar-width:thin}
+.real-device-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.real-device-grid>article{border:1px solid var(--line,#dce6f1);border-radius:14px;padding:14px;background:var(--surface2,#f7faff);overflow-wrap:anywhere}
+.real-device-grid b{display:block;margin-bottom:8px}
+.real-device-grid p{margin:6px 0;font-size:13px}
+@media(max-width:800px){.real-data-columns{grid-template-columns:1fr}.real-data-columns .panel{padding:16px}.real-scroll{max-height:400px}}
