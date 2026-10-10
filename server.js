@@ -17,12 +17,17 @@ function token(req){return (req.headers.authorization||"").replace(/^Bearer\s+/i
 async function auth(req){
  const t=token(req);if(!t)return null;
  const ss=await sessionStore.get(t);
- if(ss&&ss.exp>=Date.now())return load().users.find(x=>x.id===ss.uid)||null;
+ if(ss&&ss.exp>=Date.now()){
+  let u=load().users.find(x=>x.id===ss.uid);
+  if(!u&&process.env.DATABASE_URL){u=await pgStore.getById(ss.uid);if(u)load().users.push(u)}
+  return u||null;
+ }
  if(ss&&ss.exp<Date.now())await sessionStore.del(t);
  if(supabase.enabled()){
   const su=await supabase.getUserFromToken(t);
   if(su){
    const db=load();let u=db.users.find(x=>x.authUserId===su.id);
+   if(!u&&process.env.DATABASE_URL){u=await pgStore.getByAuthUid(su.id);if(u)db.users.push(u)}
    if(u){u.emailVerified=!!su.email_confirmed_at;return u}
   }
  }
