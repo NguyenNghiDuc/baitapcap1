@@ -63,7 +63,7 @@ window.TermExamBank=(()=>{
   const permittedGeometry=exam.subject==="math"&&scope.some(t=>["geometry","perimeter","chart"].includes(t));
   const geo=permittedGeometry?shuffle(p.filter(q=>["geometry","perimeter","chart"].includes(q.type)),seed+9):[];
   const out=[];let n=0,idx=0,next=()=>p[(idx++)%p.length];
-  // Twenty-six scored question positions with distinct formats, plus essays and matching.
+  // Thirty auto-checkable questions: multiple choice, true/false, fill, short answers and matching.
   for(let i=0;i<18;i++){
    const q=i===0&&geo.length?geo[0]:next();
    out.push(cloneMcq(q,`${exam.id}-m${++n}`));
@@ -72,7 +72,7 @@ window.TermExamBank=(()=>{
   for(let i=0;i<3;i++){const q=next();out.push(fill(q,`${exam.id}-f${++n}`))}
   for(let i=0;i<3;i++){
    const q=next(),answerText=String(q.options?.[q.answer]??"");
-   out.push({...q,id:`${exam.id}-e${++n}`,subject:exam.subject,examType:"essay",q:q.q+" (Trình bày cách làm và giải thích đáp án.)",answerText,options:undefined,answer:undefined,explain:q.explain||""});
+   out.push({...q,id:`${exam.id}-e${++n}`,subject:exam.subject,examType:"shortanswer",q:q.q,answerText,options:undefined,answer:undefined,explain:q.explain||""});
   }
   out.push(matchQuestion(exam.grade,exam.subject,`${exam.id}-x${++n}`,seed+23));
   return out.map(q=>({...q,subject:exam.subject}));
