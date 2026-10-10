@@ -155,7 +155,18 @@ async function api(req,res,p,ip){
  if(req.method==="GET"&&p==="/api/push/public-key"){if(!process.env.VAPID_PUBLIC_KEY)return send(res,503,{error:"Web Push chưa cấu hình"});return send(res,200,{publicKey:process.env.VAPID_PUBLIC_KEY})}
  if(req.method==="POST"&&p==="/api/push/subscribe"){const u=await requireUser(req,res);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}if(!d.subscription)return send(res,400,{error:"Thiếu subscription"});const db=load();db.pushSubscriptions=db.pushSubscriptions.filter(x=>x.userId!==u.id||x.subscription?.endpoint!==d.subscription.endpoint);db.pushSubscriptions.push({id:id(),userId:u.id,subscription:d.subscription,createdAt:new Date().toISOString()});save(db);return send(res,201,{ok:true})}
  if(req.method==="POST"&&p==="/api/push/send"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;if(!process.env.VAPID_PUBLIC_KEY||!process.env.VAPID_PRIVATE_KEY)return send(res,503,{error:"Web Push chưa cấu hình"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const webpush=require("web-push");webpush.setVapidDetails(process.env.VAPID_SUBJECT||"mailto:admin@example.com",process.env.VAPID_PUBLIC_KEY,process.env.VAPID_PRIVATE_KEY);const db=load(),targets=db.pushSubscriptions.filter(x=>!d.userId||x.userId===d.userId),payload=JSON.stringify({title:String(d.title||"Bài Tập Cấp 1"),body:String(d.body||"Bạn có thông báo mới"),url:d.url||"/#notifications"});const settled=await Promise.allSettled(targets.map(x=>webpush.sendNotification(x.subscription,payload)));return send(res,200,{sent:settled.filter(x=>x.status==="fulfilled").length,failed:settled.filter(x=>x.status==="rejected").length})}
- if(req.method==="GET"&&p==="/api/admin/users"){const u=await requireUser(req,res,["admin"]);if(!u)return;const db=load(),list=db.users.map(safeUser).map(x=>({...x,locked:!!db.users.find(v=>v.id===x.id)?.locked})),pg=pageList(list,req,{searchFn:x=>(x.name||"")+" "+(x.email||"")+" "+(x.role||"")});return send(res,200,{users:pg.items,pagination:pg.pagination,durable:storage.status().mode==="supabase"})}
+ if(req.method==="GET"&&p==="/api/admin/users"){
+  const u=await requireUser(req,res,["admin"]);if(!u)return;
+  let list;
+  if(process.env.DATABASE_URL){
+   try{list=(await pgStore.query("SELECT id,name,email,role,grade,locked FROM users ORDER BY created_at DESC")).rows.map(x=>({...x,locked:!!x.locked}))}
+   catch(e){safeMonitorError("admin_list_db_failed",{message:e.message});return send(res,503,{error:"Không đọc được danh sách tài khoản từ PostgreSQL"})}
+  }else{
+   const db=load();list=db.users.map(x=>({...safeUser(x),locked:!!x.locked}));
+  }
+  const pg=pageList(list,req,{searchFn:x=>(x.name||"")+" "+(x.email||"")+" "+(x.role||"")});
+  return send(res,200,{users:pg.items,pagination:pg.pagination,durable:storage.status().mode==="supabase"});
+ }
  if(req.method==="POST"&&p==="/api/admin/grant-admin"){
   const current=await requireUser(req,res,["admin"]);if(!current)return;
   const ownerUid=String(process.env.ADMIN_SUPABASE_UID||"").trim();
@@ -178,6 +189,13 @@ async function api(req,res,p,ip){
   if(!d||typeof d!=="object"||Array.isArray(d))return send(res,400,{error:"Dữ liệu không hợp lệ"});
   const db=load(),x=db.users.find(v=>v.id===userPatch.id);
   if(!x)return send(res,404,{error:"Không tìm thấy tài khoản"});
+  if(process.env.DATABASE_URL){
+   try{
+    const access=await pgStore.getUserAccess(x.id);
+    if(!access)return send(res,503,{error:"Tài khoản chưa tồn tại trong PostgreSQL"});
+    x.role=access.role;x.locked=!!access.locked;
+   }catch(e){safeMonitorError("admin_target_access_failed",{message:e.message});return send(res,503,{error:"Không kiểm tra được quyền của tài khoản đích"})}
+  }
   const ownerUid=String(process.env.ADMIN_SUPABASE_UID||"").trim();
   const isOwner=!!ownerUid&&u.authUserId===ownerUid;
   if(x.authUserId&&x.authUserId===ownerUid)return send(res,403,{error:"Tài khoản Admin chính được bảo vệ, không thể chỉnh sửa hoặc khóa"});
