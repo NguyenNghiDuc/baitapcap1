@@ -9,6 +9,10 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
   const token=String(d.accessToken||"");const su=await supabase.getUserFromToken(token);if(!su)return send(res,401,{error:"Supabase session không hợp lệ"}),true;
   const db=load();let u=db.users.find(x=>x.authUserId===su.id);
+  if(!u&&process.env.DATABASE_URL){
+   try{u=await pg.getByAuthUid(su.id);if(u)db.users.push(u)}
+   catch(e){monitor.warn("auth_db_lookup_failed",{message:e.message});return send(res,503,{error:"Không tải được tài khoản từ PostgreSQL"}),true}
+  }
   const md=su.user_metadata||{};
   // Admin provisioning must be tied to the exact Supabase Auth user UUID,
   // configured by the site owner. Never trust email or user_metadata.role.
@@ -28,7 +32,15 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
   }
   if(u.locked)return send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."}),true;
   loginDevices.record(db,u,req);
-  await save(db);await pg.upsertUser(u).catch(e=>monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id}));monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
+  if(process.env.DATABASE_URL){
+   try{
+    await pg.upsertUser(u);
+    const entry={deviceId:loginDevices.clientId(req),device:loginDevices.deviceFrom(req.headers?.["user-agent"]),browser:loginDevices.browserFrom(req.headers?.["user-agent"]),ip:loginDevices.clientIp(req)};
+    await pg.logDevice(u.id,entry);
+   }catch(e){monitor.warn("auth_db_persist_failed",{message:e.message});return send(res,503,{error:"Không lưu được phiên đăng nhập vào PostgreSQL"}),true}
+  }
+  await save(db);
+  monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
   return send(res,200,{user:{id:u.id,email:u.email,name:u.name,role:u.role,grade:u.grade,avatar:u.avatar,avatarPath:u.avatarPath||null,emailVerified:!!u.emailVerified}}),true;
  }
  return false;
