@@ -79,7 +79,24 @@ function shop(){return pageHead("GAMIFICATION","Shop & phần thưởng","Khung 
 
 function flashcards(){const cards=D.lessons.slice(0,8);return pageHead("FLASHCARD","Ôn nhanh kiến thức","Bấm vào thẻ để lật mặt sau, dùng giọng đọc của trình duyệt nếu cần.")+`<div class="cards-3">${cards.map((l,i)=>`<button class="test-card flashcard" data-flash="${i}" data-front="${esc(l.title)}" data-back="${esc(subj(l.subject).name+" • "+(l.topic||"Kiến thức trọng tâm"))}"><div class="subject-icon">${subj(l.subject).icon}</div><h3>${esc(l.title)}</h3><p>Chạm để lật</p></button>`).join("")}</div><div class="panel"><button class="outline" id="readFlash">🔊 Đọc thẻ đầu tiên</button></div>`}
 function game(){return pageHead("MINI GAME","⚡ Toán nhanh","Trả lời liên tục để tăng combo và XP.")+`<div class="result-card"><div class="score-ring"><b id="gameScore">0</b><span>XP</span></div><div class="question-card"><h2 id="gameQ">Bấm Bắt đầu</h2><div class="options" id="gameOptions"></div></div><div class="quiz-actions"><button class="primary" id="startGame">Bắt đầu game</button></div></div>`}
-async function submissions(){if(!state.user||!["teacher","admin"].includes(state.user.role))return loginRequired("Chỉ giáo viên/Admin được xem bài nộp.");let j;try{j=await window.PerfLists.get("submissions","/api/submissions")}catch(e){return errorBox(e.message)}return pageHead("CHẤM BÀI","Bài học sinh đã nộp","Chỉnh điểm và nhận xét trực tiếp.")+`${window.PerfLists.controls("submissions",j.pagination,{placeholder:"Tìm học sinh hoặc bài..."})}<div class="list-card">${j.submissions.map(x=>`<div class="lesson-row"><div class="lesson-ico">📨</div><div class="grow"><b>${esc(x.student?.name||"Học sinh")} — ${esc(x.assignment?.title||"Bài tập")}</b><small>Điểm: ${x.score}% • ${new Date(x.submittedAt).toLocaleString("vi-VN")}</small></div><button class="outline small" data-grade-submission="${x.id}" data-current-score="${x.score}">Chấm</button></div>`).join("")||'<div class="empty">Chưa có bài nộp.</div>'}</div>`}
+async function submissions(){
+ if(!state.user||!["teacher","admin"].includes(state.user.role))return loginRequired("Chỉ giáo viên/Admin được xem bài nộp.");
+ let j;try{j=await window.PerfLists.get("submissions","/api/submissions")}catch(e){return errorBox(e.message)}
+ const assigned=j.submissions.map(x=>`<div class="lesson-row"><div class="lesson-ico">📨</div><div class="grow"><b>${esc(x.student?.name||"Học sinh")} — ${esc(x.assignment?.title||"Bài được giao")}</b><small>${x.score===null||x.score===undefined?"Chờ giáo viên chấm":"Điểm: "+x.score+"/100"} • ${x.submittedAt?new Date(x.submittedAt).toLocaleString("vi-VN"):"Chưa có thời gian nộp"}</small></div><button class="outline small" data-grade-submission="${esc(x.id)}" data-current-score="${x.score??""}">Chấm</button></div>`).join("");
+ let selfReported="";
+ if(state.user.role==="admin"){
+  try{
+   const grades=await API.get("/api/real/admin/grades?page=1");
+   if(grades.source!=="postgres")throw new Error("Chưa xác minh được nguồn dữ liệu");
+   const rows=grades.results.map(x=>`<div class="lesson-row"><div class="lesson-ico">📝</div><div class="grow"><b>${esc(x.student_name||"Học sinh")} — ${esc(x.title||"Bài kiểm tra")}</b><small>Lớp ${esc(x.grade||"—")} • ${esc(x.subject||"Môn học")} • ${x.score===null||x.score===undefined?"Chưa chấm":esc(x.score)+"/100"} • ${x.verified===true?"Đã xác minh":"Điểm tự báo cáo, chưa xác minh"} • ${x.created_at?new Date(x.created_at).toLocaleString("vi-VN"):""}</small></div></div>`).join("");
+   selfReported='<section class="panel"><h3>📝 Kết quả bài kiểm tra học sinh tự làm</h3><p class="muted">Lấy từ PostgreSQL. Điểm tự báo cáo không phải điểm giáo viên chấm. Xem đầy đủ tại <a href="#adminGrades">Bảng điểm Admin</a>.</p><div class="list-card">'+(rows||'<div class="empty">Chưa có kết quả kiểm tra nào được lưu lên PostgreSQL.</div>')+'</div></section>';
+  }catch(e){selfReported='<section class="panel"><h3>📝 Kết quả bài kiểm tra tự làm</h3><p class="muted" role="alert">Chưa đọc được PostgreSQL: '+esc(e.message)+'. Không thể kết luận là học sinh chưa nộp.</p></section>'}
+ }
+ return pageHead("CHẤM BÀI","Bài học sinh đã nộp","Phân biệt bài giáo viên giao và bài kiểm tra học sinh tự làm.")+
+ '<section class="panel"><h3>📨 Bài giáo viên giao</h3><p class="muted">Chỉ bao gồm bài được giao cho lớp, không bao gồm bài kiểm tra tự chọn.</p>'+
+ window.PerfLists.controls("submissions",j.pagination,{placeholder:"Tìm học sinh hoặc bài..."})+
+ '<div class="list-card">'+(assigned||'<div class="empty">Chưa có bài được giao nào đã nộp.</div>')+'</div></section>'+selfReported;
+}
 async function premium(){return window.DemoWallet?.render?.()||errorBox("Không tải được Ví demo")}
 
 function today(){return window.StudentDashboard?.render(state.user)||errorBox("StudentDashboard chưa tải")}
