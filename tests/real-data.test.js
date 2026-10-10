@@ -20,7 +20,7 @@ function request({url,method="GET",role="student"}){
 }
 async function run(x){
  const before=process.env.DATABASE_URL;process.env.DATABASE_URL="postgresql://test-invalid/never-connected";
- try{await route(x.req,x.res,x.url,x.ctx);return x.result}
+ try{await route(x.req,x.res,new URL(x.url,"https://app.local").pathname,x.ctx);return x.result}
  finally{if(before===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=before}
 }
 test("all personal insights use verified user ID, no client-supplied user IDs",async()=>{
