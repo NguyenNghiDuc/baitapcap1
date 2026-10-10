@@ -25,14 +25,39 @@ test("student result can be exported to xlsx",async()=>{
   const out=await fetch(base+"/api/export/results.xlsx",{headers:{Authorization:"Bearer "+token}});
   assert.equal(out.status,200);assert.match(out.headers.get("content-type"),/spreadsheetml/);assert.ok((await out.arrayBuffer()).byteLength>100);
 });
-test("admin can create another admin account with a different email",async()=>{
-  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
-  assert.equal(login.status,200);const lj=await login.json(),token=lj.token;
-  const email=`admin-${Date.now()}@demo.vn`;
-  const created=await fetch(base+"/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({name:"Quản trị viên mới",email:email,password:"Admin1234!",role:"admin",grade:5})});
-  assert.equal(created.status,201);const cj=await created.json();assert.equal(cj.user.role,"admin");assert.equal(cj.user.email,email);
-  const second=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email,password:"Admin1234!"})});
-  assert.equal(second.status,200);const sj=await second.json();assert.equal(sj.user.role,"admin");
+test("admin-created accounts never grant administrator privileges by role input",async()=>{
+ const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
+ assert.equal(login.status,200);
+ const token=(await login.json()).token;
+ const email="new-user-"+Date.now()+"@demo.vn";
+ const created=await fetch(base+"/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({name:"Kiểm thử phân quyền",email,password:"User1234!",role:"admin"})});
+ assert.equal(created.status,201);
+ const account=await created.json();
+ assert.equal(account.user.role,"student");
+ const signed=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password:"User1234!"})});
+ assert.equal(signed.status,200);
+ const userToken=(await signed.json()).token;
+ const forbidden=await fetch(base+"/api/admin/users",{headers:{Authorization:"Bearer "+userToken}});
+ assert.equal(forbidden.status,403);
+});
+test("admin lock blocks active user APIs until account is unlocked",async()=>{
+ const adminLogin=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
+ assert.equal(adminLogin.status,200);
+ const token=(await adminLogin.json()).token;
+ const userLogin=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"hocsinh@demo.vn",password:"Demo1234!"})});
+ assert.equal(userLogin.status,200);
+ const studentToken=(await userLogin.json()).token;
+ const list=await fetch(base+"/api/admin/users",{headers:{Authorization:"Bearer "+token}});
+ const student=(await list.json()).users.find(u=>u.email==="hocsinh@demo.vn");
+ assert.ok(student?.id);
+ const lock=await fetch(base+"/api/admin/users/"+encodeURIComponent(student.id),{method:"PATCH",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({locked:true,reason:"Kiểm tra khóa"})});
+ assert.equal(lock.status,200);
+ const blocked=await fetch(base+"/api/classes",{headers:{Authorization:"Bearer "+studentToken}});
+ assert.equal(blocked.status,423);
+ const unlock=await fetch(base+"/api/admin/users/"+encodeURIComponent(student.id),{method:"PATCH",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({locked:false})});
+ assert.equal(unlock.status,200);
+ const again=await fetch(base+"/api/classes",{headers:{Authorization:"Bearer "+studentToken}});
+ assert.equal(again.status,200);
 });
 
 test("admin user and storage APIs are protected and functional",async()=>{
