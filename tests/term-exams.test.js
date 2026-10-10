@@ -42,8 +42,9 @@ test("daily reviews are stable and subject-specific",()=>{
 test("math exams have geometry but language exams never inject math geometry",()=>{
  for(const e of B.exams){
   const qs=B.questions(e.id);
-  if(e.subject==="math"&&B.scopes[`${e.grade}-${e.semester}-${e.stage}`]?.some(t=>["geometry","perimeter","chart"].includes(t)))assert.ok(qs.some(q=>["geometry","perimeter","chart"].includes(q.type)),e.id);
-  else assert.equal(qs.some(q=>q.subject==="math"),false,e.id);
+  if(e.subject==="math"){
+   if(B.scopes[`${e.grade}-${e.semester}-${e.stage}`]?.some(t=>["geometry","perimeter","chart"].includes(t)))assert.ok(qs.some(q=>["geometry","perimeter","chart"].includes(q.type)),e.id);
+  }else assert.equal(qs.some(q=>q.subject==="math"),false,e.id);
  }
 });
 
