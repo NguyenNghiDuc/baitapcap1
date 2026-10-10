@@ -12,7 +12,7 @@ window.StudentRealActivity=(()=>{
    return '<section class="page-head"><span class="eyebrow">DỮ LIỆU THẬT • POSTGRESQL</span><h1>📊 Hoạt động của tôi</h1><p>Chỉ hiển thị bài làm, thông báo và thiết bị được lưu trong tài khoản này. Không có số liệu mẫu.</p></section>'+
     '<div class="metrics">'+
      '<div class="metric"><b>'+fmt(d.total.attempts)+'</b><span>Lượt làm bài đã lưu</span></div>'+
-     '<div class="metric"><b>'+fmt(d.total.average)+'</b><span>Điểm trung bình bài đã có điểm</span></div>'+
+     '<div class="metric"><b>'+fmt(d.total.average)+'</b><span>Điểm TB đã lưu (chưa xác minh)</span></div>'+
      '<div class="metric"><b>'+fmt(d.submissions)+'</b><span>Bài đã nộp</span></div>'+
      '<div class="metric"><b>'+fmt(d.unreadNotifications)+'</b><span>Thông báo chưa đọc</span></div></div>'+
     '<div class="real-data-columns"><section class="panel"><h3>📚 Thống kê theo môn</h3><div class="table-wrap"><table><thead><tr><th>Môn</th><th>Lượt</th><th>Điểm TB</th></tr></thead><tbody>'+
