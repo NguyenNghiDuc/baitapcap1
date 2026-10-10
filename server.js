@@ -146,8 +146,37 @@ async function api(req,res,p,ip){
 
  if(req.method==="GET"&&p==="/api/question-bank"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;const db=load(),q=new URL(req.url,"http://x").searchParams;let list=db.questionBank;if(q.get("grade"))list=list.filter(x=>String(x.grade)===q.get("grade"));if(q.get("lessonId"))list=list.filter(x=>x.lessonId===q.get("lessonId"));const pg=pageList(list,req,{searchFn:x=>(x.q||x.question||"")+" "+(x.lessonId||"")+" "+(x.level||"")});return send(res,200,{questions:pg.items,pagination:pg.pagination})}
  if(req.method==="POST"&&p==="/api/questions/import-excel"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const m=String(d.dataUrl||"").match(/^data:.*?;base64,(.+)$/);if(!m)return send(res,400,{error:"Thiếu file Excel/CSV dạng dataUrl"});try{const XLSX=require("xlsx"),wb=XLSX.read(Buffer.from(m[1],"base64"),{type:"buffer"}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{defval:""});const db=load(),added=[];for(const row of rows){const opts=[row.A||row.a,row.B||row.b,row.C||row.c,row.D||row.d].map(String);const raw=String(row.answer||row.Answer||row["Đáp án"]||"A").trim().toUpperCase(),ans=/^[ABCD]$/.test(raw)?raw.charCodeAt(0)-65:Math.max(0,Math.min(3,Number(raw)||0));if(!row.q&&!row.question&&!row["Câu hỏi"])continue;const item={id:id(),subject:String(row.subject||"math"),grade:Number(row.grade||row["Lớp"])||4,lessonId:String(row.lessonId||row.lesson||""),level:String(row.level||row["Mức độ"]||"Trung bình"),q:String(row.q||row.question||row["Câu hỏi"]),options:opts,answer:ans,explain:String(row.explain||row["Giải thích"]||"")};db.questionBank.push(item);added.push(item)}audit(db,u,"questions_imported",{count:added.length});save(db);return send(res,201,{count:added.length,questions:added.slice(0,10)})}catch(e){return send(res,400,{error:"Không đọc được file Excel/CSV: "+e.message})}}
- if(req.method==="GET"&&p==="/api/export/results.xlsx"){const u=await requireUser(req,res);if(!u)return;const db=load();let rows=db.results;if(u.role==="student")rows=rows.filter(x=>x.userId===u.id);if(u.role==="parent")rows=rows.filter(x=>u.children?.includes(x.userId));if(u.role==="teacher"){const studentIds=new Set(db.classes.filter(c=>c.teacherId===u.id).flatMap(c=>c.studentIds||[]));rows=rows.filter(x=>studentIds.has(x.userId))}const XLSX=require("xlsx"),data=rows.map(r=>({HocSinh:db.users.find(x=>x.id===r.userId)?.name||r.userId,Bai:r.title,Mon:subjectName(r.subject),Lop:r.grade,Diem:r.score,SoCauDung:r.correct,TongCau:r.total,ThoiGianGiay:r.durationSec,Ngay:r.createdAt})),wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(data);XLSX.utils.book_append_sheet(wb,ws,"Ket qua");const buf=XLSX.write(wb,{type:"buffer",bookType:"xlsx"});res.writeHead(200,{"Content-Type":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","Content-Disposition":'attachment; filename="ket-qua-hoc-tap.xlsx"',"Content-Length":buf.length});return res.end(buf)}
- if(req.method==="GET"&&p==="/api/export/results.pdf"){const u=await requireUser(req,res);if(!u)return;const db=load();let rows=db.results;if(u.role==="student")rows=rows.filter(x=>x.userId===u.id);if(u.role==="parent")rows=rows.filter(x=>u.children?.includes(x.userId));const PDFDocument=require("pdfkit"),doc=new PDFDocument({margin:40});res.writeHead(200,{"Content-Type":"application/pdf","Content-Disposition":'attachment; filename="ket-qua-hoc-tap.pdf"'});doc.pipe(res);doc.fontSize(18).text("BAO CAO KET QUA HOC TAP",{align:"center"}).moveDown();rows.slice(0,200).forEach((r,i)=>doc.fontSize(10).text(`${i+1}. ${r.title} | Lop ${r.grade} | ${r.score}% | ${r.correct}/${r.total}`));doc.end();return}
+ if(req.method==="GET"&&p==="/api/export/results.xlsx"){
+  const u=await requireUser(req,res);if(!u)return;
+  const db=load();let rows=db.results;
+  if(u.role==="student")rows=rows.filter(x=>x.userId===u.id);
+  if(u.role==="parent")rows=rows.filter(x=>u.children?.includes(x.userId));
+  if(u.role==="teacher"){const ids=new Set(db.classes.filter(c=>c.teacherId===u.id).flatMap(c=>c.studentIds||[]));rows=rows.filter(x=>ids.has(x.userId))}
+  const XLSX=require("xlsx"),data=rows.map(r=>{
+   const owner=db.users.find(x=>x.id===r.userId);
+   return {TaiKhoan:owner?.email||"Chua xac dinh",HocSinh:owner?.name||"Chua xac dinh",Bai:r.title,Mon:subjectName(r.subject),Lop:r.grade,Diem:r.score,SoCauDung:r.correct,TongCau:r.total,ThoiGianGiay:r.durationSec,Ngay:r.createdAt};
+  }),wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb,ws,"Ket qua");
+  const buf=XLSX.write(wb,{type:"buffer",bookType:"xlsx"});
+  res.writeHead(200,{"Content-Type":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","Content-Disposition":'attachment; filename="ket-qua-hoc-tap.xlsx"',"Content-Length":buf.length});
+  return res.end(buf)
+ }
+ if(req.method==="GET"&&p==="/api/export/results.pdf"){
+  const u=await requireUser(req,res);if(!u)return;
+  const db=load();let rows=db.results;
+  if(u.role==="student")rows=rows.filter(x=>x.userId===u.id);
+  if(u.role==="parent")rows=rows.filter(x=>u.children?.includes(x.userId));
+  if(u.role==="teacher"){const ids=new Set(db.classes.filter(c=>c.teacherId===u.id).flatMap(c=>c.studentIds||[]));rows=rows.filter(x=>ids.has(x.userId))}
+  const PDFDocument=require("pdfkit"),doc=new PDFDocument({margin:40});
+  res.writeHead(200,{"Content-Type":"application/pdf","Content-Disposition":'attachment; filename="ket-qua-hoc-tap.pdf"'});
+  doc.pipe(res);doc.fontSize(18).text("BAO CAO KET QUA HOC TAP",{align:"center"}).moveDown();
+  rows.slice(0,200).forEach((r,i)=>{
+   const owner=db.users.find(x=>x.id===r.userId);
+   doc.fontSize(10).text(`${i+1}. Tai khoan: ${owner?.email||"Chua xac dinh"} | ${r.title} | Lop ${r.grade} | ${r.score}% | ${r.correct}/${r.total}`);
+  });
+  doc.end();return
+ }
+
  if(req.method==="GET"&&p==="/api/exam-rooms"){const u=await requireUser(req,res);if(!u)return;const db=load();let list=db.examRooms;if(u.role==="teacher")list=list.filter(x=>x.teacherId===u.id);if(u.role==="student")list=list.filter(x=>x.participants?.includes(u.id));return send(res,200,{rooms:list})}
  if(req.method==="POST"&&p==="/api/exam-rooms"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),room={id:id(),code:crypto.randomBytes(3).toString("hex").toUpperCase(),title:String(d.title||"Phòng thi Toán"),teacherId:u.id,grade:Number(d.grade)||4,lessonId:String(d.lessonId||"g4-mul"),durationMin:Math.max(5,Number(d.durationMin)||45),startsAt:d.startsAt||null,endsAt:d.endsAt||null,participants:[],createdAt:new Date().toISOString()};db.examRooms.push(room);audit(db,u,"exam_room_created",{roomId:room.id});save(db);return send(res,201,{room})}
  if(req.method==="POST"&&p==="/api/exam-rooms/join"){const u=await requireUser(req,res,["student"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),room=db.examRooms.find(x=>x.code===String(d.code||"").trim().toUpperCase());if(!room)return send(res,404,{error:"Không tìm thấy phòng thi"});const now=Date.now();if(room.startsAt&&now<new Date(room.startsAt).getTime())return send(res,403,{error:"Phòng thi chưa mở"});if(room.endsAt&&now>new Date(room.endsAt).getTime())return send(res,403,{error:"Phòng thi đã đóng"});room.participants=[...new Set([...(room.participants||[]),u.id])];save(db);return send(res,200,{room})}
