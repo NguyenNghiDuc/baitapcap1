@@ -28,7 +28,23 @@ async function auth(req){
  }
  return null
 }
-async function requireUser(req,res,roles){const u=await auth(req);if(!u){send(res,401,{error:"Bạn cần đăng nhập"});return null}if(u.locked){send(res,423,{error:"Tài khoản đã bị khóa"});return null}if(roles&&!roles.includes(u.role)){send(res,403,{error:"Bạn không có quyền thực hiện"});return null}return u}
+async function requireUser(req,res,roles){
+ const u=await auth(req);
+ if(!u){send(res,401,{error:"Bạn cần đăng nhập"});return null}
+ if(process.env.DATABASE_URL){
+  try{
+   const access=await pgStore.getUserAccess(u.id);
+   if(!access){send(res,503,{error:"Hồ sơ chưa được đồng bộ vào PostgreSQL"});return null}
+   u.role=access.role;u.locked=!!access.locked;
+  }catch(e){
+   safeMonitorError("account_access_lookup_failed",{message:e.message});
+   send(res,503,{error:"Không thể kiểm tra trạng thái tài khoản. Vui lòng thử lại."});return null
+  }
+ }
+ if(u.locked){send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."});return null}
+ if(roles&&!roles.includes(u.role)){send(res,403,{error:"Bạn không có quyền thực hiện"});return null}
+ return u
+}
 function rate(ip,key="global",limit=80,windowMs=60e3){const k=ip+":"+key,now=Date.now(),arr=(rateBuckets.get(k)||[]).filter(t=>now-t<windowMs);arr.push(now);rateBuckets.set(k,arr);return arr.length<=limit}
 function audit(db,user,action,meta={}){return auditStore.record(db,user,action,meta)}
 function subjectName(id){return ({math:"Toán",vietnamese:"Tiếng Việt",english:"Tiếng Anh",nature:"Tự nhiên & Xã hội",science:"Khoa học",history:"Lịch sử & Địa lý"})[id]||id}
@@ -167,8 +183,15 @@ async function api(req,res,p,ip){
    if(x.role==="admin"&&d.role!=="admin"&&!isOwner)return send(res,403,{error:"Chỉ Admin chính được thu hồi quyền Admin"});
   }
   if(d.locked!==undefined&&typeof d.locked!=="boolean")return send(res,400,{error:"Trạng thái khóa không hợp lệ"});
+  if(process.env.VERCEL==="1"&&!process.env.DATABASE_URL&&d.locked!==undefined)return send(res,503,{error:"Khóa tài khoản cần DATABASE_URL (Supabase PostgreSQL) để có hiệu lực trên mọi máy chủ Vercel."});
   if(d.locked===true&&x.id===u.id)return send(res,403,{error:"Không được khóa tài khoản của chính mình"});
   if(d.reason!==undefined&&(typeof d.reason!=="string"||d.reason.length>250))return send(res,400,{error:"Lý do khóa tối đa 250 ký tự"});
+  if(process.env.DATABASE_URL&&(d.role!==undefined||d.locked!==undefined)){
+   try{
+    const updated=await pgStore.setUserAccess(x.id,{role:d.role||x.role,locked:d.locked===undefined?!!x.locked:d.locked});
+    if(!updated)return send(res,503,{error:"Người dùng chưa tồn tại trong PostgreSQL. Hãy đồng bộ tài khoản trước."});
+   }catch(e){safeMonitorError("admin_lock_update_failed",{message:e.message});return send(res,503,{error:"Không thể lưu quyền tài khoản vào PostgreSQL."})}
+  }
   if(d.role!==undefined)x.role=d.role;
   if(d.locked!==undefined&&x.locked!==d.locked){
    x.locked=d.locked;
@@ -176,9 +199,8 @@ async function api(req,res,p,ip){
    else{x.lockedAt=null;x.lockedBy=null;x.lockReason=null;}
    audit(db,u,d.locked?"account_locked":"account_unlocked",{target:x.id,reason:d.locked?x.lockReason:undefined});
   }
-  if(Number(d.grade)>=1&&Number(d.grade)<=5)x.grade=Number(d.grade);
   audit(db,u,"user_updated",{target:x.id,role:x.role,locked:!!x.locked});
-  await save(db);await pgStore.upsertUser(x).catch(e=>monitor.warn("admin_user_upsert_failed",{message:e.message}));
+  await save(db);
   return send(res,200,{user:{...safeUser(x),locked:!!x.locked},locked:!!x.locked});
  }
  if(req.method==="GET"&&p==="/api/storage/health"){const u=await requireUser(req,res,["admin"]);if(!u)return;const [pg,redis]=await Promise.all([pgStore.health().catch(e=>({enabled:!!process.env.DATABASE_URL,error:e.message})),sessionStore.health().catch(e=>({enabled:!!process.env.REDIS_URL,error:e.message}))]);return send(res,200,{postgres:pg,redis,storage:storage.status()})}
