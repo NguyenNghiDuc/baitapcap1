@@ -17,3 +17,11 @@
 @media(max-width:580px){.student-hub,.student-route-grid{grid-template-columns:1fr}.question-nav{grid-template-columns:repeat(5,1fr)}}
 
 .reduce-motion *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+
+
+/* Lightweight exam catalog pagination */
+.exam-pagination{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;margin:22px auto 30px}
+.exam-pagination #termPageLabel{font-weight:800;color:var(--text,#173c70);font-variant-numeric:tabular-nums}
+.exam-pagination button{min-width:105px;min-height:41px;border-radius:11px}
+.exam-pagination button:disabled{opacity:.44;cursor:not-allowed}
+@media(max-width:600px){.exam-pagination{gap:9px}.exam-pagination button{min-width:86px}.exam-pagination #termPageLabel{font-size:13px}}
