@@ -2,9 +2,18 @@ const loginDevices=require("../lib/login-devices");
 const editable=["name","phone","birthday","gender","grade","school","address"];
 const text=(v,max)=>String(v??"").trim().slice(0,max);
 module.exports=async function handleProfile(req,res,p,ctx){
- if(p!=="/api/profile/overview"&&p!=="/api/profile/details")return false;
+ if(p!=="/api/profile/overview"&&p!=="/api/profile/details"&&p!=="/api/profile/avatar")return false;
  const {send,parseBody,requireUser,load,save}=ctx,u=await requireUser(req,res);if(!u)return true;
  const db=load(),account=db.users.find(x=>x.id===u.id);if(!account)return send(res,404,{error:"Hồ sơ chưa được đồng bộ"}),true;
+ if(req.method==="PATCH"&&p==="/api/profile/avatar"){
+  if(!account.authUserId)return send(res,403,{error:"Cần đăng nhập bằng Supabase để đồng bộ ảnh"}),true;
+  let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
+  const expected=account.authUserId+"/avatar.jpg";
+  if(!d||d.path!==expected)return send(res,400,{error:"Đường dẫn ảnh không thuộc tài khoản"}),true;
+  account.avatarPath=expected;
+  await save(db);
+  return send(res,200,{ok:true,avatarPath:expected}),true;
+ }
  if(req.method==="PATCH"&&p==="/api/profile/details"){
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
   if(!d||typeof d!=="object"||Array.isArray(d))return send(res,400,{error:"Dữ liệu không hợp lệ"}),true;
@@ -24,7 +33,7 @@ module.exports=async function handleProfile(req,res,p,ctx){
   const transactions=(db.demoTransactions||[]).filter(x=>x.userId===account.id),balance=transactions.reduce((n,x)=>n+Number(x.amount||0),0);
   const vipUntil=account.demoVipUntil||null;
   const notifications=Object.assign({email:true,schedule:true,homework:true,achievements:true},account.notificationPreferences||{});
-  return send(res,200,{profile:{name:account.name,email:account.email,role:account.role,grade:account.grade,avatar:account.avatar,emailVerified:!!account.emailVerified,phone:account.phone||"",birthday:account.birthday||"",gender:account.gender||"",school:account.school||"",address:account.address||""},progress:{completed:results.length,average:scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null,streak:null,badges:null},parents,wallet:{demo:true,enabled:process.env.WALLET_DEMO==="1"||(process.env.NODE_ENV!=="production"&&process.env.WALLET_DEMO!=="0"),balance,active:!!vipUntil&&Date.parse(vipUntil)>Date.now(),until:vipUntil},notifications,devices:loginDevices.list(db,account,req)}),true;
+  return send(res,200,{profile:{name:account.name,email:account.email,role:account.role,grade:account.grade,avatar:account.avatar,avatarPath:account.avatarPath||null,emailVerified:!!account.emailVerified,phone:account.phone||"",birthday:account.birthday||"",gender:account.gender||"",school:account.school||"",address:account.address||""},progress:{completed:results.length,average:scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null,streak:null,badges:null},parents,wallet:{demo:true,enabled:process.env.WALLET_DEMO==="1"||(process.env.NODE_ENV!=="production"&&process.env.WALLET_DEMO!=="0"),balance,active:!!vipUntil&&Date.parse(vipUntil)>Date.now(),until:vipUntil},notifications,devices:loginDevices.list(db,account,req)}),true;
  }
  if(req.method==="PATCH"&&p==="/api/profile/overview"){
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
