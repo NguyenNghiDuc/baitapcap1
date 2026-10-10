@@ -1,5 +1,5 @@
 window.StudentRegistry=(()=>{
- const routes={tests:"TermExamCatalog",featureHub:"StudentFeatureHub",accountSecurity:"AccountSecurity",liveClassroom:"LiveClassroom",
+ const routes={tests:"TermExamCatalog",realActivity:"StudentRealActivity",systemMonitor:"StudentSystemMonitor",featureHub:"StudentFeatureHub",accountSecurity:"AccountSecurity",liveClassroom:"LiveClassroom",
   settings:"StudentSettings",updateCenter:"StudentUpdateCenter",offlineCenter:"StudentOfflineCenter",smartNotify:"StudentSmartNotify",
   rewards:"StudentRewards",gameMap:"StudentGameMap",friends:"StudentFriends",aiQuestion:"StudentAIQuestion",ocrScan:"StudentOCRScan",
   advancedDashboard:"StudentAdvancedDashboard",parentLock:"StudentParentLock",certificate:"StudentCertificate",helpFeedback:"StudentHelpFeedback",
