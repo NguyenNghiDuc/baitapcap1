@@ -8,10 +8,10 @@ module.exports=async function realData(req,res,p,ctx){
  const pathMatch=/^\/api\/real\/me\/notifications\/([a-zA-Z0-9_-]{1,100})\/read$/.exec(p);
  if(!allowed.has(p)&&!pathMatch)return false;
  const {pg,send,requireUser}=ctx;
- if(!process.env.DATABASE_URL)return send(res,503,{error:"Chưa cấu hình DATABASE_URL. Không tạo dữ liệu giả hoặc đọc bộ nhớ tạm."}),true;
  const admin=p.startsWith("/api/real/admin/");
  const u=await requireUser(req,res,admin?["admin"]:undefined);
  if(!u)return true;
+ if(!process.env.DATABASE_URL)return send(res,503,{error:"Chưa cấu hình DATABASE_URL. Không tạo dữ liệu giả hoặc đọc bộ nhớ tạm."}),true;
  try{
   if(p==="/api/real/me/activity"&&req.method==="GET")return send(res,200,{source:"postgres",activity:await pg.accountActivity(u.id)}),true;
   if(p==="/api/real/me/notifications"&&req.method==="GET")return send(res,200,{source:"postgres",items:await pg.listNotifications(u.id)}),true;
