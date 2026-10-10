@@ -19,9 +19,13 @@ window.ExamAccountGate=(()=>{
     session=refreshed.data.session;
     result=await client.auth.getUser();
    }
-   const ok=!!result.data?.user?.id&&!result.error;
-   lastReason=ok?"ok":"expired";
-   return ok;
+   if(!result.data?.user?.id||result.error){lastReason="expired";return false}
+   // A valid Supabase JWT does NOT override an Admin account lock.
+   const status=await fetch("/api/me",{headers:{Authorization:"Bearer "+session.access_token},cache:"no-store"});
+   if(status.status===423){lastReason="locked";return false}
+   if(status.status===401){lastReason="profile";return false}
+   if(!status.ok){lastReason="network";return false}
+   lastReason="ok";return true;
   })().catch(e=>{console.warn("Exam account check:",e?.message||e);lastReason="network";return false})
     .finally(()=>{pending=null});
   return pending;
@@ -30,6 +34,8 @@ window.ExamAccountGate=(()=>{
   const preview=/\\.github\\.dev$/i.test(location.hostname);
   const notice=preview
    ? '<p>Bạn đang mở bản chạy thử trên github.dev. Phiên đăng nhập trên Vercel không được chia sẻ với địa chỉ này.</p><p><a href="https://baitapcap1.vercel.app/kiem-tra.html">Mở đề trên website chính →</a></p>'
+   : lastReason==="locked"
+    ? '<p>Tài khoản đã bị quản trị viên khóa. Vui lòng liên hệ Admin để mở khóa trước khi làm bài.</p>'
    : lastReason==="config"||lastReason==="sdk"||lastReason==="network"
     ? '<p>Không kiểm tra được phiên đăng nhập do kết nối hoặc cấu hình Supabase. Hãy tải lại trang và thử lại.</p>'
     : '<p>Trang kiểm tra chưa nhận được phiên đăng nhập hợp lệ trên <b>'+location.host.replace(/[&<>"']/g,"")+'</b>. Hãy đăng nhập ở cùng địa chỉ này rồi trở lại làm bài.</p>';
