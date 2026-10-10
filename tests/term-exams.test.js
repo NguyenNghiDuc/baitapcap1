@@ -52,3 +52,27 @@ test("later stages have cumulative scope",()=>{
  assert.ok(B.scopes["4-1-2"].length>=B.scopes["4-1-0"].length);
  assert.ok(B.scopes["5-2-2"].length>=B.scopes["5-2-0"].length);
 });
+
+test("short-answer questions only ask for the final answer and have a checkable key",()=>{
+ for(const grade of [4,5])for(const subject of ["math","vietnamese","english"]){
+  const exam=B.daily(grade,subject,new Date("2026-10-10T08:00:00Z"));
+  const short=exam.questions.filter(q=>q.examType==="shortanswer");
+  assert.equal(short.length,3,subject+" grade "+grade);
+  assert.ok(exam.questions.every(q=>q.examType!=="essay"));
+  assert.ok(short.every(q=>typeof q.answerText==="string"&&q.answerText.trim()));
+  assert.ok(short.every(q=>!q.q.includes("Trình bày cách làm")));
+ }
+});
+test("typed final answers can be graded without working steps",()=>{
+ require("../js/exams/interaction.js");
+ const I=window.ExamInteraction;
+ const q={examType:"shortanswer",answerText:"73"};
+ assert.equal(I.isCorrect(q,"73"),true);
+ assert.equal(I.isCorrect(q," 073. "),true);
+ assert.equal(I.isCorrect(q,"52 + 7 × 3 = 73"),false);
+ assert.equal(I.isCorrect(q,"72"),false);
+ assert.equal(I.isCorrect(q,""),false);
+ assert.equal(I.correctText(q),"73");
+ assert.ok(I.render(q,"73").includes('type="text"'));
+ assert.ok(!I.render(q,"73").includes("<textarea"));
+});
