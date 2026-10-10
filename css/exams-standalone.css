@@ -69,6 +69,6 @@ body{background:#f4f7fc;color:#172b49}
 
 
 /* Short answers replace oversized essay boxes: students only enter their final answer. */
-.short-answer-input{display:block;width:100%;max-width:640px;min-height:54px;margin:10px 0 12px;border:1.5px solid #c8d8ee;border-radius:12px;padding:12px 16px;background:#fbfdff;color:#173253;font:600 18px/1.4 inherit;outline:none}
+.short-answer-input{display:block;width:100%;max-width:640px;min-height:54px;margin:10px 0 12px;border:1.5px solid #c8d8ee;border-radius:12px;padding:12px 16px;background:#fbfdff;color:#173253;font-size:18px;font-weight:600;font-family:inherit;line-height:1.4;outline:none}
 .short-answer-input:focus{border-color:#1478df;box-shadow:0 0 0 3px rgba(20,120,223,.13)}
 @media(max-width:620px){.short-answer-input{max-width:100%;font-size:18px;min-height:50px}}
