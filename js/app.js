@@ -15,7 +15,7 @@ async function downloadProtected(path,name){try{const r=await fetch(path,{header
 async function restore(){if(!API.token)return;try{const j=await API.get("/api/me");state.user=j.user}catch{API.setToken("")}}
 function avatarKey(u){return "bt_avatar_"+String(u?.id||u?.email||"guest").replace(/[^a-zA-Z0-9_-]/g,"_")}
 window.ProfileAvatar=()=>avatarUrl(state.user);
-function avatarUrl(u){try{const v=localStorage.getItem(avatarKey(u));return v&&/^data:image\/(png|jpeg|webp);base64,/.test(v)?v:null}catch{return null}}
+function avatarUrl(u){if(typeof u?.avatarUrl==="string"&&u.avatarUrl.startsWith("https://"))return u.avatarUrl;try{const v=localStorage.getItem(avatarKey(u));return v&&/^data:image\/(png|jpeg|webp);base64,/.test(v)?v:null}catch{return null}}
 function avatarHtml(u,large=false){const src=avatarUrl(u);return src?'<img src="'+src+'" alt="Ảnh đại diện" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(u?.avatar||"👧🏻")}
 function shell(){const u=state.user;$("#sideName").textContent=u?.name||"Khách";$("#sideRole").textContent=u?({student:"Học sinh",parent:"Phụ huynh",teacher:"Giáo viên",admin:"Quản trị viên"}[u.role]||u.role):"Học sinh";$("#sideAvatar").innerHTML=avatarHtml(u);$("#authBtn").textContent=u?"Đăng xuất":"Đăng nhập";const rb=$("#registerBtn");if(rb)rb.hidden=!!u;$$(".admin-only").forEach(x=>x.style.display=u?.role==="admin"?"flex":"none");$$(".teacher-only").forEach(x=>x.style.display=["teacher","admin"].includes(u?.role)?"flex":"none")}
 function pageHead(k,t,p=""){return `<section class="page-head"><span class="eyebrow">${k}</span><h1>${t}</h1><p>${p}</p></section>`}
@@ -248,9 +248,21 @@ function bind(){
    const ctx=canvas.getContext("2d");if(!ctx)throw new Error("Không thể xử lý ảnh");
    const scale=Math.max(dim/picture.width,dim/picture.height);const w=picture.width*scale,h=picture.height*scale;
    ctx.drawImage(picture,(dim-w)/2,(dim-h)/2,w,h);picture.close?.();
-   localStorage.setItem(avatarKey(state.user),canvas.toDataURL("image/jpeg",0.75));
-   shell();render();toast("Đã đổi ảnh đại diện");
-  }catch(err){toast("Không lưu được ảnh, hãy thử ảnh nhỏ hơn")}
+   const dataUrl=canvas.toDataURL("image/jpeg",0.78);
+   localStorage.setItem(avatarKey(state.user),dataUrl);
+   let message="Đã đổi ảnh trên thiết bị này";
+   if(window.SupabaseApp?.enabled?.()&&window.SupabaseStorage?.avatar){
+    try{
+     const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.78));
+     if(!blob)throw new Error("Không tạo được ảnh JPEG");
+     const uploaded=await window.SupabaseStorage.avatar(new File([blob],"avatar.jpg",{type:"image/jpeg"}));
+     await API.patch("/api/profile/avatar",{path:uploaded.path});
+     if(state.user){state.user.avatarUrl=uploaded.url;state.user.avatarPath=uploaded.path}
+     message="Đã đồng bộ ảnh đại diện trên Supabase";
+    }catch(uploadError){console.warn("Đồng bộ avatar chưa thành công",uploadError?.message||uploadError);message="Ảnh đã lưu trên máy; Supabase chưa đồng bộ: "+(uploadError?.message||"lỗi kết nối")}
+   }
+   shell();render();toast(message);
+  }catch(err){toast("Không xử lý được ảnh, hãy thử ảnh JPG nhỏ hơn")}
  });
  const studentRerender=()=>render();
  if(state.route==="goals")window.StudentGoals?.bind(toast);
