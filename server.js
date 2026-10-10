@@ -67,11 +67,12 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
  if(["/api/metrics","/api/client-errors"].includes(p)&&!rate(ip,"telemetry",30,60e3))return send(res,429,{error:"Too many metrics"});
- if(await handleMetrics(req,res,p,{send,parseBody,monitor}))return;
+ if(await handleMetrics(req,res,p,{send,parseBody,monitor,pg:pgStore}))return;
  if(!rate(ip,"api",180,60e3))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&["/api/ai","/api/ai/analyze-wrong"].includes(p)&&!rate(ip,"ai",24,60e3))return send(res,429,{error:"AI đang bận, thử lại sau"});
  if(req.method==="POST"&&p==="/api/student/ocr"&&!rate(ip,"ocr",10,60e3))return send(res,429,{error:"OCR đang bận, thử lại sau"});
  if(req.method==="POST"&&(p.startsWith("/api/storage/")||p==="/api/student/handwriting")&&!rate(ip,"upload",20,60e3))return send(res,429,{error:"Bạn tải file quá nhanh"});
+ if(await require("./routes/real-data")(req,res,p,{send,requireUser,pg:pgStore,monitor}))return;
  if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
@@ -177,8 +178,11 @@ async function api(req,res,p,ip){
   const db=load(),target=db.users.find(x=>String(x.email||"").toLowerCase()===email&&x.authUserId);
   if(!target)return send(res,404,{error:"Chưa tìm thấy tài khoản Supabase này. Người dùng cần đăng ký và đăng nhập website ít nhất một lần."});
   if(target.locked)return send(res,409,{error:"Tài khoản đang bị khóa"});
+  if(process.env.DATABASE_URL){
+   try{const updated=await pgStore.setUserAccess(target.id,{role:"admin",locked:false});if(!updated)return send(res,503,{error:"Chưa đồng bộ người dùng lên PostgreSQL"})}
+   catch(e){safeMonitorError("admin_grant_db_failed",{message:e.message});return send(res,503,{error:"Không cấp được quyền Admin trong PostgreSQL"})}
+  }
   target.role="admin";audit(db,current,"admin_granted",{target:target.id});save(db);
-  await pgStore.upsertUser(target).catch(()=>{});
   return send(res,200,{user:safeUser(target),message:"Đã cấp quyền Admin. Người dùng cần đăng nhập lại."});
  }
  if(req.method==="POST"&&p==="/api/admin/users"){const u=await requireUser(req,res,["admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})};const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),name=String(d.name||"Người dùng").trim();if(!/^\S+@\S+\.\S+$/.test(email)||password.length<8)return send(res,400,{error:"Email hợp lệ và mật khẩu tối thiểu 8 ký tự"});const role=["student","parent","teacher"].includes(d.role)?d.role:"student";const db=load();if(db.users.some(x=>x.email===email))return send(res,409,{error:"Email đã tồn tại"});const x={id:id(),name:name.slice(0,80),email,password:hashPassword(password),role,grade:role==="student"?Number(d.grade)||1:null,avatar:role==="teacher"?"👩🏻‍🏫":role==="parent"?"👩🏻":role==="admin"?"🧑🏻‍💻":"👧🏻",emailVerified:true,createdAt:new Date().toISOString()};db.users.push(x);audit(db,u,"user_created",{target:x.id,role:x.role});save(db);return send(res,201,{user:safeUser(x),message:"Tạo tài khoản thành công"})}
