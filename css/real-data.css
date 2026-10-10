@@ -32,3 +32,20 @@
 .grade-pagination button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:1020px){.grade-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.grade-filters label:first-child{grid-column:1/-1}}
 @media(max-width:500px){.grade-filters{grid-template-columns:1fr}.grade-filters label:first-child{grid-column:auto}.grade-filters button{width:100%}}
+
+
+/* Actual exam attempt monitoring in Admin > Chấm bài */
+.admin-live-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.admin-live-head h3{margin:0 0 6px}
+.admin-live-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.live-submission-card{border:1px solid var(--line,#d8e4f1);background:var(--surface2,#f7faff);border-radius:15px;padding:15px;min-width:0}
+.live-submission-card>div:first-child{display:flex;flex-direction:column;gap:4px}
+.live-submission-card>div:first-child>b{font-size:15px;color:var(--text,#1b365c)}
+.live-submission-card>div:first-child>span{font-size:13px;overflow-wrap:anywhere}
+.live-submission-card>div:nth-child(2){display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:12px 0;padding-bottom:10px;border-bottom:1px solid var(--line,#d8e4f1)}
+.live-submission-card>div:nth-child(2)>strong{font-size:13px;font-variant-numeric:tabular-nums;color:var(--text,#1b365c)}
+.live-submission-card>div:nth-child(3){display:grid;gap:6px}
+.live-submission-card small{color:var(--muted,#64758e);overflow-wrap:anywhere}
+.live-exam-status{font-size:12px;font-weight:800}
+.live-submission-countdown{font-variant-numeric:tabular-nums;font-weight:750}
+@media(max-width:520px){.admin-live-head>button{width:100%}.admin-live-grid{grid-template-columns:1fr}.live-submission-card{padding:12px}}
