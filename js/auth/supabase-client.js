@@ -21,7 +21,13 @@ window.SupabaseApp=(()=>{
   return readyPromise
  }
  async function session(){await ready();if(!client)return null;const {data}=await client.auth.getSession();return data.session||null}
- async function sync(sessionObj){if(!sessionObj?.access_token)return null;API.setToken(sessionObj.access_token);const j=await API.post("/api/auth/sync",{accessToken:sessionObj.access_token});currentAppUser=j.user;return j.user}
+ async function sync(sessionObj){if(!sessionObj?.access_token)return null;API.setToken(sessionObj.access_token);const j=await API.post("/api/auth/sync",{accessToken:sessionObj.access_token});currentAppUser=j.user;
+  if(j.user?.avatarPath&&client){
+   try{const {data,error}=await client.storage.from("avatars").createSignedUrl(j.user.avatarPath,3600);
+    if(!error&&data?.signedUrl)j.user.avatarUrl=data.signedUrl;
+   }catch(e){console.warn("Không lấy được ảnh đại diện riêng tư",e?.message||e)}
+  }
+  return j.user}
  async function init(onUser){
   await ready();if(!client)return null;
   const showSession=sess=>{
