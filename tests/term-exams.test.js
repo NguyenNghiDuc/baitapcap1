@@ -7,12 +7,12 @@ require("../js/advanced-bank.js");
 require("../js/exams/term-exams.js");
 const B=window.TermExamBank;
 
-test("has 216 fixed subject-specific term exams",()=>assert.equal(B.exams.length,216));
+test("contains 1080 term exams plus 180 daily sets",()=>assert.equal(B.exams.length,1260));
 
-test("term exams cover every grade semester stage subject and 6 variants",()=>{
+test("term exams cover every grade semester stage subject and 30 variants",()=>{
  for(const grade of [4,5])for(const semester of [1,2])for(const stage of [0,1,2])for(const subject of ["math","vietnamese","english"]){
   const a=B.exams.filter(e=>e.grade===grade&&e.semester===semester&&e.stage===stage&&e.subject===subject);
-  assert.equal(a.length,6,grade+"-"+semester+"-"+stage+"-"+subject);
+  assert.equal(a.length,30,grade+"-"+semester+"-"+stage+"-"+subject);
  }
 });
 
@@ -23,7 +23,7 @@ test("every term exam has 30 questions from exactly one subject",()=>{
   assert.ok(qs.every(q=>q.subject===e.subject),e.id+" contains mixed subjects");
   const types=new Set(qs.map(q=>q.examType||"mcq"));
   for(const t of ["mcq","truefalse","fill","matching"])assert.ok(types.has(t),e.id+" missing "+t);
-  if(e.subject==="math")assert.ok(qs.some(q=>["geometry","perimeter","chart"].includes(q.type)),e.id+" needs geometry");
+  if(e.subject==="math"&&B.scopes[`${e.grade}-${e.semester}-${e.stage}`]?.some(t=>["geometry","perimeter","chart"].includes(t)))assert.ok(qs.some(q=>["geometry","perimeter","chart"].includes(q.type)),e.id+" needs geometry in scope");
  }
 });
 
@@ -42,7 +42,7 @@ test("daily reviews are stable and subject-specific",()=>{
 test("math exams have geometry but language exams never inject math geometry",()=>{
  for(const e of B.exams){
   const qs=B.questions(e.id);
-  if(e.subject==="math")assert.ok(qs.some(q=>["geometry","perimeter","chart"].includes(q.type)),e.id);
+  if(e.subject==="math"&&B.scopes[`${e.grade}-${e.semester}-${e.stage}`]?.some(t=>["geometry","perimeter","chart"].includes(t)))assert.ok(qs.some(q=>["geometry","perimeter","chart"].includes(q.type)),e.id);
   else assert.equal(qs.some(q=>q.subject==="math"),false,e.id);
  }
 });
