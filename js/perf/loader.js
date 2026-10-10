@@ -3,7 +3,7 @@ window.PerfLoader=(()=>{
  const routeFiles={
   tests:["/js/exams/interaction.js","/js/exams/term-exams.js","/js/exams/runner.js","/js/exams/catalog.js"],
   profile:["/js/student/profile-page.js","/js/supabase/storage.js"],
-  realActivity:["/js/student/real-activity.js"],systemMonitor:["/js/admin/system-monitor.js"],
+  realActivity:["/js/student/real-activity.js"],systemMonitor:["/js/admin/system-monitor.js"],adminGrades:["/js/admin/grades.js"],
   accountSecurity:["/js/auth/account-security.js"],
   liveClassroom:["/js/supabase/realtime.js","/js/teacher/live-classroom.js"],
   today:["/js/student/dashboard.js"],goals:["/js/student/goals.js"],formulas:["/js/student/formulas.js"],vocab:["/js/student/vocab.js"],
