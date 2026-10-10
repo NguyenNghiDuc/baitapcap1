@@ -10,7 +10,15 @@ window.SupabaseStorage=(()=>{
  }
  async function studentWork(file){const id=await uid();return upload("student-work",file,id)}
  async function material(file){const id=await uid();return upload("learning-materials",file,id)}
- async function avatar(file){if(window.ImageOptimizer)file=await window.ImageOptimizer.optimize(file,{maxWidth:640,maxHeight:640,quality:.8});const id=await uid();const c=await client(),path=`${id}/avatar.${ext(file)}`;const {data,error}=await c.storage.from("avatars").upload(path,file,{upsert:true,contentType:file.type});if(error)throw error;const {data:pub}=c.storage.from("avatars").getPublicUrl(data.path);return {bucket:"avatars",path:data.path,url:pub.publicUrl}}
+ async function avatar(file){
+  if(file?.type!=="image/jpeg"||file.size>2*1024*1024)throw new Error("Ảnh đại diện cần là JPEG dưới 2 MB");
+  const id=await uid(),c=await client(),path=`${id}/avatar.jpg`;
+  const {error}=await c.storage.from("avatars").upload(path,file,{upsert:true,contentType:"image/jpeg",cacheControl:"60"});
+  if(error)throw error;
+  const {data:signed,error:signError}=await c.storage.from("avatars").createSignedUrl(path,3600);
+  if(signError||!signed?.signedUrl)throw signError||new Error("Không đọc được ảnh đại diện riêng tư");
+  return {bucket:"avatars",path,url:signed.signedUrl};
+ }
  async function remove(bucket,paths){const c=await client(),{error}=await c.storage.from(bucket).remove(paths);if(error)throw error;return true}
  return {upload,studentWork,material,avatar,remove}
 })();
