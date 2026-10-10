@@ -79,7 +79,42 @@ function shop(){return pageHead("GAMIFICATION","Shop & phần thưởng","Khung 
 
 function flashcards(){const cards=D.lessons.slice(0,8);return pageHead("FLASHCARD","Ôn nhanh kiến thức","Bấm vào thẻ để lật mặt sau, dùng giọng đọc của trình duyệt nếu cần.")+`<div class="cards-3">${cards.map((l,i)=>`<button class="test-card flashcard" data-flash="${i}" data-front="${esc(l.title)}" data-back="${esc(subj(l.subject).name+" • "+(l.topic||"Kiến thức trọng tâm"))}"><div class="subject-icon">${subj(l.subject).icon}</div><h3>${esc(l.title)}</h3><p>Chạm để lật</p></button>`).join("")}</div><div class="panel"><button class="outline" id="readFlash">🔊 Đọc thẻ đầu tiên</button></div>`}
 function game(){return pageHead("MINI GAME","⚡ Toán nhanh","Trả lời liên tục để tăng combo và XP.")+`<div class="result-card"><div class="score-ring"><b id="gameScore">0</b><span>XP</span></div><div class="question-card"><h2 id="gameQ">Bấm Bắt đầu</h2><div class="options" id="gameOptions"></div></div><div class="quiz-actions"><button class="primary" id="startGame">Bắt đầu game</button></div></div>`}
-async function submissions(){if(!state.user||!["teacher","admin"].includes(state.user.role))return loginRequired("Chỉ giáo viên/Admin được xem bài nộp.");let j;try{j=await window.PerfLists.get("submissions","/api/submissions")}catch(e){return errorBox(e.message)}return pageHead("CHẤM BÀI","Bài học sinh đã nộp","Chỉnh điểm và nhận xét trực tiếp.")+`${window.PerfLists.controls("submissions",j.pagination,{placeholder:"Tìm học sinh hoặc bài..."})}<div class="list-card">${j.submissions.map(x=>`<div class="lesson-row"><div class="lesson-ico">📨</div><div class="grow"><b>${esc(x.student?.name||"Học sinh")} — ${esc(x.assignment?.title||"Bài tập")}</b><small>Điểm: ${x.score}% • ${new Date(x.submittedAt).toLocaleString("vi-VN")}</small></div><button class="outline small" data-grade-submission="${x.id}" data-current-score="${x.score}">Chấm</button></div>`).join("")||'<div class="empty">Chưa có bài nộp.</div>'}</div>`}
+async function submissions(){
+ if(!state.user||!["teacher","admin"].includes(state.user.role))return loginRequired("Chỉ giáo viên/Admin được xem bài nộp.");
+ let j;try{j=await window.PerfLists.get("submissions","/api/submissions")}catch(e){return errorBox(e.message)}
+ const assigned=j.submissions.map(x=>`<div class="lesson-row"><div class="lesson-ico">📨</div><div class="grow"><b>${esc(x.student?.name||"Học sinh")} — ${esc(x.assignment?.title||"Bài được giao")}</b><small>${x.score===null||x.score===undefined?"Chờ giáo viên chấm":"Điểm: "+x.score+"/100"} • ${x.submittedAt?new Date(x.submittedAt).toLocaleString("vi-VN"):"Chưa có thời gian nộp"}</small></div><button class="outline small" data-grade-submission="${esc(x.id)}" data-current-score="${x.score??""}">Chấm</button></div>`).join("");
+ let selfReported="";
+ if(state.user.role==="admin"){
+  try{
+   const grades=await API.get("/api/real/admin/grades?page=1");
+   if(grades.source!=="postgres")throw new Error("Chưa xác minh được nguồn dữ liệu");
+   const rows=grades.results.map(x=>`<div class="lesson-row"><div class="lesson-ico">📝</div><div class="grow"><b>${esc(x.student_name||"Học sinh")} — ${esc(x.title||"Bài kiểm tra")}</b><small>Lớp ${esc(x.grade||"—")} • ${esc(x.subject||"Môn học")} • ${x.score===null||x.score===undefined?"Chưa chấm":esc(x.score)+"/100"} • ${x.verified===true?"Đã xác minh":"Điểm tự báo cáo, chưa xác minh"} • ${x.created_at?new Date(x.created_at).toLocaleString("vi-VN"):""}</small></div></div>`).join("");
+   selfReported='<section class="panel"><h3>📝 Kết quả bài kiểm tra học sinh tự làm</h3><p class="muted">Lấy từ PostgreSQL. Điểm tự báo cáo không phải điểm giáo viên chấm. Xem đầy đủ tại <a href="#adminGrades">Bảng điểm Admin</a>.</p><div class="list-card">'+(rows||'<div class="empty">Chưa có kết quả kiểm tra nào được lưu lên PostgreSQL.</div>')+'</div></section>';
+  }catch(e){selfReported='<section class="panel"><h3>📝 Kết quả bài kiểm tra tự làm</h3><p class="muted" role="alert">Chưa đọc được PostgreSQL: '+esc(e.message)+'. Không thể kết luận là học sinh chưa nộp.</p></section>'}
+ }
+ let liveMonitoring="";
+ if(state.user.role==="admin"){
+  try{
+   const monitoring=await API.get("/api/real/admin/exam-sessions?page=1");
+   if(monitoring.source!=="postgres")throw new Error("Không có dữ liệu PostgreSQL");
+   const offset=Date.parse(monitoring.serverNow)-Date.now();
+   const statusNames={active:"🟢 Đang làm",disconnected:"🟠 Mất kết nối",expired:"🔴 Hết giờ, chưa nộp",submitted:"✅ Đã nộp"};
+   const items=monitoring.items.map(v=>{
+    const began=v.startedAt?new Date(v.startedAt).toLocaleString("vi-VN"):"Không xác định";
+    const due=v.dueAt?new Date(v.dueAt).toLocaleString("vi-VN"):"Không xác định";
+    const last=v.lastSeenAt?new Date(v.lastSeenAt).toLocaleString("vi-VN"):"Không xác định";
+    const submitted=v.submittedAt?new Date(v.submittedAt).toLocaleString("vi-VN"):"Chưa có";
+    const remaining=v.submittedAt?"Đã nộp":v.status==="expired"?"Hết giờ":'<span class="live-submission-countdown" data-exam-due="'+esc(v.dueAt||"")+'" data-server-offset="'+(Number.isFinite(offset)?offset:0)+'">Đang tính…</span>';
+    return '<article class="live-submission-card"><div><b>'+esc(v.studentName||"Học sinh")+'</b><span>'+esc(v.title||"Bài kiểm tra")+' • Lớp '+esc(v.grade||"—")+'</span></div><div><span class="live-exam-status">'+esc(statusNames[v.status]||v.status)+'</span><strong>'+remaining+'</strong></div><div><small>Bắt đầu: '+esc(began)+'</small><small>Hạn nộp: '+esc(due)+'</small><small>Đã trả lời: '+esc(v.answeredCount||0)+'/'+esc(v.totalQuestions||0)+' câu</small><small>Lần kết nối: '+esc(last)+'</small><small>Nộp bài: '+esc(submitted)+'</small></div></article>';
+   }).join("");
+   liveMonitoring='<section class="panel"><div class="admin-live-head"><div><h3>⏱ Học sinh đang làm bài / đã nộp</h3><p class="muted">Dữ liệu theo thời gian server. Mất kết nối không có nghĩa học sinh đã thoát; trạng thái cập nhật khi tải lại.</p></div><button id="refreshSubmissions" type="button" class="outline">↻ Cập nhật</button></div><div class="admin-live-grid">'+(items||'<div class="empty">Chưa có phiên làm bài nào được ghi vào PostgreSQL.</div>')+'</div><p class="muted">Hiển thị tối đa 25 phiên gần nhất. Giờ nộp chỉ hiện sau khi server xác nhận lưu kết quả.</p></section>';
+  }catch(e){liveMonitoring='<section class="panel"><h3>⏱ Theo dõi bài đang làm</h3><p role="alert">Chưa tải được dữ liệu phiên làm bài từ PostgreSQL: '+esc(e.message)+'</p></section>'}
+ }
+ return pageHead("CHẤM BÀI","Bài học sinh đã nộp","Phân biệt bài giáo viên giao và bài kiểm tra học sinh tự làm.")+
+ '<section class="panel"><h3>📨 Bài giáo viên giao</h3><p class="muted">Chỉ bao gồm bài được giao cho lớp, không bao gồm bài kiểm tra tự chọn.</p>'+
+ window.PerfLists.controls("submissions",j.pagination,{placeholder:"Tìm học sinh hoặc bài..."})+
+ '<div class="list-card">'+(assigned||'<div class="empty">Chưa có bài được giao nào đã nộp.</div>')+'</div></section>'+liveMonitoring+selfReported;
+}
 async function premium(){return window.DemoWallet?.render?.()||errorBox("Không tải được Ví demo")}
 
 function today(){return window.StudentDashboard?.render(state.user)||errorBox("StudentDashboard chưa tải")}
@@ -154,7 +189,7 @@ async function render(){
  }
 }
 function filterLessons(){const q=norm($("#lessonSearch")?.value),g=$("#gradeFilter")?.value||"",lv=$("#levelFilter")?.value||"",s=state.subjectFilter;const a=D.lessons.filter(l=>(!q||norm(l.title+" "+subj(l.subject).name+" "+(l.topic||"")).includes(q))&&(!g||String(l.grade)===g)&&(!lv||l.level===lv)&&(!s||l.subject===s));$("#lessonResults").innerHTML=a.map(lessonRow).join("")||'<div class="empty">Không tìm thấy.</div>';bind()}
-function persistQuiz(){if(!state.quiz)return;localStorage.setItem("bt_quiz",JSON.stringify(state.quiz));window.OfflineSyncQueue?.saveDraft?.({kind:"quiz",quiz:state.quiz})}
+function persistQuiz(){if(!state.quiz)return;if(state.user?.role==="student")window.ExamTracking?.observe?.(state.quiz);localStorage.setItem("bt_quiz",JSON.stringify(state.quiz));window.OfflineSyncQueue?.saveDraft?.({kind:"quiz",quiz:state.quiz})}
 function openPractice(){
  if(!state.quiz?.questions?.length)return toast("Không tìm thấy câu hỏi của bài tập.");
  if(location.hash.slice(1)!=="practice")location.hash="practice";
@@ -162,7 +197,7 @@ function openPractice(){
 }
 function startCustom(qs,title="Luyện tập cá nhân",meta={}){if(!Array.isArray(qs)||!qs.length){toast("Chưa có câu phù hợp");return}const grade=meta.grade||qs.find(q=>q.grade)?.grade||state.user?.grade||4;state.quiz={subject:meta.subject||"mixed",grade,assignmentId:null,lessonId:"",examId:meta.examId||"",durationMin:meta.time||null,customTitle:title,questions:qs.slice(0,30),i:0,answers:{},marked:[],start:Date.now()};persistQuiz();openPractice()}
 function shuffleExamQuestion(q){const pairs=q.options.map((o,i)=>({o,ok:i===q.answer})).sort(()=>Math.random()-.5);return {...q,options:pairs.map(x=>x.o),answer:pairs.findIndex(x=>x.ok)}}
-function startExam(examId){const t=(D.examSets||[]).find(x=>x.examId===examId),raw=D.questions.filter(q=>q.examId===examId);if(!t||raw.length!==30){toast("Đề thi chưa đủ 30 câu");return}const qs=raw.map(shuffleExamQuestion).sort(()=>Math.random()-.5);state.quiz={subject:"mixed",grade:t.grade,assignmentId:null,lessonId:"",examId,questions:qs,i:0,answers:{},marked:[],start:Date.now()};window.StudentExamProctor?.start(t.time||60);persistQuiz();openPractice()}
+function startExam(examId){const t=(D.examSets||[]).find(x=>x.examId===examId),raw=D.questions.filter(q=>q.examId===examId);if(!t||raw.length!==30){toast("Đề thi chưa đủ 30 câu");return}const qs=raw.map(shuffleExamQuestion).sort(()=>Math.random()-.5);state.quiz={subject:"mixed",grade:t.grade,assignmentId:null,lessonId:"",examId,questions:qs,i:0,answers:{},marked:[],start:Date.now()};state.quiz.durationMin=t.time||60;window.StudentExamProctor?.start(t.time||60);persistQuiz();openPractice()}
 function startQuiz(subject,grade,assignmentId=null,lessonId=""){
  let qs=lessonId?D.questions.filter(q=>q.lessonId===lessonId):D.questions.filter(q=>q.subject===subject&&q.grade===grade);
  if(!qs.length)qs=D.questions.filter(q=>q.subject===subject&&q.grade===grade);
@@ -192,7 +227,22 @@ function quiz(){
  $("#lockedSubmit").onclick=()=>{if(confirm("Bạn chắc chắn muốn nộp bài? Sau khi nộp sẽ không thể sửa đáp án."))finishQuiz()};
  $$(".locked-qnav").forEach(b=>b.onclick=()=>{z.i=Number(b.dataset.qindex);persistQuiz();quiz()});
  if(z.examId)window.StudentExamProctor?.attach($("#timer"),()=>finishQuiz(true));
-}async function finishQuiz(auto=false){const z=state.quiz;let correct=0,wrong=[];z.questions.forEach(q=>{if(z.answers[q.id]===q.answer)correct++;else wrong.push(q.id)});state.lastWrong=z.questions.filter(q=>wrong.includes(q.id)).map(q=>({id:q.id,q:q.q,options:q.options,answer:q.answer,grade:q.grade,lessonId:q.lessonId,subject:q.subject,type:q.type,topic:D.lessons.find(l=>l.lessonId===q.lessonId)?.topic||(subj(q.subject).name+" • "+(q.type||"Tổng hợp")),explain:q.explain}));window.StudentReview?.add(state.lastWrong);const score=Math.round(correct/z.questions.length*100),durationSec=Math.round((Date.now()-z.start)/1000),proctor=z.examId?window.StudentExamProctor?.stop():null;window.StudentRewards?.earn(score,correct);window.StudentMastery?.record(z.questions,z.questions.filter(q=>z.answers[q.id]===q.answer).map(q=>q.id));const r={id:Date.now(),title:z.customTitle||z.examId?((z.customTitle)||((D.examSets||[]).find(t=>t.examId===z.examId)?.title||`Đề tổng hợp lớp ${z.grade}`)):z.lessonId?(D.lessons.find(l=>l.lessonId===z.lessonId)?.title||`${subj(z.subject).name} lớp ${z.grade}`):`${subj(z.subject).name} lớp ${z.grade}`,subject:z.subject,grade:z.grade,correct,total:z.questions.length,score,points:correct*10,durationSec,date:new Date().toLocaleDateString("vi-VN"),isoDate:new Date().toISOString(),proctor};state.results.push(r);saveLocal();if(state.user?.role==="student"){try{r.clientSubmissionId=window.OfflineSyncQueue?.enqueueResult?.({...r,wrongQuestionIds:wrong});await window.OfflineSyncQueue?.flush?.();if(z.assignmentId)await API.post("/api/assignments/"+z.assignmentId+"/submit",{answers:z.answers,score})}catch(e){toast("Đã lưu local; sẽ tự đồng bộ khi có mạng")}}window.ExamLock?.exit();$("#content").innerHTML=`<section class="result-card"><div class="score-ring"><b>${score}%</b><span>${correct}/${z.questions.length} đúng</span></div><h1>${auto?"Hết giờ – bài đã tự nộp ⏰":score>=80?"Xuất sắc 🎉":score>=50?"Làm tốt 👍":"Ôn thêm nhé 💪"}</h1><div class="result-review">${z.questions.map((q,i)=>`<div class="review ${z.answers[q.id]===q.answer?"":"bad"}"><b>Câu ${i+1}: ${esc(q.q)}</b><p>Đáp án đúng: ${esc(q.options[q.answer])}</p><small>💡 ${esc(q.explain||"")}</small></div>`).join("")}</div><div class="quiz-actions"><button class="outline" id="analyzeWrong">🤖 AI phân tích câu sai</button><button class="outline" id="similarWrong">🔁 5 câu tương tự</button><button class="primary" id="goHistory">Xem kết quả</button></div><div id="wrongAnalysis"></div></section>`;$("#goHistory").onclick=()=>nav("history");$("#similarWrong").onclick=()=>{const src=z.questions.find(q=>wrong.includes(q.id));if(!src)return toast("Không có câu sai");startCustom(window.StudentAdaptive?.similar(src,5)||[],"5 câu tương tự")};$("#analyzeWrong").onclick=async()=>{const box=$("#wrongAnalysis");if(!state.lastWrong.length){box.innerHTML="<div class=\"panel\"><h3>🎉 Không có câu sai</h3><p>Em đã làm đúng toàn bộ bài này.</p></div>";return}if(!state.user){box.innerHTML="<div class=\"panel\"><p>Đăng nhập để AI lưu và phân tích lỗi sai theo tiến độ của em.</p></div>";return}box.innerHTML="<div class=\"panel\">Đang phân tích...</div>";try{const j=await API.post("/api/ai/analyze-wrong",{grade:z.grade,lessonId:z.lessonId,items:state.lastWrong});box.innerHTML=`<div class="panel"><h3>🎯 Chủ đề cần ôn: ${esc(j.weakTopic||"Toán")}</h3><p>${esc(j.summary||"")}</p>${j.ai?`<p>${esc(j.ai)}</p>`:""}<ol>${(j.plan||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`}catch(e){box.innerHTML=`<div class="panel"><p>${esc(e.message)}</p></div>`}};state.quiz=null;localStorage.removeItem("bt_quiz");window.OfflineSyncQueue?.clearDraft?.()}
+}async function finishQuiz(auto=false){const z=state.quiz;let correct=0,wrong=[];z.questions.forEach(q=>{if(z.answers[q.id]===q.answer)correct++;else wrong.push(q.id)});state.lastWrong=z.questions.filter(q=>wrong.includes(q.id)).map(q=>({id:q.id,q:q.q,options:q.options,answer:q.answer,grade:q.grade,lessonId:q.lessonId,subject:q.subject,type:q.type,topic:D.lessons.find(l=>l.lessonId===q.lessonId)?.topic||(subj(q.subject).name+" • "+(q.type||"Tổng hợp")),explain:q.explain}));window.StudentReview?.add(state.lastWrong);const score=Math.round(correct/z.questions.length*100),durationSec=Math.round((Date.now()-z.start)/1000),proctor=z.examId?window.StudentExamProctor?.stop():null;window.StudentRewards?.earn(score,correct);window.StudentMastery?.record(z.questions,z.questions.filter(q=>z.answers[q.id]===q.answer).map(q=>q.id));const r={id:Date.now(),title:z.customTitle||z.examId?((z.customTitle)||((D.examSets||[]).find(t=>t.examId===z.examId)?.title||`Đề tổng hợp lớp ${z.grade}`)):z.lessonId?(D.lessons.find(l=>l.lessonId===z.lessonId)?.title||`${subj(z.subject).name} lớp ${z.grade}`):`${subj(z.subject).name} lớp ${z.grade}`,subject:z.subject,grade:z.grade,correct,total:z.questions.length,score,points:correct*10,durationSec,date:new Date().toLocaleDateString("vi-VN"),isoDate:new Date().toISOString(),proctor};let submissionTracked=null;
+ state.results.push(r);saveLocal();
+ if(state.user?.role==="student"){
+  const clientSubmissionId=z.trackingId||crypto.randomUUID();
+  const payload={...r,wrongQuestionIds:wrong,clientSubmissionId};
+  try{
+   const saved=await API.post("/api/results",payload,{key:"submit-result:"+clientSubmissionId,cancelPrevious:false,timeout:15000});
+   if(saved.source!=="postgres")throw new Error("Điểm chưa được ghi nhận trong PostgreSQL");
+   submissionTracked=await window.ExamTracking?.submit?.(z)===true;
+   if(!submissionTracked)throw new Error("Server chưa ghi nhận thời điểm nộp");
+  }catch(e){
+   window.OfflineSyncQueue?.enqueueResult?.(payload);
+   toast("Đã lưu trên máy; chưa xác nhận nộp lên server");
+  }
+  if(z.assignmentId){try{await API.post("/api/assignments/"+z.assignmentId+"/submit",{answers:z.answers,score})}catch(e){toast("Chưa lưu được bài giáo viên giao")}}
+ }window.ExamLock?.exit();$("#content").innerHTML=`<section class="result-card"><div class="score-ring"><b>${score}%</b><span>${correct}/${z.questions.length} đúng</span></div><h1>${auto?"Hết giờ – bài đã tự nộp ⏰":score>=80?"Xuất sắc 🎉":score>=50?"Làm tốt 👍":"Ôn thêm nhé 💪"}</h1>${state.user?.role==="student"&&submissionTracked!==true?'<p class="muted" role="alert">⚠️ Server chưa xác nhận thời điểm nộp. Bài đã lưu trên máy nhưng chưa được ghi nhận là “Đã nộp” trong bảng theo dõi Admin.</p>':""}<div class="result-review">${z.questions.map((q,i)=>`<div class="review ${z.answers[q.id]===q.answer?"":"bad"}"><b>Câu ${i+1}: ${esc(q.q)}</b><p>Đáp án đúng: ${esc(q.options[q.answer])}</p><small>💡 ${esc(q.explain||"")}</small></div>`).join("")}</div><div class="quiz-actions"><button class="outline" id="analyzeWrong">🤖 AI phân tích câu sai</button><button class="outline" id="similarWrong">🔁 5 câu tương tự</button><button class="primary" id="goHistory">Xem kết quả</button></div><div id="wrongAnalysis"></div></section>`;$("#goHistory").onclick=()=>nav("history");$("#similarWrong").onclick=()=>{const src=z.questions.find(q=>wrong.includes(q.id));if(!src)return toast("Không có câu sai");startCustom(window.StudentAdaptive?.similar(src,5)||[],"5 câu tương tự")};$("#analyzeWrong").onclick=async()=>{const box=$("#wrongAnalysis");if(!state.lastWrong.length){box.innerHTML="<div class=\"panel\"><h3>🎉 Không có câu sai</h3><p>Em đã làm đúng toàn bộ bài này.</p></div>";return}if(!state.user){box.innerHTML="<div class=\"panel\"><p>Đăng nhập để AI lưu và phân tích lỗi sai theo tiến độ của em.</p></div>";return}box.innerHTML="<div class=\"panel\">Đang phân tích...</div>";try{const j=await API.post("/api/ai/analyze-wrong",{grade:z.grade,lessonId:z.lessonId,items:state.lastWrong});box.innerHTML=`<div class="panel"><h3>🎯 Chủ đề cần ôn: ${esc(j.weakTopic||"Toán")}</h3><p>${esc(j.summary||"")}</p>${j.ai?`<p>${esc(j.ai)}</p>`:""}<ol>${(j.plan||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`}catch(e){box.innerHTML=`<div class="panel"><p>${esc(e.message)}</p></div>`}};state.quiz=null;localStorage.removeItem("bt_quiz");window.OfflineSyncQueue?.clearDraft?.()}
 function openAuth(){return window.AuthUI?.open("login")}
 function bind(){
  // Open immediately on mobile while preserving the direct-link fallback.
@@ -203,6 +253,18 @@ function bind(){
   window.AuthUI.open("register");
  });
  window.PerfLists?.bind?.(state.route,render);
+ if(window._btSubmissionTimer){clearInterval(window._btSubmissionTimer);window._btSubmissionTimer=null}
+ if(state.route==="submissions"){
+  const refresh=()=>render();
+  $("#refreshSubmissions")?.addEventListener("click",refresh);
+  const tick=()=>document.querySelectorAll(".live-submission-countdown").forEach(el=>{
+   const due=Date.parse(el.dataset.examDue),offset=Number(el.dataset.serverOffset)||0;
+   if(!Number.isFinite(due)){el.textContent="Không xác định";return}
+   const sec=Math.max(0,Math.ceil((due-Date.now()-offset)/1000));
+   el.textContent=sec===0?"Hết giờ":Math.floor(sec/3600)+" giờ "+String(Math.floor(sec%3600/60)).padStart(2,"0")+" phút "+String(sec%60).padStart(2,"0")+" giây";
+  });
+  tick();window._btSubmissionTimer=setInterval(tick,1000);
+ }
  $$("[data-route]").forEach(x=>x.onclick=()=>nav(x.dataset.route));$$("[data-subject]").forEach(x=>x.onclick=()=>{state.subjectFilter=x.dataset.subject;nav("subjects")});$$("[data-fav]").forEach(x=>x.onclick=()=>{const id=Number(x.dataset.fav);state.favorites=state.favorites.includes(id)?state.favorites.filter(a=>a!==id):[...state.favorites,id];saveLocal();render()});$$("[data-start]").forEach(x=>x.onclick=()=>startQuiz(x.dataset.start,Number(x.dataset.grade),null,x.dataset.lesson||""));$("#openLogin")?.addEventListener("click",openAuth);
  if(state.route==="tests")window.TermExamBank?.bind?.(startCustom);
  $("#globalSearchBtn")?.addEventListener("click",()=>{const q=$("#globalSearch").value;nav("subjects");setTimeout(()=>{$("#lessonSearch").value=q;filterLessons()},20)});$$(".quick-grades [data-grade]").forEach(x=>x.onclick=()=>{nav("subjects");setTimeout(()=>{$("#gradeFilter").value=x.dataset.grade;filterLessons()},20)});

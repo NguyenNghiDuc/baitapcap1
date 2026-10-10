@@ -15,7 +15,7 @@ window.ExamRunner=(()=>{
   const q=quiz.questions[quiz.i],subject=q.subject||"mixed",timeMin=Number(quiz.meta.time)||60;
   document.querySelector("#content").innerHTML=window.LockedExamUI.render({
    title:quiz.title,subject,grade:quiz.grade,index:quiz.i,questions:quiz.questions,answers:quiz.answers,timeMin,
-   bodyHtml:body(q),typeLabel:q.type==="tf"?"Đúng / Sai":q.type==="matching"?"Nối đáp án":q.type==="fill"?"Điền đáp án":"Trắc nghiệm"
+   bodyHtml:body(q),typeLabel:q.examType==="truefalse"?"Đúng / Sai":q.examType==="matching"?"Nối đáp án":["fill","shortanswer","essay"].includes(q.examType)?"Trả lời ngắn":"Trắc nghiệm"
   });
   window.ExamInteraction.bind(q,quiz,render,save);
   document.querySelector("#lockedPrev").onclick=()=>{if(quiz.i>0){quiz.i--;save();render()}};

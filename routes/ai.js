@@ -26,7 +26,7 @@ async function verifiedMath(prompt){
  const contextText=ctx.calculations?.length?"\n\nCONTEXT TÍNH TOÁN ĐÃ KIỂM TRA BẰNG MÁY:\n"+JSON.stringify(ctx.calculations):"";
  const draft=await ai.chat(prompt+contextText,SUBJECT.math);
  const checked=await ai.chat("ĐỀ GỐC:\n"+prompt+"\n\nLỜI GIẢI CẦN KIỂM TRA:\n"+draft+contextText,VERIFY);
- return {answer:checked||draft,verified:true,engine:"ai+verifier"}
+ return {answer:checked||draft,verified:false,engine:"ai+verifier",verification:"AI tự kiểm tra, chưa có chứng minh độc lập về tính chính xác"}
 }
 
 module.exports=async function handleAI(req,res,p,ctx){
@@ -51,7 +51,7 @@ module.exports=async function handleAI(req,res,p,ctx){
     const out=await verifiedMath(prompt);monitor.info("ai_math",{userId:u.id,engine:out.engine});return send(res,200,{...out,provider:true,subject}),true
    }
    if(!ai.enabled()){const local=localTutor.answer(prompt,subject);if(local)return send(res,200,{...local,provider:false,subject:local.subject||subject}),true;return send(res,200,{answer:"Mình chưa có đủ kiến thức local cho câu này. Hãy cấu hình AI provider để xử lý câu hỏi mở/nâng cao hơn.",provider:false,subject}),true}
-   const answer=await ai.chat(prompt,SUBJECT[subject]||SUBJECT.general);monitor.info("ai_chat",{userId:u.id,subject});return send(res,200,{answer,provider:true,subject,verified:subject!=="general"}),true
+   const answer=await ai.chat(prompt,SUBJECT[subject]||SUBJECT.general);monitor.info("ai_chat",{userId:u.id,subject});return send(res,200,{answer,provider:true,subject,verified:false,verification:"Nội dung sinh bởi AI, cần kiểm tra trước khi dùng làm đáp án chính thức"}),true
   }catch(e){return send(res,502,{error:e.message,subject}),true}
  }
  if(req.method==="POST"&&p==="/api/ai/calculate"){

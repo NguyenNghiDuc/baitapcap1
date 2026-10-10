@@ -49,26 +49,38 @@
    return;
   }
   if(!Array.isArray(questions)||questions.length<1){err("Đề không có câu hỏi hợp lệ.");return;}
-  stop();exam={info,questions,i:0,answers:{},started:Date.now(),duration:minutes};seconds=minutes*60;
-  try{paint();timer=setInterval(()=>{seconds=Math.max(0,seconds-1);const el=document.querySelector("#countdown");if(el)el.textContent=clock();if(seconds===0)finish(true);},1000);}catch(e){err(e);}
+  const candidate={info,subject:info.subject,grade:info.grade,questions,i:0,answers:{},started:Date.now(),duration:minutes,durationMin:minutes};
+  const session=await window.ExamTracking?.begin?.(candidate);
+  if(!session){err(candidate.trackingError||"Không bắt đầu được bài kiểm tra trên server. Kiểm tra đăng nhập và PostgreSQL, sau đó thử lại.");return;}
+  stop();exam=candidate;
+  const update=()=>{
+   if(!exam)return;
+   const left=window.ExamTracking.remaining(exam);
+   seconds=left===null?Math.max(0,seconds-1):left;
+   const el=document.querySelector("#countdown");if(el)el.textContent=clock();
+   if(seconds===0){void finish(true);return}
+   void window.ExamTracking.heartbeat(exam);
+  };
+  seconds=window.ExamTracking.remaining(exam)??minutes*60;
+  try{paint();timer=setInterval(update,1000)}catch(e){err(e);}
+
  }
  function clock(){return Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");}
  function persistAnswer(){
   const q=exam.questions[exam.i],t=q.examType||"mcq";
-  if(t==="fill"||t==="essay")exam.answers[q.id]=document.querySelector("#fill")?.value.trim()||"";
+  if(["fill","essay","shortanswer"].includes(t))exam.answers[q.id]=host.querySelector("#fill")?.value.trim()||"";
   if(t==="matching"){const vals={};host.querySelectorAll("[data-pair]").forEach(el=>{vals[el.dataset.pair]=el.value});exam.answers[q.id]=vals;}
  }
  function paint(){
   if(!exam)return;const q=exam.questions[exam.i],v=exam.answers[q.id],t=q.examType||"mcq";
   let answer="";
   if(t==="truefalse")answer='<div class="choices">'+["true","false"].map((x,i)=>'<button class="answer '+(v===x?"selected":"")+'" data-choice="'+x+'">'+(i?"Sai":"Đúng")+'</button>').join("")+'</div>';
-  else if(t==="essay")answer='<label class="essay-label" for="fill">✍️ Bài làm tự luận</label><textarea id="fill" class="essay-input" rows="8" placeholder="Viết các bước giải, phép tính và đáp số của em...">'+esc(v||"")+'</textarea><p class="essay-note">Bài tự luận cần giáo viên đánh giá; hệ thống chỉ tự chấm trắc nghiệm và Đúng/Sai.</p>';
-  else if(t==="fill")answer='<label>Nhập câu trả lời<input id="fill" type="text" value="'+esc(v||"")+'"></label>';
+  else if(t==="shortanswer"||t==="essay"||t==="fill")answer='<label class="essay-label" for="fill">✏️ Chỉ nhập đáp án đúng, không cần trình bày cách giải</label><input id="fill" class="short-answer-input" type="text" autocomplete="off" maxlength="160" placeholder="Ví dụ: 73" value="'+esc(v||"")+'"><p class="essay-note">Chỉ ghi kết quả cuối cùng. Hệ thống tự so sánh đáp án sau khi nộp.</p>';
   else if(t==="matching")answer='<div class="matches">'+q.pairs.map((p,i)=>'<label>'+esc(p[0])+'<select data-pair="'+i+'"><option value="">Chọn đáp án</option>'+q.pairs.map(other=>'<option value="'+esc(other[1])+'" '+((v||{})[i]===other[1]?"selected":"")+'>'+esc(other[1])+'</option>').join("")+'</select></label>').join("")+'</div>';
   else answer='<div class="choices">'+(q.options||[]).map((o,i)=>'<button class="answer '+(v===i?"selected":"")+'" data-choice="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>').join("")+'</div>';
-  const groups=[{name:"Phần I · Trắc nghiệm",type:"mcq"},{name:"Phần II · Đúng / Sai",type:"truefalse"},{name:"Phần III · Tự luận",type:"essay"}];
-  const kind=t==="truefalse"?"truefalse":t==="essay"||t==="fill"?"essay":"mcq";
-  const groupButtons=groups.map(g=>{const count=exam.questions.filter(x=>(x.examType==="truefalse"?"truefalse":x.examType==="essay"||x.examType==="fill"?"essay":"mcq")===g.type).length;const first=exam.questions.findIndex(x=>(x.examType==="truefalse"?"truefalse":x.examType==="essay"||x.examType==="fill"?"essay":"mcq")===g.type);return count?'<button type="button" class="section-tab '+(kind===g.type?'active':'')+'" data-section="'+first+'">'+g.name+' <small>('+count+')</small></button>':""}).join("");
+  const groups=[{name:"Phần I · Trắc nghiệm",type:"mcq"},{name:"Phần II · Đúng / Sai",type:"truefalse"},{name:"Phần III · Trả lời ngắn",type:"essay"}];
+  const kind=t==="truefalse"?"truefalse":["shortanswer","essay","fill"].includes(t)?"essay":"mcq";
+  const groupButtons=groups.map(g=>{const count=exam.questions.filter(x=>(x.examType==="truefalse"?"truefalse":["shortanswer","essay","fill"].includes(x.examType)?"essay":"mcq")===g.type).length;const first=exam.questions.findIndex(x=>(x.examType==="truefalse"?"truefalse":["shortanswer","essay","fill"].includes(x.examType)?"essay":"mcq")===g.type);return count?'<button type="button" class="section-tab '+(kind===g.type?'active':'')+'" data-section="'+first+'">'+g.name+' <small>('+count+')</small></button>':""}).join("");
   host.innerHTML='<section class="panel"><div class="exam-sections">'+groupButtons+'</div><div class="exam-top"><strong>'+esc(exam.info.title)+'</strong><strong>⏱ <span id="countdown">'+clock()+'</span></strong></div><p>Câu '+(exam.i+1)+' / '+exam.questions.length+'</p><h2>'+esc(q.q)+'</h2>'+answer+'<div class="actions"><button id="prev" '+(exam.i===0?"disabled":"")+'>← Trước</button><button id="next" '+(exam.i===exam.questions.length-1?"disabled":"")+'>Tiếp →</button><button id="submit" class="submit">Nộp bài</button></div><div class="numbers">'+exam.questions.map((q,i)=>'<button class="'+(i===exam.i?"current":"")+'" data-index="'+i+'">'+(i+1)+'</button>').join("")+'</div></section>';
   host.querySelectorAll("[data-choice]").forEach(b=>b.onclick=()=>{exam.answers[q.id]=t==="truefalse"?b.dataset.choice:Number(b.dataset.choice);paint();});
   host.querySelector("#prev").onclick=()=>move(exam.i-1);host.querySelector("#next").onclick=()=>move(exam.i+1);
@@ -77,9 +89,44 @@
   host.querySelector("#submit").onclick=()=>{persistAnswer();if(confirm("Nộp bài kiểm tra?"))finish(false);};
  }
  function move(i){persistAnswer();exam.i=Math.max(0,Math.min(exam.questions.length-1,i));paint();}
- function finish(auto){if(!exam)return;persistAnswer();stop();const done=exam;exam=null;const objective=done.questions.filter(q=>q.examType!=="essay"&&q.examType!=="fill"),correct=objective.filter(q=>I.isCorrect(q,done.answers[q.id])).length,score=objective.length?Math.round(correct/objective.length*100):0;
-  try{const old=JSON.parse(localStorage.getItem("bt_results")||"[]");old.push({id:Date.now(),title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total:objective.length,score,points:0,gradingStatus:'practice_objective_only',durationSec:Math.round((Date.now()-done.started)/1000),date:new Date().toLocaleDateString("vi-VN")});localStorage.setItem("bt_results",JSON.stringify(old));}catch{}
-  host.innerHTML='<section class="panel"><h1>'+(auto?"Hết giờ!":"Đã nộp bài!")+'</h1><h2>Điểm phần tự chấm: '+score+'% ('+correct+'/'+objective.length+' câu đúng)</h2><p>Phần tự luận gồm '+(done.questions.length-objective.length)+' câu, cần giáo viên chấm riêng; đây chưa phải điểm tổng kết.</p><button id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+done.questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(q.examType==='essay'?'Gợi ý: '+(q.answerText||'Xem hướng dẫn') : I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+'</section>';host.querySelector("#back").onclick=list;
+ async function saveStandaloneResult(done,correct,total,score){
+  const sb=window.SupabaseApp;
+  await sb.ready();
+  const token=(await sb.client.auth.getSession()).data?.session?.access_token;
+  if(!token)throw new Error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+  const data={clientSubmissionId:done.trackingId,title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total,score,durationSec:Math.max(0,Math.floor((Date.now()-done.started)/1000)),wrongQuestionIds:done.questions.filter(q=>!I.isCorrect(q,done.answers[q.id])).map(q=>q.id).slice(0,200)};
+  const r=await fetch("/api/results",{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify(data)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error||"Không lưu được điểm lên PostgreSQL");
+  if(j.source!=="postgres")throw new Error("Điểm chưa được xác nhận trong PostgreSQL");
+  return j;
+ }
+ async function finish(auto){
+  if(!exam)return;
+  persistAnswer();stop();const done=exam;exam=null;
+  const objective=done.questions;
+  const correct=objective.filter(q=>I.isCorrect(q,done.answers[q.id])).length;
+  const score=objective.length?Math.round(correct/objective.length*100):0;
+  const total=objective.length;
+  try{
+   const old=JSON.parse(localStorage.getItem("bt_results")||"[]");
+   old.push({id:Date.now(),title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total,score,points:0,gradingStatus:"self_reported_auto_checked",durationSec:Math.round((Date.now()-done.started)/1000),date:new Date().toLocaleDateString("vi-VN")});
+   localStorage.setItem("bt_results",JSON.stringify(old));
+  }catch{}
+  host.innerHTML='<section class="panel"><h1>Đang gửi bài lên server…</h1><p>Vui lòng đợi xác nhận lưu vào PostgreSQL.</p></section>';
+  const sync=async()=>{
+   let resultSaved=false,sessionSaved=false,problems=[];
+   try{await saveStandaloneResult(done,correct,total||1,score);resultSaved=true}catch(e){problems.push("Kết quả: "+e.message)}
+   try{sessionSaved=await window.ExamTracking.submit(done);if(!sessionSaved)problems.push("Thời điểm nộp: "+(done.trackingError||"Chưa lưu"))}catch(e){problems.push("Thời điểm nộp: "+e.message)}
+   const confirmed=resultSaved&&sessionSaved;
+   host.innerHTML='<section class="panel"><h1>'+(confirmed?(auto?"Hết giờ – đã ghi nhận nộp bài":"Đã nộp bài lên PostgreSQL!"):"⚠️ Bài chưa được lưu đầy đủ trên server")+'</h1><h2>Điểm tự kiểm tra: '+score+'% ('+correct+'/'+total+' câu đúng)</h2><p>Cả 30 câu, bao gồm trả lời ngắn, đều được đối chiếu đáp án tự động. Đây là kết quả tự báo cáo, chưa phải điểm đã được giáo viên xác minh.</p>'+
+    (confirmed?'<p>Admin có thể xem kết quả trong mục Chấm bài → Kết quả bài kiểm tra.</p>':'<p role="alert">Đã lưu một bản trên thiết bị này. '+esc(problems.join(". "))+'</p><button id="retrySubmit" type="button">↻ Thử đồng bộ lại bài nộp</button>')+
+    '<button id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+
+    done.questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+'</section>';
+   host.querySelector("#back").onclick=list;
+   const retry=host.querySelector("#retrySubmit");if(retry)retry.onclick=()=>{retry.disabled=true;host.innerHTML='<section class="panel">Đang thử đồng bộ lại…</section>';void sync()};
+  };
+  await sync();
  }
  try{list();}catch(e){err(e);}
 })();
