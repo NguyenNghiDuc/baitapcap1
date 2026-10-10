@@ -80,18 +80,45 @@ window.TermExamBank=(()=>{
  function currentStage(date=new Date()){const m=date.getMonth()+1;if(m>=9&&m<=10)return {semester:1,stage:0};if(m===11)return {semester:1,stage:1};if(m===12||m===1)return {semester:1,stage:2};if(m>=2&&m<=3)return {semester:2,stage:0};if(m===4)return {semester:2,stage:1};return {semester:2,stage:2}}
  function daily(grade=4,subject="math",date=new Date()){const x=currentStage(date),day=date.toISOString().slice(0,10),info=subjectInfo[subject],exam={id:`daily-g${grade}-${subject}-${day}`,grade,subject,semester:x.semester,stage:x.stage,variant:1,title:`Ôn ${info.name} hằng ngày • Lớp ${grade} • ${day}`,time:45,daily:true};return {...exam,questions:build(exam,day)}}
  function questions(id){const e=exams.find(x=>x.id===id);return e?build(e):[]}
+ let activeTimeResolver=null;
+ const TERM_PAGE_SIZE=24;
+ function termCard(e){
+  const info=subjectInfo[e.subject],duration=activeTimeResolver?activeTimeResolver(e):e.time;
+  return `<article class="test-card term-exam" data-subject="${e.subject}" data-grade="${e.grade}" data-semester="${e.semester}" data-stage="${e.stage}"><div class="test-top"><span class="subject-icon mini blue">${info.icon}</span><span class="badge">${info.badge} • HK${e.semester}</span></div><h3>${e.title}</h3><p>30 câu ${info.name} • <span data-exam-duration>${duration} phút</span> • không trộn môn</p><div class="test-meta"><span>✅ A/B/C/D</span><span>↔ Nối</span>${e.subject==="math"?'<span>📐 Hình học theo kỳ</span>':""}</div><button class="primary full" data-term-exam="${e.id}">Bắt đầu</button></article>`;
+ }
  function render(timeResolver){
+  activeTimeResolver=timeResolver||null;
   const dailyCards=[4,5].flatMap(grade=>subjects.map(subject=>daily(grade,subject)));
-  return `<section class="page-head"><span class="eyebrow">BÀI KIỂM TRA</span><h1>📝 Kiểm tra theo môn, học kỳ & ôn hằng ngày</h1><p>Đề được tách riêng từng môn. Đề Toán chỉ có Toán, Tiếng Việt chỉ có Tiếng Việt, Tiếng Anh chỉ có Tiếng Anh.</p></section>
+  const termOnly=exams.filter(e=>!e.dailySet);
+  return `<section class="page-head"><span class="eyebrow">BÀI KIỂM TRA</span><h1>📝 Kiểm tra theo môn, học kỳ & ôn hằng ngày</h1><p>Đề được tách theo từng môn và phân trang để tải nhanh trên điện thoại.</p></section>
   <div class="cards-3">${dailyCards.map(e=>{const info=subjectInfo[e.subject];return `<article class="test-card daily-exam"><h3>${info.icon} ${info.name} hôm nay — Lớp ${e.grade}</h3><p>Ôn đúng môn ${info.name} • <span data-exam-duration>${timeResolver?timeResolver(e):e.time} phút</span>.</p><button class="primary full" data-daily-grade="${e.grade}" data-daily-subject="${e.subject}">Làm đề ${info.name}</button></article>`}).join("")}</div>
   <section class="filterbar"><select id="termSubject"><option value="">Tất cả môn</option><option value="math">Toán</option><option value="vietnamese">Tiếng Việt</option><option value="english">Tiếng Anh</option></select><select id="termGrade"><option value="">Lớp 4 & 5</option><option value="4">Lớp 4</option><option value="5">Lớp 5</option></select><select id="termSemester"><option value="">Cả HK1 & HK2</option><option value="1">Học kỳ 1</option><option value="2">Học kỳ 2</option></select><select id="termStage"><option value="">Tất cả mốc</option><option value="0">Đầu kỳ</option><option value="1">Giữa kỳ</option><option value="2">Cuối kỳ</option></select></section>
-  <div id="termExamGrid" class="cards-3">${exams.map(e=>{const info=subjectInfo[e.subject];return `<article class="test-card term-exam" data-subject="${e.subject}" data-grade="${e.grade}" data-semester="${e.semester}" data-stage="${e.stage}"><div class="test-top"><span class="subject-icon mini blue">${info.icon}</span><span class="badge">${info.badge} • HK${e.semester}</span></div><h3>${e.title}</h3><p>30 câu ${info.name} • <span data-exam-duration>${timeResolver?timeResolver(e):e.time} phút</span> • không trộn môn</p><div class="test-meta"><span>✅ A/B/C/D</span><span>↔ Nối</span>${e.subject==="math"?'<span>📐 Hình học</span>':""}</div><button class="primary full" data-term-exam="${e.id}">Bắt đầu</button></article>`}).join("")}</div>`
+  <p class="muted" id="termExamCount">Có ${termOnly.length} đề theo học kỳ</p>
+  <div id="termExamGrid" class="cards-3">${termOnly.slice(0,TERM_PAGE_SIZE).map(termCard).join("")}</div>
+  <div class="exam-pagination" id="termExamPager"><button type="button" class="outline" id="termPrevPage" disabled>← Trước</button><span id="termPageLabel">Trang 1/${Math.ceil(termOnly.length/TERM_PAGE_SIZE)}</span><button type="button" class="outline" id="termNextPage">Tiếp →</button></div>`;
  }
  function bind(startCustom){
-  document.querySelectorAll("[data-term-exam]").forEach(b=>b.onclick=()=>{const e=exams.find(x=>x.id===b.dataset.termExam);startCustom(questions(e.id),e.title,{examId:e.id,time:e.time,termExam:true,subject:e.subject,grade:e.grade})});
   document.querySelectorAll("[data-daily-grade]").forEach(b=>{b.onclick=()=>{const e=daily(Number(b.dataset.dailyGrade),b.dataset.dailySubject);startCustom(e.questions,e.title,{examId:e.id,time:e.time,daily:true,subject:e.subject,grade:e.grade})}});
-  const filter=()=>{const sub=document.querySelector("#termSubject")?.value,g=document.querySelector("#termGrade")?.value,s=document.querySelector("#termSemester")?.value,p=document.querySelector("#termStage")?.value;document.querySelectorAll(".term-exam").forEach(c=>c.style.display=(!sub||c.dataset.subject===sub)&&(!g||c.dataset.grade===g)&&(!s||c.dataset.semester===s)&&(!p||c.dataset.stage===p)?"":"none")};
-  ["termSubject","termGrade","termSemester","termStage"].forEach(id=>document.querySelector("#"+id)?.addEventListener("change",filter));
+  const grid=document.querySelector("#termExamGrid");
+  if(!grid)return;
+  grid.onclick=event=>{const button=event.target.closest("[data-term-exam]");if(!button)return;const e=exams.find(x=>x.id===button.dataset.termExam);if(e)startCustom(questions(e.id),e.title,{examId:e.id,time:e.time,termExam:true,subject:e.subject,grade:e.grade})};
+  let page=0;
+  const filter=()=>{
+   const sub=document.querySelector("#termSubject")?.value,g=document.querySelector("#termGrade")?.value,s=document.querySelector("#termSemester")?.value,stage=document.querySelector("#termStage")?.value;
+   return exams.filter(e=>!e.dailySet&&(!sub||e.subject===sub)&&(!g||String(e.grade)===g)&&(!s||String(e.semester)===s)&&(!stage||String(e.stage)===stage));
+  };
+  const show=()=>{
+   const list=filter(),totalPages=Math.max(1,Math.ceil(list.length/TERM_PAGE_SIZE));page=Math.max(0,Math.min(page,totalPages-1));
+   grid.innerHTML=list.slice(page*TERM_PAGE_SIZE,(page+1)*TERM_PAGE_SIZE).map(termCard).join("")||'<p>Không có đề phù hợp bộ lọc.</p>';
+   document.querySelector("#termPageLabel").textContent="Trang "+(page+1)+"/"+totalPages;
+   document.querySelector("#termExamCount").textContent="Có "+list.length+" đề theo bộ lọc";
+   document.querySelector("#termPrevPage").disabled=page===0;
+   document.querySelector("#termNextPage").disabled=page>=totalPages-1;
+  };
+  for(const id of ["termSubject","termGrade","termSemester","termStage"])document.querySelector("#"+id)?.addEventListener("change",()=>{page=0;show()});
+  document.querySelector("#termPrevPage")?.addEventListener("click",()=>{page--;show()});
+  document.querySelector("#termNextPage")?.addEventListener("click",()=>{page++;show()});
+  show();
  }
  return {exams,scopes,subjectTypes,subjectInfo,build,questions,daily,render,bind};
 })();
