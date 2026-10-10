@@ -95,7 +95,12 @@ async function api(req,res,p,ip){
   if(!u||!verifyPassword(String(d.password||""),u.password)){
    if(!rate(ip+":"+email,"login-failed",8,60e3))return send(res,429,{error:"Quá nhiều lần đăng nhập sai"});
    return send(res,401,{error:"Sai email hoặc mật khẩu"});
-  }if(u.locked)return send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."});if(u.totpSecret&&!verifyTotp(u.totpSecret,d.otp))return send(res,401,{error:"Cần mã 2FA hợp lệ",requires2fa:true});
+  }
+  if(process.env.DATABASE_URL){
+   try{const access=await pgStore.getUserAccess(u.id);if(!access)return send(res,503,{error:"Tài khoản chưa đồng bộ PostgreSQL"});u.locked=!!access.locked;u.role=access.role}
+   catch(e){safeMonitorError("login_access_failed",{message:e.message});return send(res,503,{error:"Không kiểm tra được trạng thái tài khoản"})}
+  }
+  if(u.locked)return send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."});if(u.totpSecret&&!verifyTotp(u.totpSecret,d.otp))return send(res,401,{error:"Cần mã 2FA hợp lệ",requires2fa:true});
   const t=crypto.randomBytes(32).toString("hex");await sessionStore.set(t,{uid:u.id,exp:Date.now()+TOKEN_TTL},TOKEN_TTL);audit(db,u,"login");loginDevices.record(db,u,req);save(db);return send(res,200,{token:t,user:safeUser(u)})}
  if(req.method==="POST"&&p==="/api/logout"){await sessionStore.del(token(req));return send(res,200,{ok:true})}
  if(req.method==="GET"&&p==="/api/me"){const u=await requireUser(req,res);if(!u)return;return send(res,200,{user:safeUser(u)})}
