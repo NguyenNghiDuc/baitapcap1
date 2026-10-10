@@ -135,8 +135,25 @@ async function api(req,res,p,ip){
    catch{return send(res,503,{error:"Không lưu được bài giao vào PostgreSQL"})}
   }
   db.assignments.push(a);audit(db,u,"assignment_created",{assignmentId:a.id});save(db);return send(res,201,{assignment:a})}
- const sub=routeMatch(p,"/api/assignments/:id/submit");if(req.method==="POST"&&sub){const u=await requireUser(req,res,["student"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),a=db.assignments.find(x=>x.id===sub.id);if(!a)return send(res,404,{error:"Không tìm thấy bài giao"});if(!db.classes.some(c=>c.id===a.classId&&c.studentIds?.includes(u.id)))return send(res,403,{error:"Học sinh không thuộc lớp được giao bài"});const attempts=db.submissions.filter(s=>s.assignmentId===a.id&&s.studentId===u.id).length;if(attempts>=a.maxAttempts)return send(res,409,{error:"Đã hết số lần nộp"});const s={id:id(),assignmentId:a.id,studentId:u.id,answers:(d.answers&&typeof d.answers==="object"&&!Array.isArray(d.answers)?d.answers:{}),score:null,gradingStatus:"pending",feedback:"",submittedAt:new Date().toISOString()};db.submissions.push(s);audit(db,u,"assignment_submitted",{assignmentId:a.id,gradingStatus:"pending"});save(db);return send(res,201,{submission:s})}
- const grade=routeMatch(p,"/api/submissions/:id/grade");if(req.method==="PATCH"&&grade){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),s=db.submissions.find(x=>x.id===grade.id);if(!s)return send(res,404,{error:"Không tìm thấy bài nộp"});if(u.role==="teacher"&&!db.assignments.some(a=>a.id===s.assignmentId&&a.teacherId===u.id))return send(res,403,{error:"Không được chấm bài giáo viên khác"});if(!Number.isFinite(Number(d.score))||Number(d.score)<0||Number(d.score)>100)return send(res,400,{error:"Điểm phải nằm trong khoảng 0–100"});s.score=Number(d.score);s.gradingStatus="teacher_graded";s.feedback=String(d.feedback||"");s.gradedAt=new Date().toISOString();audit(db,u,"submission_graded",{submissionId:s.id,score:s.score});save(db);return send(res,200,{submission:s})}
+ const sub=routeMatch(p,"/api/assignments/:id/submit");if(req.method==="POST"&&sub){const u=await requireUser(req,res,["student"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}if(process.env.DATABASE_URL){
+   const answers=d.answers&&typeof d.answers==="object"&&!Array.isArray(d.answers)?d.answers:{};
+   try{
+    const submission=await pgStore.submitAssignmentFor(u.id,sub.id,answers);
+    if(!submission)return send(res,409,{error:"Không thể nộp: bài không được giao cho em, đã hết số lần nộp hoặc bài vừa được nộp trên thiết bị khác"});
+    return send(res,201,{submission,source:"postgres"});
+   }catch(e){safeMonitorError("assignment_submission_pg_failed",{message:e.message});return send(res,503,{error:"Không lưu được bài giáo viên giao lên PostgreSQL"})}
+  }
+  const db=load(),a=db.assignments.find(x=>x.id===sub.id);if(!a)return send(res,404,{error:"Không tìm thấy bài giao"});if(!db.classes.some(c=>c.id===a.classId&&c.studentIds?.includes(u.id)))return send(res,403,{error:"Học sinh không thuộc lớp được giao bài"});const attempts=db.submissions.filter(s=>s.assignmentId===a.id&&s.studentId===u.id).length;if(attempts>=a.maxAttempts)return send(res,409,{error:"Đã hết số lần nộp"});const s={id:id(),assignmentId:a.id,studentId:u.id,answers:(d.answers&&typeof d.answers==="object"&&!Array.isArray(d.answers)?d.answers:{}),score:null,gradingStatus:"pending",feedback:"",submittedAt:new Date().toISOString()};db.submissions.push(s);audit(db,u,"assignment_submitted",{assignmentId:a.id,gradingStatus:"pending"});save(db);return send(res,201,{submission:s})}
+ const grade=routeMatch(p,"/api/submissions/:id/grade");if(req.method==="PATCH"&&grade){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}if(process.env.DATABASE_URL){
+   const points=Number(d.score),comment=String(d.feedback||"").slice(0,4000);
+   if(!Number.isFinite(points)||points<0||points>100)return send(res,400,{error:"Điểm phải từ 0 đến 100"});
+   try{
+    const graded=await pgStore.gradeSubmissionFor(u,grade.id,points,comment);
+    if(!graded)return send(res,404,{error:"Không tìm thấy bài nộp hoặc không có quyền chấm"});
+    return send(res,200,{submission:graded,source:"postgres"});
+   }catch(e){safeMonitorError("assignment_grading_pg_failed",{message:e.message});return send(res,503,{error:"Không lưu được điểm chấm trong PostgreSQL"})}
+  }
+  const db=load(),s=db.submissions.find(x=>x.id===grade.id);if(!s)return send(res,404,{error:"Không tìm thấy bài nộp"});if(u.role==="teacher"&&!db.assignments.some(a=>a.id===s.assignmentId&&a.teacherId===u.id))return send(res,403,{error:"Không được chấm bài giáo viên khác"});if(!Number.isFinite(Number(d.score))||Number(d.score)<0||Number(d.score)>100)return send(res,400,{error:"Điểm phải nằm trong khoảng 0–100"});s.score=Number(d.score);s.gradingStatus="teacher_graded";s.feedback=String(d.feedback||"");s.gradedAt=new Date().toISOString();audit(db,u,"submission_graded",{submissionId:s.id,score:s.score});save(db);return send(res,200,{submission:s})}
 
  if(req.method==="GET"&&p==="/api/results"){
   const u=await requireUser(req,res);if(!u)return;
