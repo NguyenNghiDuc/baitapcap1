@@ -15,6 +15,16 @@ Nhánh: `feat/real-data-security-20261010`. **Chưa deploy Vercel Production và
 | 9 | Quyền riêng tư | RLS ngăn tài khoản bị khóa, avatar private, IP chỉ chính chủ; export từ bảng PostgreSQL | Xóa tài khoản đa nguồn chưa được bảo đảm atomic, cần quy trình kiểm chứng, backup vùng riêng và chính sách retention |
 | 10 | Giám sát Admin | `#systemMonitor`: tổng tài khoản, khóa, kết quả, hoạt động 7 ngày, lỗi 24h, nhật ký, bản backup đã ghi | Cần xác nhận quyền, giám sát alert thực tế và lịch sao lưu trong Production |
 
+## Admin: xem điểm học sinh
+
+- Vào **Quản trị → Bảng điểm** (route `#adminGrades`). Tính năng chỉ hiển thị cho Admin và API `GET /api/real/admin/grades` bắt buộc quyền Admin ở server.
+- Bảng điểm đọc trực tiếp từ `results` JOIN `users` trong PostgreSQL, không dùng bảng điểm mẫu, không đọc toàn bộ danh sách vào trình duyệt. Mỗi lần tải tối đa 25 kết quả.
+- Có lọc tên học sinh, lớp 1–5, môn học, trạng thái đã xác minh/chưa xác minh; phân trang.
+- Mỗi dòng hiện học sinh, lớp, môn, bài, điểm /100, số câu đúng/tổng, thời gian, **trạng thái xác minh**.
+- Điểm học sinh tự nộp hiện **Chưa xác minh**. Không tự đổi nhãn thành điểm chính thức, không cho sửa điểm từ giao diện xem này.
+- Nếu chưa cấu hình PostgreSQL hoặc chưa chạy migration, trang báo lỗi thay vì hiển thị dữ liệu giả.
+- Kết quả học sinh là dữ liệu nhạy cảm: chỉ Admin được phân quyền xem, không có URL công khai không xác thực.
+
 ## Cấu hình bắt buộc cho dữ liệu thật
 
 1. Supabase PostgreSQL: đặt `DATABASE_URL` an toàn trong **Vercel Environment Variables**. Không dán URL có mật khẩu lên GitHub/chat.
