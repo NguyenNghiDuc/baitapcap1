@@ -1,6 +1,6 @@
 const fs=require("fs"),path=require("path"),crypto=require("crypto"),cache=require("../lib/cache");
 module.exports=async function handleStudent(req,res,p,ctx){
- const {send,parseBody,requireUser,load,save,ROOT}=ctx;
+ const {send,parseBody,requireUser,load,save,ROOT,pg}=ctx;
  if(req.method==="GET"&&p==="/api/student/leaderboard"){
   const u=await requireUser(req,res);if(!u)return true;
   const key="leaderboard:g"+(u.grade||"all"),rows=await cache.remember(key,30000,async()=>{const db=load(),scores=new Map();
@@ -10,13 +10,23 @@ module.exports=async function handleStudent(req,res,p,ctx){
   return send(res,200,{leaderboard:rows,cached:true}),true;
  }
  if(req.method==="GET"&&p==="/api/student/sync"){
-  const u=await requireUser(req,res,["student"]);if(!u)return true;const db=load();
-  return send(res,200,{sync:u.studentSync||{goals:null,notes:[],bookmarks:[],vocab:[],schedule:[],wrong:[]},updatedAt:u.studentSyncUpdatedAt||null}),true;
+  const u=await requireUser(req,res,["student"]);if(!u)return true;
+  if(process.env.DATABASE_URL){
+   try{const row=await pg.getStudentSync(u.id);if(!row)return send(res,503,{error:"Tài khoản chưa được đồng bộ PostgreSQL"}),true;
+    return send(res,200,{sync:row.student_sync||{goals:null,notes:[],bookmarks:[],vocab:[],schedule:[],wrong:[]},updatedAt:row.student_sync_updated_at||null,source:"postgres"}),true
+   }catch{return send(res,503,{error:"Không tải được tiến độ từ PostgreSQL"}),true}
+  }
+  return send(res,200,{sync:u.studentSync||{goals:null,notes:[],bookmarks:[],vocab:[],schedule:[],wrong:[]},updatedAt:u.studentSyncUpdatedAt||null,source:"local"}),true;
  }
  if(req.method==="POST"&&p==="/api/student/sync"){
   const u=await requireUser(req,res,["student"]);if(!u)return true;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
   const db=load(),x=db.users.find(v=>v.id===u.id),sync={goals:d.goals||null,notes:Array.isArray(d.notes)?d.notes.slice(0,200):[],bookmarks:Array.isArray(d.bookmarks)?d.bookmarks.slice(0,500):[],vocab:Array.isArray(d.vocab)?d.vocab.slice(0,500):[],schedule:Array.isArray(d.schedule)?d.schedule.slice(0,200):[],wrong:Array.isArray(d.wrong)?d.wrong.slice(-500):[]};
-  x.studentSync=sync;x.studentSyncUpdatedAt=new Date().toISOString();save(db);return send(res,200,{ok:true,updatedAt:x.studentSyncUpdatedAt}),true;
+  if(process.env.DATABASE_URL){
+   try{const saved=await pg.saveStudentSync(u.id,sync);if(!saved)return send(res,503,{error:"Không tìm thấy tài khoản trong PostgreSQL"}),true}
+   catch{return send(res,503,{error:"Không lưu được tiến độ thật vào PostgreSQL"}),true}
+  }
+  x.studentSync=sync;x.studentSyncUpdatedAt=new Date().toISOString();save(db);
+  return send(res,200,{ok:true,updatedAt:x.studentSyncUpdatedAt,source:process.env.DATABASE_URL?"postgres":"local"}),true;
  }
  if(req.method==="POST"&&p==="/api/student/handwriting"){
   const u=await requireUser(req,res,["student"]);if(!u)return true;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
