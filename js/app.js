@@ -92,10 +92,28 @@ async function submissions(){
    selfReported='<section class="panel"><h3>📝 Kết quả bài kiểm tra học sinh tự làm</h3><p class="muted">Lấy từ PostgreSQL. Điểm tự báo cáo không phải điểm giáo viên chấm. Xem đầy đủ tại <a href="#adminGrades">Bảng điểm Admin</a>.</p><div class="list-card">'+(rows||'<div class="empty">Chưa có kết quả kiểm tra nào được lưu lên PostgreSQL.</div>')+'</div></section>';
   }catch(e){selfReported='<section class="panel"><h3>📝 Kết quả bài kiểm tra tự làm</h3><p class="muted" role="alert">Chưa đọc được PostgreSQL: '+esc(e.message)+'. Không thể kết luận là học sinh chưa nộp.</p></section>'}
  }
+ let liveMonitoring="";
+ if(state.user.role==="admin"){
+  try{
+   const monitoring=await API.get("/api/real/admin/exam-sessions?page=1");
+   if(monitoring.source!=="postgres")throw new Error("Không có dữ liệu PostgreSQL");
+   const offset=Date.parse(monitoring.serverNow)-Date.now();
+   const statusNames={active:"🟢 Đang làm",disconnected:"🟠 Mất kết nối",expired:"🔴 Hết giờ, chưa nộp",submitted:"✅ Đã nộp"};
+   const items=monitoring.items.map(v=>{
+    const began=v.startedAt?new Date(v.startedAt).toLocaleString("vi-VN"):"Không xác định";
+    const due=v.dueAt?new Date(v.dueAt).toLocaleString("vi-VN"):"Không xác định";
+    const last=v.lastSeenAt?new Date(v.lastSeenAt).toLocaleString("vi-VN"):"Không xác định";
+    const submitted=v.submittedAt?new Date(v.submittedAt).toLocaleString("vi-VN"):"Chưa có";
+    const remaining=v.submittedAt?"Đã nộp":v.status==="expired"?"Hết giờ":'<span class="live-submission-countdown" data-exam-due="'+esc(v.dueAt||"")+'" data-server-offset="'+(Number.isFinite(offset)?offset:0)+'">Đang tính…</span>';
+    return '<article class="live-submission-card"><div><b>'+esc(v.studentName||"Học sinh")+'</b><span>'+esc(v.title||"Bài kiểm tra")+' • Lớp '+esc(v.grade||"—")+'</span></div><div><span class="live-exam-status">'+esc(statusNames[v.status]||v.status)+'</span><strong>'+remaining+'</strong></div><div><small>Bắt đầu: '+esc(began)+'</small><small>Hạn nộp: '+esc(due)+'</small><small>Đã trả lời: '+esc(v.answeredCount||0)+'/'+esc(v.totalQuestions||0)+' câu</small><small>Lần kết nối: '+esc(last)+'</small><small>Nộp bài: '+esc(submitted)+'</small></div></article>';
+   }).join("");
+   liveMonitoring='<section class="panel"><div class="admin-live-head"><div><h3>⏱ Học sinh đang làm bài / đã nộp</h3><p class="muted">Dữ liệu theo thời gian server. Mất kết nối không có nghĩa học sinh đã thoát; trạng thái cập nhật khi tải lại.</p></div><button id="refreshSubmissions" type="button" class="outline">↻ Cập nhật</button></div><div class="admin-live-grid">'+(items||'<div class="empty">Chưa có phiên làm bài nào được ghi vào PostgreSQL.</div>')+'</div><p class="muted">Hiển thị tối đa 25 phiên gần nhất. Giờ nộp chỉ hiện sau khi server xác nhận lưu kết quả.</p></section>';
+  }catch(e){liveMonitoring='<section class="panel"><h3>⏱ Theo dõi bài đang làm</h3><p role="alert">Chưa tải được dữ liệu phiên làm bài từ PostgreSQL: '+esc(e.message)+'</p></section>'}
+ }
  return pageHead("CHẤM BÀI","Bài học sinh đã nộp","Phân biệt bài giáo viên giao và bài kiểm tra học sinh tự làm.")+
  '<section class="panel"><h3>📨 Bài giáo viên giao</h3><p class="muted">Chỉ bao gồm bài được giao cho lớp, không bao gồm bài kiểm tra tự chọn.</p>'+
  window.PerfLists.controls("submissions",j.pagination,{placeholder:"Tìm học sinh hoặc bài..."})+
- '<div class="list-card">'+(assigned||'<div class="empty">Chưa có bài được giao nào đã nộp.</div>')+'</div></section>'+selfReported;
+ '<div class="list-card">'+(assigned||'<div class="empty">Chưa có bài được giao nào đã nộp.</div>')+'</div></section>'+liveMonitoring+selfReported;
 }
 async function premium(){return window.DemoWallet?.render?.()||errorBox("Không tải được Ví demo")}
 
@@ -235,6 +253,18 @@ function bind(){
   window.AuthUI.open("register");
  });
  window.PerfLists?.bind?.(state.route,render);
+ if(window._btSubmissionTimer){clearInterval(window._btSubmissionTimer);window._btSubmissionTimer=null}
+ if(state.route==="submissions"){
+  const refresh=()=>render();
+  $("#refreshSubmissions")?.addEventListener("click",refresh);
+  const tick=()=>$(".live-submission-countdown").forEach(el=>{
+   const due=Date.parse(el.dataset.examDue),offset=Number(el.dataset.serverOffset)||0;
+   if(!Number.isFinite(due)){el.textContent="Không xác định";return}
+   const sec=Math.max(0,Math.ceil((due-Date.now()-offset)/1000));
+   el.textContent=sec===0?"Hết giờ":Math.floor(sec/3600)+" giờ "+String(Math.floor(sec%3600/60)).padStart(2,"0")+" phút "+String(sec%60).padStart(2,"0")+" giây";
+  });
+  tick();window._btSubmissionTimer=setInterval(tick,1000);
+ }
  $$("[data-route]").forEach(x=>x.onclick=()=>nav(x.dataset.route));$$("[data-subject]").forEach(x=>x.onclick=()=>{state.subjectFilter=x.dataset.subject;nav("subjects")});$$("[data-fav]").forEach(x=>x.onclick=()=>{const id=Number(x.dataset.fav);state.favorites=state.favorites.includes(id)?state.favorites.filter(a=>a!==id):[...state.favorites,id];saveLocal();render()});$$("[data-start]").forEach(x=>x.onclick=()=>startQuiz(x.dataset.start,Number(x.dataset.grade),null,x.dataset.lesson||""));$("#openLogin")?.addEventListener("click",openAuth);
  if(state.route==="tests")window.TermExamBank?.bind?.(startCustom);
  $("#globalSearchBtn")?.addEventListener("click",()=>{const q=$("#globalSearch").value;nav("subjects");setTimeout(()=>{$("#lessonSearch").value=q;filterLessons()},20)});$$(".quick-grades [data-grade]").forEach(x=>x.onclick=()=>{nav("subjects");setTimeout(()=>{$("#gradeFilter").value=x.dataset.grade;filterLessons()},20)});
