@@ -128,8 +128,32 @@ async function api(req,res,p,ip){
 
  if(req.method==="GET"&&p==="/api/analytics"){const u=await requireUser(req,res);if(!u)return;const db=load();let rs=db.results;if(u.role==="student")rs=rs.filter(r=>r.userId===u.id);if(u.role==="parent")rs=rs.filter(r=>u.children?.includes(r.userId));if(u.role==="teacher")rs=rs.filter(r=>db.classes.some(c=>c.teacherId===u.id&&c.studentIds?.includes(r.userId)));const bySubject={};for(const r of rs){const k=r.subject||"other";bySubject[k]??={count:0,sum:0,wrong:0};bySubject[k].count++;bySubject[k].sum+=r.score;bySubject[k].wrong+=Math.max(0,(r.total||0)-(r.correct||0))}const subjects=Object.entries(bySubject).map(([id,v])=>({id,name:subjectName(id),attempts:v.count,avg:Math.round(v.sum/v.count),wrong:v.wrong})).sort((a,b)=>a.avg-b.avg);return send(res,200,{totalAttempts:rs.length,average:rs.length?Math.round(rs.reduce((a,b)=>a+b.score,0)/rs.length):0,totalMinutes:Math.round(rs.reduce((a,b)=>a+(b.durationSec||0),0)/60),subjects,weakest:subjects[0]||null})}
 
- if(req.method==="GET"&&p==="/api/notifications"){const u=await requireUser(req,res);if(!u)return;const db=load(),base=db.notifications.filter(n=>!n.userId||n.userId===u.id),pg=pageList(base,req,{searchFn:n=>(n.title||"")+" "+(n.message||"")});return send(res,200,{notifications:pg.items,pagination:pg.pagination})}
- if(req.method==="POST"&&p==="/api/notifications"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),n={id:id(),userId:d.userId||null,title:String(d.title||"Thông báo"),message:String(d.message||""),createdAt:new Date().toISOString()};db.notifications.unshift(n);audit(db,u,"notification_created");save(db);return send(res,201,{notification:n})}
+ if(req.method==="GET"&&p==="/api/notifications"){
+  const u=await requireUser(req,res);if(!u)return;
+  if(process.env.DATABASE_URL){
+   try{const list=await pgStore.listNotifications(u.id);const pged=pageList(list,req,{searchFn:n=>(n.title||"")+" "+(n.message||"")});return send(res,200,{notifications:pged.items,pagination:pged.pagination,source:"postgres"})}
+   catch(e){return send(res,503,{error:"Không truy vấn được thông báo thật"})}
+  }
+  const db=load(),base=db.notifications.filter(n=>!n.userId||n.userId===u.id),pg=pageList(base,req,{searchFn:n=>(n.title||"")+" "+(n.message||"")});
+  return send(res,200,{notifications:pg.items,pagination:pg.pagination,source:"local"});
+ }
+ if(req.method==="POST"&&p==="/api/notifications"){
+  const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;
+  let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
+  const title=String(d.title||"Thông báo").trim().slice(0,160),message=String(d.message||"").trim().slice(0,2000);
+  if(!message)return send(res,400,{error:"Nội dung thông báo không được để trống"});
+  const db=load(),n={id:id(),userId:d.userId||null,title,message,createdAt:new Date().toISOString()};
+  if(process.env.DATABASE_URL){
+   try{
+    const recipients=await pgStore.createNotification(u,n);
+    audit(db,u,"notification_created",{recipients});
+    save(db);
+    return send(res,201,{notification:n,recipients,source:"postgres"});
+   }catch(e){return send(res,403,{error:String(e.message).slice(0,180)})}
+  }
+  db.notifications.unshift(n);audit(db,u,"notification_created");save(db);
+  return send(res,201,{notification:n,source:"local"});
+ }
 
  if(req.method==="POST"&&p==="/api/upload"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const m=String(d.dataUrl||"").match(/^data:(application\/pdf|image\/(?:png|jpeg)|audio\/(?:mpeg|wav));base64,(.+)$/);if(!m)return send(res,400,{error:"Chỉ hỗ trợ PDF, PNG, JPEG, MP3, WAV dạng base64"});const buf=Buffer.from(m[2],"base64");if(buf.length>5e6)return send(res,413,{error:"File tối đa 5MB"});fs.mkdirSync(UPLOAD_DIR,{recursive:true});const ext=({ "application/pdf":"pdf","image/png":"png","image/jpeg":"jpg","audio/mpeg":"mp3","audio/wav":"wav"})[m[1]],name=id()+"."+ext;fs.writeFileSync(path.join(UPLOAD_DIR,name),buf);const db=load(),mat={id:id(),title:String(d.title||name),url:"/uploads/"+name,type:m[1],ownerId:u.id,createdAt:new Date().toISOString()};db.materials.push(mat);audit(db,u,"material_uploaded",{materialId:mat.id});save(db);return send(res,201,{material:mat})}
 
