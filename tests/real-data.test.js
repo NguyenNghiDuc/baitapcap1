@@ -38,7 +38,7 @@ test("Admin monitoring requires Admin role and real database",async()=>{
  const x=request({url:"/api/real/admin/dashboard",role:"admin"});
  assert.equal((await run(x)).payload.stats.users.locked,2);
  const y=request({url:"/api/real/admin/dashboard",role:"student"});
- assert.equal(await route(y.req,y.res,y.url,y.ctx),true);assert.equal(y.result,null);
+ assert.equal((await run(y))===null,true);assert.equal(y.result,null);
  const noDb=request({url:"/api/real/me/activity"});
  const old=process.env.DATABASE_URL;delete process.env.DATABASE_URL;
  try{await route(noDb.req,noDb.res,noDb.url,noDb.ctx);assert.equal(noDb.result.status,503)}
