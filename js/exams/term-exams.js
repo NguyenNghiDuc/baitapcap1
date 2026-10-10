@@ -59,15 +59,23 @@ window.TermExamBank=(()=>{
  function build(exam,seedExtra=""){
   const seed=hash(exam.id+seedExtra),p=shuffle(pool(exam),seed);
   if(!p.length)return [];
-  const geo=exam.subject==="math"?shuffle((D.questions||[]).filter(q=>q.grade===exam.grade&&q.subject==="math"&&["geometry","perimeter","chart"].includes(q.type)),seed+9):[];
+  const scope=allowedTypes(exam);
+  const permittedGeometry=exam.subject==="math"&&scope.some(t=>["geometry","perimeter","chart"].includes(t));
+  const geo=permittedGeometry?shuffle(p.filter(q=>["geometry","perimeter","chart"].includes(q.type)),seed+9):[];
   const out=[];let n=0,idx=0,next=()=>p[(idx++)%p.length];
-  for(let i=0;i<18;i++){const q=next();out.push(cloneMcq(q,`${exam.id}-m${++n}`))}
-  for(let i=0;i<6;i++){const q=next();out.push(trueFalse(q,`${exam.id}-t${++n}`,i%2===0))}
-  for(let i=0;i<6;i++){
+  // Twenty-six scored question positions with distinct formats, plus essays and matching.
+  for(let i=0;i<18;i++){
+   const q=i===0&&geo.length?geo[0]:next();
+   out.push(cloneMcq(q,`${exam.id}-m${++n}`));
+  }
+  for(let i=0;i<5;i++){const q=next();out.push(trueFalse(q,`${exam.id}-t${++n}`,i%2===0))}
+  for(let i=0;i<3;i++){const q=next();out.push(fill(q,`${exam.id}-f${++n}`))}
+  for(let i=0;i<3;i++){
    const q=next(),answerText=String(q.options?.[q.answer]??"");
    out.push({...q,id:`${exam.id}-e${++n}`,subject:exam.subject,examType:"essay",q:q.q+" (Trình bày cách làm và giải thích đáp án.)",answerText,options:undefined,answer:undefined,explain:q.explain||""});
   }
-  return out.slice(0,30).map(q=>({...q,subject:exam.subject}));
+  out.push(matchQuestion(exam.grade,exam.subject,`${exam.id}-x${++n}`,seed+23));
+  return out.map(q=>({...q,subject:exam.subject}));
  }
  function currentStage(date=new Date()){const m=date.getMonth()+1;if(m>=9&&m<=10)return {semester:1,stage:0};if(m===11)return {semester:1,stage:1};if(m===12||m===1)return {semester:1,stage:2};if(m>=2&&m<=3)return {semester:2,stage:0};if(m===4)return {semester:2,stage:1};return {semester:2,stage:2}}
  function daily(grade=4,subject="math",date=new Date()){const x=currentStage(date),day=date.toISOString().slice(0,10),info=subjectInfo[subject],exam={id:`daily-g${grade}-${subject}-${day}`,grade,subject,semester:x.semester,stage:x.stage,variant:1,title:`Ôn ${info.name} hằng ngày • Lớp ${grade} • ${day}`,time:45,daily:true};return {...exam,questions:build(exam,day)}}
