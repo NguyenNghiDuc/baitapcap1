@@ -48,8 +48,12 @@ test("admin lock blocks active user APIs until account is unlocked",async()=>{
  assert.equal(userLogin.status,200);
  const studentToken=(await userLogin.json()).token;
  const list=await fetch(base+"/api/admin/users",{headers:{Authorization:"Bearer "+token}});
- const student=(await list.json()).users.find(u=>u.email==="hocsinh@demo.vn");
+ const users=(await list.json()).users;
+ const student=users.find(u=>u.email==="hocsinh@demo.vn");
  assert.ok(student?.id);
+ const owner=users.find(u=>u.email==="admin@demo.vn");
+ const selfLock=await fetch(base+"/api/admin/users/"+encodeURIComponent(owner.id),{method:"PATCH",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({locked:true})});
+ assert.equal(selfLock.status,403);
  const lock=await fetch(base+"/api/admin/users/"+encodeURIComponent(student.id),{method:"PATCH",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({locked:true,reason:"Kiểm tra khóa"})});
  assert.equal(lock.status,200);
  const blocked=await fetch(base+"/api/classes",{headers:{Authorization:"Bearer "+studentToken}});
