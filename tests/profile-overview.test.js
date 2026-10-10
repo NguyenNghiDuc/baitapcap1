@@ -34,3 +34,12 @@ test("profile update stores supported fields but not forged role or email",async
  assert.equal(r.db.users[0].role,"student");
  assert.equal(r.db.users[0].email,"student@example.test");
 });
+
+test("avatar path is restricted to the authenticated Supabase owner",async()=>{
+ const path="supa-1/avatar.jpg";
+ const bad=await call("/api/profile/avatar","PATCH",{path:"another-user/avatar.jpg"});
+ assert.equal(bad.status,400);
+ const own=await call("/api/profile/avatar","PATCH",{path});
+ assert.equal(own.status,200);
+ assert.equal(own.db.users[0].avatarPath,path);
+});
