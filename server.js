@@ -87,7 +87,7 @@ async function api(req,res,p,ip){
  if(await handleStorageMeta(req,res,p,{send,parseBody,requireUser,load,save,monitor,audit:auditStore}))return;
  if(await handleApp(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
  if(await handleExamSettings(req,res,p,{send,parseBody,requireUser,load,save,ROOT,audit:auditStore}))return;
- if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT}))return;
+ if(await handleStudent(req,res,p,{send,parseBody,requireUser,load,save,ROOT,pg:pgStore}))return;
  if(await require("./routes/demo-wallet")(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(req.method==="POST"&&p==="/api/register"){if(!rate(ip,"auth",10,10*60e3))return send(res,429,{error:"Thử lại sau"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
   const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),role=["student","parent"].includes(d.role)?d.role:"student";
@@ -123,7 +123,22 @@ async function api(req,res,p,ip){
  const sub=routeMatch(p,"/api/assignments/:id/submit");if(req.method==="POST"&&sub){const u=await requireUser(req,res,["student"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),a=db.assignments.find(x=>x.id===sub.id);if(!a)return send(res,404,{error:"Không tìm thấy bài giao"});if(!db.classes.some(c=>c.id===a.classId&&c.studentIds?.includes(u.id)))return send(res,403,{error:"Học sinh không thuộc lớp được giao bài"});const attempts=db.submissions.filter(s=>s.assignmentId===a.id&&s.studentId===u.id).length;if(attempts>=a.maxAttempts)return send(res,409,{error:"Đã hết số lần nộp"});const s={id:id(),assignmentId:a.id,studentId:u.id,answers:(d.answers&&typeof d.answers==="object"&&!Array.isArray(d.answers)?d.answers:{}),score:null,gradingStatus:"pending",feedback:"",submittedAt:new Date().toISOString()};db.submissions.push(s);audit(db,u,"assignment_submitted",{assignmentId:a.id,gradingStatus:"pending"});save(db);return send(res,201,{submission:s})}
  const grade=routeMatch(p,"/api/submissions/:id/grade");if(req.method==="PATCH"&&grade){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),s=db.submissions.find(x=>x.id===grade.id);if(!s)return send(res,404,{error:"Không tìm thấy bài nộp"});if(u.role==="teacher"&&!db.assignments.some(a=>a.id===s.assignmentId&&a.teacherId===u.id))return send(res,403,{error:"Không được chấm bài giáo viên khác"});if(!Number.isFinite(Number(d.score))||Number(d.score)<0||Number(d.score)>100)return send(res,400,{error:"Điểm phải nằm trong khoảng 0–100"});s.score=Number(d.score);s.gradingStatus="teacher_graded";s.feedback=String(d.feedback||"");s.gradedAt=new Date().toISOString();audit(db,u,"submission_graded",{submissionId:s.id,score:s.score});save(db);return send(res,200,{submission:s})}
 
- if(req.method==="GET"&&p==="/api/results"){const u=await requireUser(req,res);if(!u)return;const db=load(),q=url.parse(req.url,true).query||{};let list=db.results;if(u.role==="student")list=list.filter(r=>r.userId===u.id);if(u.role==="parent")list=list.filter(r=>u.children?.includes(r.userId));if(u.role==="teacher")list=list.filter(r=>db.classes.some(c=>c.teacherId===u.id&&c.studentIds?.includes(r.userId)));list=[...list].sort((a,b)=>new Date(b.createdAt||b.isoDate||0)-new Date(a.createdAt||a.isoDate||0));const limit=Math.max(1,Math.min(100,Number(q.limit)||50)),page=Math.max(1,Number(q.page)||1),total=list.length,start=(page-1)*limit,items=list.slice(start,start+limit);return send(res,200,{results:items,pagination:{page,limit,total,pages:Math.ceil(total/limit),hasMore:start+limit<total}})}
+ if(req.method==="GET"&&p==="/api/results"){
+  const u=await requireUser(req,res);if(!u)return;
+  const q=url.parse(req.url,true).query||{};
+  const limit=Math.max(1,Math.min(100,Number(q.limit)||50)),page=Math.max(1,Number(q.page)||1);
+  if(process.env.DATABASE_URL){
+   try{const j=await pgStore.listAuthorizedResults(u,page,limit);return send(res,200,{...j,source:"postgres"})}
+   catch(e){safeMonitorError("results_db_read_failed",{message:e.message});return send(res,503,{error:"Không truy vấn được kết quả học tập từ PostgreSQL"})}
+  }
+  const db=load();let list=db.results;
+  if(u.role==="student")list=list.filter(r=>r.userId===u.id);
+  if(u.role==="parent")list=list.filter(r=>u.children?.includes(r.userId));
+  if(u.role==="teacher")list=list.filter(r=>db.classes.some(c=>c.teacherId===u.id&&c.studentIds?.includes(r.userId)));
+  list=[...list].sort((a,b)=>new Date(b.createdAt||b.isoDate||0)-new Date(a.createdAt||a.isoDate||0));
+  const total=list.length,start=(page-1)*limit,items=list.slice(start,start+limit);
+  return send(res,200,{results:items,pagination:{page,limit,total,pages:Math.ceil(total/limit),hasMore:start+limit<total},source:"local"});
+ }
  if(req.method==="POST"&&p==="/api/results"){const u=await requireUser(req,res,["student"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),clientSubmissionId=String(d.clientSubmissionId||"").slice(0,120);if(clientSubmissionId){
    if(process.env.DATABASE_URL){
     try{const existing=await pgStore.getResultBySubmission(u.id,clientSubmissionId);if(existing)return send(res,200,{result:existing,duplicate:true,source:"postgres"})}
