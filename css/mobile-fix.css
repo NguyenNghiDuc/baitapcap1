@@ -59,3 +59,10 @@
  .topbar .brand{font-size:15px!important}
  .topbar .top-actions #registerBtn,.topbar .top-actions #authBtn{padding-inline:6px!important;font-size:10px!important}
 }
+
+
+/* Admin users: dedicated role and lock actions remain usable on touch devices. */
+.admin-user-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:200px}
+.admin-user-actions button{min-height:38px;white-space:nowrap;border-radius:10px}
+.admin-user-actions button[disabled]{opacity:.5;cursor:not-allowed}
+@media(max-width:700px){.admin-user-actions{min-width:160px}.admin-user-actions button{width:100%}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
