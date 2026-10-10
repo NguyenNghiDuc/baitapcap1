@@ -22,6 +22,7 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
    if(isConfiguredAdmin)u.role="admin";
    else if(u.role!=="admin"&&["student","parent"].includes(md.role))u.role=md.role;
   }
+  if(u.locked)return send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."}),true;
   loginDevices.record(db,u,req);
   await save(db);await pg.upsertUser(u).catch(e=>monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id}));monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
   return send(res,200,{user:{id:u.id,email:u.email,name:u.name,role:u.role,grade:u.grade,avatar:u.avatar,emailVerified:!!u.emailVerified}}),true;
