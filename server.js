@@ -77,6 +77,7 @@ async function api(req,res,p,ip){
  if(req.method==="POST"&&["/api/ai","/api/ai/analyze-wrong"].includes(p)&&!rate(ip,"ai",24,60e3))return send(res,429,{error:"AI đang bận, thử lại sau"});
  if(req.method==="POST"&&p==="/api/student/ocr"&&!rate(ip,"ocr",10,60e3))return send(res,429,{error:"OCR đang bận, thử lại sau"});
  if(req.method==="POST"&&(p.startsWith("/api/storage/")||p==="/api/student/handwriting")&&!rate(ip,"upload",20,60e3))return send(res,429,{error:"Bạn tải file quá nhanh"});
+ if(await require("./routes/exam-sessions")(req,res,p,{send,parseBody,requireUser,pg:pgStore,monitor}))return;
  if(await require("./routes/real-data")(req,res,p,{send,requireUser,pg:pgStore,monitor}))return;
  if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
