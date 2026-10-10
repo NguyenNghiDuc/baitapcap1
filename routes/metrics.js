@@ -2,7 +2,13 @@ module.exports=async function handleMetrics(req,res,p,ctx){
  if(req.method!=="POST")return false;
  if(p==="/api/client-errors"){
   const {send,parseBody,monitor}=ctx;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
-  monitor.error("client_error",{message:String(d.message||"").slice(0,500),stack:String(d.stack||"").slice(0,3000),route:String(d.route||"").slice(0,120),path:String(d.path||"").slice(0,180),ua:String(d.ua||"").slice(0,300)});return send(res,202,{ok:true}),true;
+  const strip=v=>String(v||"").replace(/Bearer\\s+[^\\s]+/gi,"[redacted]").replace(/(token|key|password|secret)=\\S+/gi,"$1=[redacted]").slice(0,240);
+  const route=String(d.route||"").split("?")[0].slice(0,120),message=strip(d.message);
+  monitor.error("client_error",{message,route});
+  if(process.env.DATABASE_URL){
+   try{await ctx.pg.clientError(route,message)}catch(e){monitor.warn("client_error_store_failed",{message:e.message})}
+  }
+  return send(res,202,{ok:true}),true;
  }
  if(p!=="/api/metrics")return false;
  const {send,parseBody,monitor}=ctx;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
