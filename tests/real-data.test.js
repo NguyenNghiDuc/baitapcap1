@@ -11,11 +11,12 @@ function request({url,method="GET",role="student"}){
    listNotifications:async id=>{called.push(["notices",id]);return [{id:"notice-owned",title:"Bài mới"}]},
    markNotification:async(id,item)=>{called.push(["read",id,item]);return item==="notice-owned"},
    listDevices:async id=>{called.push(["devices",id]);return [{device_id:"btdev_1234567890123",device:"iPhone",browser:"Safari",ip:"203.0.113.4",first_seen_at:"2026-10-10",last_seen_at:"2026-10-10"}]},
+   adminGrades:async filters=>{called.push(["grades",filters]);return {results:[{id:"real-db-result",student_name:"Học sinh thật",score:82,verified:false}],summary:{total:1,verified:0,unverified:1},pagination:{page:filters.page,limit:25,total:1,pages:1}}},
    adminLive:async()=>({users:{total:9,locked:2},roles:[],results:{total:3},submissions:7}),
    adminAudit:async()=>[],recentClientErrors:async()=>[]
   }
  };
- return {req:{method:method,headers:{"x-client-device-id":"btdev_1234567890123"}},res:{},url,ctx,get result(){return output},called};
+ return {req:{method:method,url,headers:{"x-client-device-id":"btdev_1234567890123"}},res:{},url,ctx,get result(){return output},called};
 }
 async function run(x){
  const before=process.env.DATABASE_URL;process.env.DATABASE_URL="postgresql://test-invalid/never-connected";
@@ -56,4 +57,25 @@ test("real-data migration revokes client privileges and blocks locked Supabase a
  assert.match(rls,/REVOKE INSERT,UPDATE ON public.results FROM authenticated/);
  assert.doesNotMatch(pg,/role=EXCLUDED.role,grade=EXCLUDED.grade/);
  for(const f of ["pg-public-backup.js","pg-public-restore.js"])assert.ok(fs.existsSync(path.join(root,"scripts",f)));
+});
+
+test("Admin can browse real result scores with safe filtering",async()=>{
+ const a=request({url:"/api/real/admin/grades?grade=4&subject=math&status=unverified&search=An&page=2",role:"admin"});
+ const result=await run(a);
+ assert.equal(result.status,200);assert.equal(result.payload.source,"postgres");
+ assert.equal(result.payload.results[0].score,82);
+ assert.deepEqual(a.called,[["grades",{grade:4,subject:"math",status:"unverified",search:"An",page:2}]]);
+});
+test("Grade records cannot be listed by a non-admin role",async()=>{
+ const x=request({url:"/api/real/admin/grades",role:"student"});
+ await run(x);assert.deepEqual(x.called,[]);
+ assert.equal(x.result,null);
+});
+test("Grade filters reject invalid grade, subject and large search inputs",async()=>{
+ for(const url of ["/api/real/admin/grades?grade=9","/api/real/admin/grades?subject=unknown","/api/real/admin/grades?status=official","/api/real/admin/grades?page=-1","/api/real/admin/grades?search="+("x".repeat(81))]){
+  const x=request({url,role:"admin"});
+  const result=await run(x);
+  assert.equal(result.status,400,url);
+  assert.deepEqual(x.called,[],url);
+ }
 });
