@@ -2,7 +2,14 @@ const {test,expect}=require("@playwright/test");
 test("home renders without white screen",async({page})=>{await page.goto("/");await expect(page.getByText("Bài Tập",{exact:false}).first()).toBeVisible();await expect(page.locator("#content")).not.toBeEmpty()});
 test("polished auth modal has login and register flows",async({page})=>{await page.goto("/");await page.locator("#authBtn").click();await expect(page.locator(".auth-modal")).toBeVisible();await expect(page.getByRole("button",{name:"Đăng nhập",exact:true}).first()).toBeVisible();await page.getByRole("button",{name:"Đăng ký",exact:true}).click();await expect(page.locator("#sbRegisterForm")).toBeVisible();await expect(page.locator("#regPassword")).toBeVisible()});
 test("demo admin can login through fallback auth",async({page})=>{await page.goto("/");await page.locator("#authBtn").click();await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");await page.locator('#sbLoginForm input[name="password"]').fill("27032006");await page.locator("#sbLoginForm .auth-primary").click();await expect(page.locator("#sideRole")).toContainText("Quản trị")});
-test("term exam catalog renders daily and semester exams",async({page})=>{await page.goto("/#tests");await expect(page.getByText("Kiểm tra theo môn, học kỳ",{exact:false})).toBeVisible();await expect(page.getByText("Toán hôm nay",{exact:false}).first()).toBeVisible();await expect(page.locator(".term-exam")).toHaveCount(24);await expect(page.locator("#termPageLabel")).toContainText("Trang 1/");await page.locator("#termNextPage").click();await expect(page.locator("#termPageLabel")).toContainText("Trang 2/")});
+test("exam navigation opens the standalone catalog with 30 paginated subject exams",async({page})=>{
+ await page.goto("/#tests");
+ await expect(page).toHaveURL(/\/kiem-tra\.html$/);
+ await expect(page.locator("#examApp .exam-hero")).toBeVisible();
+ await expect(page.locator("#examApp .exam-card [data-exam]")).toHaveCount(30);
+ await expect(page.locator("#examApp [data-select-subject]")).toHaveCount(3);
+});
+
 test("mobile navigation opens",async({page},testInfo)=>{test.skip(testInfo.project.name!=="mobile","mobile only");await page.goto("/");await page.locator("#menuBtn").click();await expect(page.locator("#sidebar")).toHaveClass(/open/)});
 
 test("exercise navigation works and answers survive reload",async({page})=>{
