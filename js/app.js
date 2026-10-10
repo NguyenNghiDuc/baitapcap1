@@ -221,11 +221,11 @@ function bind(){
  $("#examRoomForm")?.addEventListener("submit",async e=>{e.preventDefault();try{const d=Object.fromEntries(new FormData(e.currentTarget));await API.post("/api/exam-rooms",d);toast("Đã tạo phòng thi");render()}catch(x){toast(x.message)}});
  $("#joinExamForm")?.addEventListener("submit",async e=>{e.preventDefault();try{const j=await API.post("/api/exam-rooms/join",Object.fromEntries(new FormData(e.currentTarget)));toast("Đã vào phòng "+j.room.code);startQuiz("math",j.room.grade,null,j.room.lessonId)}catch(x){toast(x.message)}});
  $$("[data-room-start]").forEach(b=>b.onclick=()=>startQuiz("math",Number(b.dataset.roomGrade),null,b.dataset.roomStart));
- $("[data-user-save]").forEach(b=>b.onclick=async()=>{
+ $$("[data-user-save]").forEach(b=>b.onclick=async()=>{
    const role=$('[data-user-role="'+b.dataset.userSave+'"]').value;
    try{await API.patch("/api/admin/users/"+encodeURIComponent(b.dataset.userSave),{role});toast("Đã lưu vai trò");render()}catch(x){toast(x.message)}
  });
- $("[data-user-lock]").forEach(b=>b.onclick=async()=>{
+ $$("[data-user-lock]").forEach(b=>b.onclick=async()=>{
    const locked=b.dataset.locked==="1",email=b.dataset.userEmail||"tài khoản";
    if(!confirm((locked?"Mở khóa":"Khóa")+" tài khoản "+email+"? "+(locked?"Người dùng sẽ được phép truy cập trở lại.":"Người dùng sẽ bị chặn truy cập các API ngay lập tức.")))return;
    let reason="";
