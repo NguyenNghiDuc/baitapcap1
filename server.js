@@ -303,7 +303,11 @@ async function handler(req,res){
   }
   if(p.startsWith("/api/")){
    try{await bootstrap()}catch(e){safeMonitorError("database_startup_failed",{message:e.message});return send(res,503,{error:"Cơ sở dữ liệu chưa sẵn sàng. Kiểm tra DATABASE_URL và migrations."})}
-   return await api(req,res,p,ip)
+   try{return await api(req,res,p,ip)}
+   finally{
+    // Vercel must not freeze the function while real writes are still in flight.
+    await Promise.allSettled([storage.flush(),auditStore.flush()]);
+   }
   }
   return await staticServer.serve(req,res,STATIC_ROOT,p)
  }catch(e){
