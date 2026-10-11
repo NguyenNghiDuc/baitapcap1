@@ -71,7 +71,10 @@ async function api(req,res,p,ip){
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
  if(["/api/metrics","/api/client-errors"].includes(p)&&!rate(ip,"telemetry",30,60e3))return send(res,429,{error:"Too many metrics"});
  if(await handleMetrics(req,res,p,{send,parseBody,monitor}))return;
- if(!rate(ip,"api",180,60e3))return send(res,429,{error:"Bạn thao tác quá nhanh"});
+ if(p==="/api/presence"&&req.method==="POST"){
+  // Classroom users often share one Wi-Fi IP. Heartbeats must not exhaust the learning API budget.
+  if(!rate(ip,"presence",600,60e3))return send(res,429,{error:"Quá nhiều tín hiệu online"});
+ }else if(!rate(ip,"api",180,60e3))return send(res,429,{error:"Bạn thao tác quá nhanh"});
  if(req.method==="POST"&&["/api/ai","/api/ai/analyze-wrong"].includes(p)&&!rate(ip,"ai",24,60e3))return send(res,429,{error:"AI đang bận, thử lại sau"});
  if(req.method==="POST"&&p==="/api/student/ocr"&&!rate(ip,"ocr",10,60e3))return send(res,429,{error:"OCR đang bận, thử lại sau"});
  if(req.method==="POST"&&(p.startsWith("/api/storage/")||p==="/api/student/handwriting")&&!rate(ip,"upload",20,60e3))return send(res,429,{error:"Bạn tải file quá nhanh"});
