@@ -29,7 +29,13 @@ window.LivePresence=(()=>{
  function stopTimer(){if(timer){clearInterval(timer);timer=null}}
  function setIdentity(user){
   const next=user?.id?String(user.id):null;
-  if(userId&&userId!==next)void ping(false,{keepalive:true});
+  if(userId&&userId!==next&&lastToken){
+   // Use the last token belonging to the previous account; never mark the new account offline.
+   void fetch("/api/presence",{method:"POST",keepalive:true,cache:"no-store",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+lastToken},
+    body:JSON.stringify({sessionId,active:false})}).catch(()=>{});
+   lastToken="";
+  }
   userId=next;
   if(!userId){stopTimer();return}
   startTimer();
