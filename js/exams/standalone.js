@@ -76,9 +76,41 @@
   host.querySelector("#submit").onclick=()=>{persistAnswer();if(confirm("Nộp bài kiểm tra?"))finish(false);};
  }
  function move(i){persistAnswer();exam.i=Math.max(0,Math.min(exam.questions.length-1,i));paint();}
- async function finish(auto){if(!exam)return;persistAnswer();stop();const done=exam;exam=null;const account=await window.ResultAccount?.current?.()||{};const objective=done.questions,correct=objective.filter(q=>I.isCorrect(q,done.answers[q.id])).length,score=objective.length?Math.round(correct/objective.length*100):0;
-  try{const old=JSON.parse(localStorage.getItem("bt_results")||"[]");old.push({...account,id:Date.now(),title:done.info.title,subject:done.info.subject,grade:done.info.grade,correct,total:objective.length,score,points:0,gradingStatus:'self_reported_auto_checked',durationSec:Math.round((Date.now()-done.started)/1000),date:new Date().toLocaleDateString("vi-VN")});localStorage.setItem("bt_results",JSON.stringify(old));}catch{}
-  host.innerHTML='<section class="panel"><h1>'+(auto?"Hết giờ!":"Đã làm xong bài!")+'</h1><h2>Điểm tự kiểm tra: '+score+'% ('+correct+'/'+objective.length+' câu đúng)</h2><p>Cả 30 câu đã được đối chiếu đáp án tự động. Kết quả hiện chỉ lưu trên thiết bị này, chưa có xác nhận nộp lên PostgreSQL hay điểm giáo viên chấm.</p><button id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+done.questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+'</section>';host.querySelector("#back").onclick=list;
+ async function finish(auto){
+  if(!exam)return;
+  persistAnswer();stop();
+  const done=exam;exam=null;
+  const account=await window.ResultAccount?.current?.()||{};
+  const questions=done.questions,correct=questions.filter(q=>I.isCorrect(q,done.answers[q.id])).length;
+  const score=questions.length?Math.round(correct/questions.length*100):0;
+  const durationSec=Math.round((Date.now()-done.started)/1000);
+  const clientSubmissionId=crypto.randomUUID?.()||("exam-"+Date.now());
+  const result={...account,id:Date.now(),clientSubmissionId,title:done.info.title,
+   subject:done.info.subject||"math",grade:done.info.grade,correct,total:questions.length,score,points:0,
+   gradingStatus:"self_reported_auto_checked",durationSec,date:new Date().toLocaleDateString("vi-VN")};
+  try{const old=JSON.parse(localStorage.getItem("bt_results")||"[]");old.push(result);localStorage.setItem("bt_results",JSON.stringify(old.slice(-300)))}catch{}
+  const payload={clientSubmissionId,title:result.title,subject:result.subject,grade:result.grade,
+   correct,total:result.total,score,durationSec,wrongQuestionIds:questions.filter(q=>!I.isCorrect(q,done.answers[q.id])).map(q=>q.id)};
+  const status=await window.ExamResultSync?.submit(payload).catch(e=>({synced:false,message:e?.message||"Lỗi kết nối"}));
+  const synced=!!status?.synced;
+  host.innerHTML='<section class="panel"><h1>'+(auto?"Hết giờ!":"Đã làm xong bài!")+'</h1>'+
+   '<h2>Điểm tự kiểm tra: '+score+'% ('+correct+'/'+questions.length+' câu đúng)</h2>'+
+   '<p>Điểm được chấm tự động trên trình duyệt, chưa phải điểm giáo viên duyệt.</p>'+
+   '<p id="examServerStatus" role="status">'+esc(status?.message||"Chưa gửi kết quả lên server.")+'</p>'+
+   (synced?"":'<button type="button" id="examRetryResult">↻ Thử gửi lại điểm</button>')+
+   '<button type="button" id="back">← Danh sách đề</button><h3>Đáp án và giải thích</h3>'+
+   questions.map((q,i)=>'<article class="review"><b>Câu '+(i+1)+': '+esc(q.q)+'</b><p>Đáp án đúng: '+esc(I.correctText(q))+'</p><small>'+esc(q.explain||"")+'</small></article>').join("")+
+   '</section>';
+  host.querySelector("#back").onclick=list;
+  const retry=host.querySelector("#examRetryResult");
+  if(retry)retry.onclick=async()=>{
+   retry.disabled=true;
+   try{
+    const r=await window.ExamResultSync.retryPending();
+    host.querySelector("#examServerStatus").textContent=r.pending?"Vẫn còn "+r.pending+" kết quả chưa đồng bộ. Kiểm tra mạng và quyền tài khoản.":"Đã đồng bộ kết quả lên máy chủ.";
+    if(!r.pending)retry.remove();
+   }catch(e){host.querySelector("#examServerStatus").textContent=e?.message||"Không gửi được điểm"}finally{retry.disabled=false}
+  };
  }
  try{list();}catch(e){err(e);}
 })();
