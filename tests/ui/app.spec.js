@@ -2,6 +2,18 @@ const {test,expect}=require("@playwright/test");
 test("home renders without white screen",async({page})=>{await page.goto("/");await expect(page.getByText("Bài Tập",{exact:false}).first()).toBeVisible();await expect(page.locator("#content")).not.toBeEmpty()});
 test("polished auth modal has login and register flows",async({page})=>{await page.goto("/");await page.locator("#authBtn").click();await expect(page.locator(".auth-modal")).toBeVisible();await expect(page.getByRole("button",{name:"Đăng nhập",exact:true}).first()).toBeVisible();await page.getByRole("button",{name:"Đăng ký",exact:true}).click();await expect(page.locator("#sbRegisterForm")).toBeVisible();await expect(page.locator("#regPassword")).toBeVisible()});
 test("demo admin can login through fallback auth",async({page})=>{await page.goto("/");await page.locator("#authBtn").click();await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");await page.locator('#sbLoginForm input[name="password"]').fill("27032006");await page.locator("#sbLoginForm .auth-primary").click();await expect(page.locator("#sideRole")).toContainText("Quản trị")});
+test("Admin opens all students grades from Results screen",async({page})=>{
+ await page.goto("/");
+ await page.locator("#authBtn").click();
+ await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");
+ await page.locator('#sbLoginForm input[name="password"]').fill("27032006");
+ await page.locator("#sbLoginForm .auth-primary").click();
+ await expect(page.locator("#sideRole")).toContainText("Quản trị");
+ await page.evaluate(()=>location.hash="#history");
+ await expect(page.locator("#adminResultsFilter")).toBeVisible();
+ await expect(page.getByRole("heading",{name:/Kết quả toàn bộ học sinh/})).toBeVisible();
+ await expect(page.locator("#adminResultsFilter [name='kind']")).toHaveValue("exam");
+});
 test("exam navigation opens the standalone catalog with 30 paginated subject exams",async({page})=>{
  await page.goto("/#tests");
  await expect(page).toHaveURL(/\/kiem-tra\.html$/);
