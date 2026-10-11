@@ -2,6 +2,8 @@ const http=require("http"),fs=require("fs"),path=require("path"),crypto=require(
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,STATIC_ROOT=process.env.STATIC_ROOT||((process.env.NODE_ENV==="production"&&fs.existsSync(path.join(ROOT,"dist")))?path.join(ROOT,"dist"):ROOT),DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const loginDevices=require("./lib/login-devices");
 const handleAdminResults=require("./routes/admin-results");
+const handlePresence=require("./routes/presence");
+const presence=require("./lib/presence");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
 const rateBuckets=new Map(),resetTokens=new Map(),oauthStates=new Map();
 const pgStore=require("./lib/postgres"),storage=require("./lib/storage"),sessionStore=require("./lib/redis-session"),supabase=require("./lib/supabase-admin"),monitor=require("./lib/monitoring"),handleStudent=require("./routes/student"),handleApp=require("./routes/app"),handleExamSettings=require("./routes/exam-settings"),handleSupabaseAuth=require("./routes/supabase-auth"),handleAccount=require("./routes/account"),handleCaptcha=require("./routes/captcha"),handleStorageMeta=require("./routes/storage-meta"),handleHealth=require("./routes/health"),handleAI=require("./routes/ai"),handleExamDrafts=require("./routes/exam-drafts"),handleMetrics=require("./routes/metrics"),errorTracking=require("./lib/error-tracking"),auditStore=require("./lib/audit"),{verify:verifyTotp,secret:newTotpSecret}=require("./lib/totp");
@@ -76,6 +78,7 @@ async function api(req,res,p,ip){
  if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleAdminResults(req,res,p,{send,requireUser,load,pg:pgStore}))return;
+ if(await handlePresence(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor,audit:auditStore}))return;
  if(await require("./routes/profile-overview")(req,res,p,{send,parseBody,requireUser,load,save}))return;
@@ -196,7 +199,12 @@ async function api(req,res,p,ip){
    const db=load();list=db.users.map(x=>({...safeUser(x),locked:!!x.locked}));
   }
   const pg=pageList(list,req,{searchFn:x=>(x.name||"")+" "+(x.email||"")+" "+(x.role||"")});
-  return send(res,200,{users:pg.items,pagination:pg.pagination,durable:storage.status().mode==="supabase"});
+  let live;
+  try{live=await presence.overview(pg.items.map(x=>x.id))}
+  catch(e){monitor.warn("admin_presence_failed",{message:e.message});live={available:false,users:[],onlineTotal:null}}
+  const mapped=new Map(live.users.map(x=>[x.id,x]));
+  const users=pg.items.map(x=>({...x,presence:mapped.get(String(x.id))||null}));
+  return send(res,200,{users,pagination:pg.pagination,durable:storage.status().mode==="supabase",presenceAvailable:live.available,onlineTotal:live.onlineTotal});
  }
  if(req.method==="POST"&&p==="/api/admin/grant-admin"){
   const current=await requireUser(req,res,["admin"]);if(!current)return;
