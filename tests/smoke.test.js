@@ -64,6 +64,28 @@ test("admin lock blocks active user APIs until account is unlocked",async()=>{
  assert.equal(again.status,200);
 });
 
+test("Admin can see another account's submitted scores, but students cannot",async()=>{
+ const headers={"Content-Type":"application/json"};
+ const login=async(email,password)=>{
+  const r=await fetch(base+"/api/login",{method:"POST",headers,body:JSON.stringify({email,password})});
+  assert.equal(r.status,200);
+  return (await r.json()).token;
+ };
+ const admin=await login("admin@demo.vn","27032006");
+ const student=await login("hocsinh@demo.vn","Demo1234!");
+ const uniq="Diem tu cham "+Date.now();
+ const result=await fetch(base+"/api/results",{method:"POST",headers:{...headers,Authorization:"Bearer "+student},body:JSON.stringify({clientSubmissionId:"test-gradebook-"+Date.now(),title:uniq,subject:"english",grade:4,score:75,correct:3,total:4,durationSec:45})});
+ assert.equal(result.status,201);
+ const own=await result.json();assert.equal(own.result.verified,false);
+ const anonymous=await fetch(base+"/api/admin/results");assert.equal(anonymous.status,401);
+ const forbidden=await fetch(base+"/api/admin/results",{headers:{Authorization:"Bearer "+student}});assert.equal(forbidden.status,403);
+ const adminResponse=await fetch(base+"/api/admin/results?search="+encodeURIComponent(uniq)+"&subject=english&grade=4",{headers:{Authorization:"Bearer "+admin}});
+ assert.equal(adminResponse.status,200);const data=await adminResponse.json();
+ assert.ok(data.results.find(x=>x.title===uniq&&x.owner.email==="hocsinh@demo.vn"&&x.score===75));
+ assert.equal(data.results[0].verified,false);
+ const hidden=await fetch(base+"/api/admin/results?search="+encodeURIComponent(uniq)+"&subject=math",{headers:{Authorization:"Bearer "+admin}});
+ assert.equal((await hidden.json()).pagination.total,0);
+});
 test("admin user and storage APIs are protected and functional",async()=>{
   const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
   const lj=await login.json(),token=lj.token;
