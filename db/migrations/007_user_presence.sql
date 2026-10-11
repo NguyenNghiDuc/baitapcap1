@@ -9,3 +9,7 @@ CREATE TABLE IF NOT EXISTS public.user_presence (
 );
 CREATE INDEX IF NOT EXISTS idx_user_presence_active_seen ON public.user_presence(active,last_seen_at DESC);
 CREATE INDEX IF NOT EXISTS idx_user_presence_user_seen ON public.user_presence(user_id,last_seen_at DESC);
+
+-- Contains children's activity timestamps: no direct public/client access.
+-- The backend's trusted PostgreSQL connection is the only access path.
+ALTER TABLE public.user_presence ENABLE ROW LEVEL SECURITY;
