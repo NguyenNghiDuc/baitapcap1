@@ -40,6 +40,42 @@ test("admin-created accounts never grant administrator privileges by role input"
  const forbidden=await fetch(base+"/api/admin/users",{headers:{Authorization:"Bearer "+userToken}});
  assert.equal(forbidden.status,403);
 });
+test("online/offline presence requires authentication and stays admin-only",async()=>{
+ const login=async(email,password)=>{
+  const response=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
+  assert.equal(response.status,200);
+  return (await response.json()).token;
+ };
+ const student=await login("hocsinh@demo.vn","Demo1234!"),admin=await login("admin@demo.vn","27032006");
+ const headers=token=>({"Authorization":"Bearer "+token,"Content-Type":"application/json"});
+ const session="smoke_presence_session_123456789";
+ const body=active=>JSON.stringify({sessionId:session,active});
+ const anon=await fetch(base+"/api/presence",{method:"POST",headers:{"Content-Type":"application/json"},body:body(true)});
+ assert.equal(anon.status,401);
+ const invalid=await fetch(base+"/api/presence",{method:"POST",headers:headers(student),body:JSON.stringify({sessionId:"?",active:true})});
+ assert.equal(invalid.status,400);
+ const active=await fetch(base+"/api/presence",{method:"POST",headers:headers(student),body:body(true)});
+ assert.equal(active.status,200);
+ const blocked=await fetch(base+"/api/admin/presence",{headers:headers(student)});
+ assert.equal(blocked.status,403);
+ const denied=await fetch(base+"/api/admin/presence");assert.equal(denied.status,401);
+ const list=await fetch(base+"/api/admin/users",{headers:headers(admin)});
+ assert.equal(list.status,200);
+ const users=(await list.json()).users;
+ const target=users.find(x=>x.email==="hocsinh@demo.vn");
+ assert.ok(target?.id);
+ assert.equal(target.presence.online,true);
+ const status=await fetch(base+"/api/admin/presence?ids="+encodeURIComponent(target.id),{headers:headers(admin)});
+ assert.equal(status.status,200);
+ const snapshot=await status.json();
+ assert.equal(snapshot.available,true);
+ assert.equal(snapshot.users[0].online,true);
+ assert.ok(snapshot.users[0].lastSeenAt);
+ const off=await fetch(base+"/api/presence",{method:"POST",headers:headers(student),body:body(false)});
+ assert.equal(off.status,200);
+ const offline=await fetch(base+"/api/admin/presence?ids="+encodeURIComponent(target.id),{headers:headers(admin)});
+ assert.equal((await offline.json()).users[0].online,false);
+});
 test("admin lock blocks active user APIs until account is unlocked",async()=>{
  const adminLogin=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
  assert.equal(adminLogin.status,200);
