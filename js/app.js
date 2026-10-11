@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],D=window.APP_DATA||{subjects:[],lessons:[],questions:[],tests:[],materials:[]};
 const state={user:null,route:location.hash.slice(1)||"home",theme:localStorage.getItem("bt_theme")||"light",results:JSON.parse(localStorage.getItem("bt_results")||"[]"),favorites:JSON.parse(localStorage.getItem("bt_favs")||"[]"),quiz:null,lastWrong:[]};
 let renderSequence=0;
-window.AppAuthBridge={setUser(u){state.user=u;render()},updateProfile(data){if(!state.user)return;state.user={...state.user,name:data.name||state.user.name,grade:Number(data.grade)||state.user.grade};shell()},toast,render};
+window.AppAuthBridge={setUser(u){state.user=u;window.LivePresence?.setIdentity?.(u);render()},updateProfile(data){if(!state.user)return;state.user={...state.user,name:data.name||state.user.name,grade:Number(data.grade)||state.user.grade};shell()},toast,render};
 document.documentElement.dataset.theme=state.theme;
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
@@ -55,12 +55,42 @@ async function examRooms(){
  ${state.user.role==="student"?'<div class="panel"><h3>🔑 Nhập mã phòng</h3><form id="joinExamForm" class="chat-input"><input name="code" placeholder="Mã phòng thi" required><button class="primary">Vào phòng</button></form></div>':""}
  <div class="cards-3">${j.rooms.map(r=>`<article class="test-card"><h3>🧪 ${esc(r.title)}</h3><p>Lớp ${r.grade} • ${r.durationMin} phút</p><div class="test-meta"><span>Mã <b>${r.code}</b></span><span>👥 ${r.participants?.length||0}</span></div>${state.user.role==="student"?`<button class="primary full" data-room-start="${r.lessonId}" data-room-grade="${r.grade}">Bắt đầu 30 câu</button>`:""}</article>`).join("")||'<div class="empty">Chưa có phòng thi.</div>'}</div>`
 }
+const sinceOnline=t=>{
+ if(!t)return "Chưa ghi nhận hoạt động";
+ const d=new Date(t);return Number.isFinite(d.valueOf())?"Lần cuối: "+d.toLocaleString("vi-VN"):"Chưa ghi nhận hoạt động";
+};
+function liveBadge(status,available){
+ const online=available&&!!status?.online,unknown=!available;
+ const label=unknown?"⚪ Chưa có dữ liệu":online?"🟢 Online":"⚫ Offline";
+ return '<span data-live-status class="admin-live-indicator '+(unknown?"unknown":online?"online":"offline")+'">'+label+'</span><small data-live-last>'+esc(unknown?"Cần PostgreSQL trên Vercel":sinceOnline(status?.lastSeenAt))+'</small>';
+}
+let adminPresenceRefresh=null;
+function bindAdminPresence(){
+ if(adminPresenceRefresh){clearInterval(adminPresenceRefresh);adminPresenceRefresh=null}
+ if(state.route!=="adminUsers"||state.user?.role!=="admin")return;
+ const panel=document.querySelector("#adminPresenceSummary");
+ if(!panel||panel.dataset.available!=="1")return;
+ async function refresh(){
+  if(document.visibilityState!=="visible"||state.route!=="adminUsers")return;
+  const nodes=[...document.querySelectorAll("[data-live-user]")];
+  if(!nodes.length)return;
+  const ids=nodes.map(n=>n.dataset.liveUser).filter(Boolean);
+  try{
+   const response=await API.get("/api/admin/presence?ids="+encodeURIComponent(ids.join(",")),{retries:0,cancelPrevious:false,timeout:8000});
+   panel.textContent=response.available?"🟢 "+Number(response.onlineTotal||0)+" tài khoản đang online (toàn hệ thống)":"⚪ Chưa cấu hình theo dõi online";
+   const states=new Map((response.users||[]).map(v=>[v.id,v]));
+   for(const node of nodes){node.innerHTML=liveBadge(states.get(node.dataset.liveUser),response.available)}
+  }catch{panel.textContent="⚪ Chưa cập nhật được trạng thái; sẽ thử lại"}
+ }
+ adminPresenceRefresh=setInterval(refresh,30000);
+}
 async function adminUsers(){
  if(state.user?.role!=="admin")return loginRequired("Chỉ Admin được quản lý tài khoản.");
  let j;try{j=await window.PerfLists.get("adminUsers","/api/admin/users")}catch(e){return errorBox(e.message)}
  return pageHead("QUẢN LÝ USER","Tài khoản hệ thống","Khóa/mở tài khoản và đổi vai trò.")+(j.durable?"":'<div class="panel" role="alert"><b>⚠️ Chưa có PostgreSQL dùng chung.</b><p>Trên Vercel, cần cấu hình DATABASE_URL trước khi khóa/mở khóa tài khoản. Không nên sử dụng JSON cục bộ để quản lý quyền thật.</p></div>')+`
+ <div class="panel admin-presence-summary" id="adminPresenceSummary" role="status" data-available="${j.presenceAvailable?"1":"0"}">${j.presenceAvailable?"🟢 "+Number(j.onlineTotal||0)+" tài khoản đang online (toàn hệ thống)":"⚪ Chưa bật giám sát online: Vercel cần DATABASE_URL"}. Trạng thái online là hoạt động trên website trong khoảng 2 phút gần nhất.</div>
  <div class="panel"><h3>🛡️ Cấp quyền Admin cho tài khoản đã đăng ký</h3><p class="muted">Chỉ Admin chính có thể cấp quyền. Tài khoản nhận quyền cần đăng ký và đăng nhập website ít nhất một lần.</p><form id="grantAdminForm" class="stack"><label>Email tài khoản cần cấp quyền<input name="email" type="email" autocomplete="email" placeholder="nguoidung@gmail.com" required></label><button class="primary">Cấp quyền Admin</button></form></div>
- ${window.PerfLists.controls("adminUsers",j.pagination,{placeholder:"Tìm tên, email, vai trò..."})}<div class="panel"><div class="table-wrap"><table><thead><tr><th>Tên</th><th>Email</th><th>Vai trò</th><th>Lớp</th><th>Trạng thái</th><th></th></tr></thead><tbody>${j.users.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td><select data-user-role="${u.id}">${["student","parent","teacher","admin"].map(r=>`<option ${r===u.role?"selected":""}>${r}</option>`).join("")}</select></td><td>${u.grade||"—"}</td><td>${u.locked?"🔒 Khóa":"✅ Hoạt động"}</td><td><div class="admin-user-actions"><button type="button" class="outline small" data-user-save="${esc(u.id)}">Lưu vai trò</button><button type="button" class="outline small" data-user-lock="${esc(u.id)}" data-user-email="${esc(u.email)}" data-locked="${u.locked?"1":"0"}" ${u.id===state.user.id?"disabled title='Không thể tự khóa tài khoản'":""}>${u.locked?"🔓 Mở khóa":"🔒 Khóa tài khoản"}</button></div></td></tr>`).join("")}</tbody></table></div></div>`
+ ${window.PerfLists.controls("adminUsers",j.pagination,{placeholder:"Tìm tên, email, vai trò..."})}<div class="panel"><div class="table-wrap"><table><thead><tr><th>Tên</th><th>Email</th><th>Vai trò</th><th>Lớp</th><th>Tài khoản</th><th>Online / Offline</th><th></th></tr></thead><tbody>${j.users.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td><select data-user-role="${u.id}">${["student","parent","teacher","admin"].map(r=>`<option ${r===u.role?"selected":""}>${r}</option>`).join("")}</select></td><td>${u.grade||"—"}</td><td>${u.locked?"🔒 Khóa":"✅ Hoạt động"}</td><td data-live-user="${esc(u.id)}">${liveBadge(u.presence,j.presenceAvailable)}</td><td><div class="admin-user-actions"<button type="button" class="outline small" data-user-save="${esc(u.id)}">Lưu vai trò</button><button type="button" class="outline small" data-user-lock="${esc(u.id)}" data-user-email="${esc(u.email)}" data-locked="${u.locked?"1":"0"}" ${u.id===state.user.id?"disabled title='Không thể tự khóa tài khoản'":""}>${u.locked?"🔓 Mở khóa":"🔒 Khóa tài khoản"}</button></div></td></tr>`).join("")}</tbody></table></div></div>`
 }
 async function storageHealth(){
  if(state.user?.role!=="admin")return loginRequired("Chỉ Admin.");
@@ -195,6 +225,7 @@ function quiz(){
 }async function finishQuiz(auto=false){const z=state.quiz;let correct=0,wrong=[];z.questions.forEach(q=>{if(z.answers[q.id]===q.answer)correct++;else wrong.push(q.id)});state.lastWrong=z.questions.filter(q=>wrong.includes(q.id)).map(q=>({id:q.id,q:q.q,options:q.options,answer:q.answer,grade:q.grade,lessonId:q.lessonId,subject:q.subject,type:q.type,topic:D.lessons.find(l=>l.lessonId===q.lessonId)?.topic||(subj(q.subject).name+" • "+(q.type||"Tổng hợp")),explain:q.explain}));window.StudentReview?.add(state.lastWrong);const score=Math.round(correct/z.questions.length*100),durationSec=Math.round((Date.now()-z.start)/1000),proctor=z.examId?window.StudentExamProctor?.stop():null;window.StudentRewards?.earn(score,correct);window.StudentMastery?.record(z.questions,z.questions.filter(q=>z.answers[q.id]===q.answer).map(q=>q.id));const r={...(window.ResultAccount?.fromUser?.(state.user)||{}),id:Date.now(),title:z.customTitle||z.examId?((z.customTitle)||((D.examSets||[]).find(t=>t.examId===z.examId)?.title||`Đề tổng hợp lớp ${z.grade}`)):z.lessonId?(D.lessons.find(l=>l.lessonId===z.lessonId)?.title||`${subj(z.subject).name} lớp ${z.grade}`):`${subj(z.subject).name} lớp ${z.grade}`,subject:z.subject,grade:z.grade,correct,total:z.questions.length,score,points:correct*10,durationSec,date:new Date().toLocaleDateString("vi-VN"),isoDate:new Date().toISOString(),proctor};state.results.push(r);saveLocal();if(state.user?.role==="student"){try{r.clientSubmissionId=window.OfflineSyncQueue?.enqueueResult?.({...r,wrongQuestionIds:wrong});await window.OfflineSyncQueue?.flush?.();if(z.assignmentId)await API.post("/api/assignments/"+z.assignmentId+"/submit",{answers:z.answers,score})}catch(e){toast("Đã lưu local; sẽ tự đồng bộ khi có mạng")}}window.ExamLock?.exit();$("#content").innerHTML=`<section class="result-card"><div class="score-ring"><b>${score}%</b><span>${correct}/${z.questions.length} đúng</span></div><h1>${auto?"Hết giờ – bài đã tự nộp ⏰":score>=80?"Xuất sắc 🎉":score>=50?"Làm tốt 👍":"Ôn thêm nhé 💪"}</h1><div class="result-review">${z.questions.map((q,i)=>`<div class="review ${z.answers[q.id]===q.answer?"":"bad"}"><b>Câu ${i+1}: ${esc(q.q)}</b><p>Đáp án đúng: ${esc(q.options[q.answer])}</p><small>💡 ${esc(q.explain||"")}</small></div>`).join("")}</div><div class="quiz-actions"><button class="outline" id="analyzeWrong">🤖 AI phân tích câu sai</button><button class="outline" id="similarWrong">🔁 5 câu tương tự</button><button class="primary" id="goHistory">Xem kết quả</button></div><div id="wrongAnalysis"></div></section>`;$("#goHistory").onclick=()=>nav("history");$("#similarWrong").onclick=()=>{const src=z.questions.find(q=>wrong.includes(q.id));if(!src)return toast("Không có câu sai");startCustom(window.StudentAdaptive?.similar(src,5)||[],"5 câu tương tự")};$("#analyzeWrong").onclick=async()=>{const box=$("#wrongAnalysis");if(!state.lastWrong.length){box.innerHTML="<div class=\"panel\"><h3>🎉 Không có câu sai</h3><p>Em đã làm đúng toàn bộ bài này.</p></div>";return}if(!state.user){box.innerHTML="<div class=\"panel\"><p>Đăng nhập để AI lưu và phân tích lỗi sai theo tiến độ của em.</p></div>";return}box.innerHTML="<div class=\"panel\">Đang phân tích...</div>";try{const j=await API.post("/api/ai/analyze-wrong",{grade:z.grade,lessonId:z.lessonId,items:state.lastWrong});box.innerHTML=`<div class="panel"><h3>🎯 Chủ đề cần ôn: ${esc(j.weakTopic||"Toán")}</h3><p>${esc(j.summary||"")}</p>${j.ai?`<p>${esc(j.ai)}</p>`:""}<ol>${(j.plan||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`}catch(e){box.innerHTML=`<div class="panel"><p>${esc(e.message)}</p></div>`}};state.quiz=null;localStorage.removeItem("bt_quiz");window.OfflineSyncQueue?.clearDraft?.()}
 function openAuth(){return window.AuthUI?.open("login")}
 function bind(){
+ bindAdminPresence();
  // Open immediately on mobile while preserving the direct-link fallback.
  const registerLink=$("#registerBtn");
  if(registerLink)registerLink.addEventListener("click",e=>{
