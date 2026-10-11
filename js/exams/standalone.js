@@ -112,5 +112,6 @@
    }catch(e){host.querySelector("#examServerStatus").textContent=e?.message||"Không gửi được điểm"}finally{retry.disabled=false}
   };
  }
+ void window.LivePresence?.start?.();
  try{list();}catch(e){err(e);}
 })();
