@@ -66,3 +66,17 @@
 .admin-user-actions button{min-height:38px;white-space:nowrap;border-radius:10px}
 .admin-user-actions button[disabled]{opacity:.5;cursor:not-allowed}
 @media(max-width:700px){.admin-user-actions{min-width:160px}.admin-user-actions button{width:100%}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
+
+
+/* Admin-only approximate live user presence; account lock status stays separate. */
+.admin-presence-summary{font-size:14px;line-height:1.6}
+.admin-live-indicator{display:inline-flex;align-items:center;white-space:nowrap;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800}
+.admin-live-indicator.online{background:rgba(22,163,74,.12);color:#15803d}
+.admin-live-indicator.offline{background:rgba(107,114,128,.12);color:#596273}
+.admin-live-indicator.unknown{background:rgba(202,138,4,.1);color:#946400}
+[data-live-user]{min-width:145px}
+[data-live-last]{display:block;margin-top:5px;font-size:11px;line-height:1.5;color:var(--muted,#64748b);white-space:normal}
+:root[data-theme="dark"] .admin-live-indicator.online{color:#7ae8ad}
+:root[data-theme="dark"] .admin-live-indicator.offline{color:#c1cad9}
+:root[data-theme="dark"] .admin-live-indicator.unknown{color:#f7d374}
+@media(max-width:700px){[data-live-user]{min-width:135px}.admin-presence-summary{font-size:13px}}
