@@ -134,7 +134,7 @@ async function render(){
    $("#content").innerHTML=content;bind();
    window.StudentRegistry.bind(route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
   }
-  const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
+  const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),history:async()=>{if(state.user?.role==="admin"){await window.PerfLoader.ensureRoute("adminResults");return window.AdminResults.render(state.user)}return history()},storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
   if(asyncMap[route]){
    const content=await asyncMap[route]();
    if(sequence!==renderSequence||route!==state.route)return;
@@ -203,7 +203,7 @@ function bind(){
   window.AuthUI.open("register");
  });
  window.PerfLists?.bind?.(state.route,render);
- if(state.route==="adminResults")window.AdminResults?.bind(toast,render);
+ if(state.route==="adminResults"||(state.route==="history"&&state.user?.role==="admin"))window.AdminResults?.bind(toast,render);
  $$("[data-route]").forEach(x=>x.onclick=()=>nav(x.dataset.route));$$("[data-subject]").forEach(x=>x.onclick=()=>{state.subjectFilter=x.dataset.subject;nav("subjects")});$$("[data-fav]").forEach(x=>x.onclick=()=>{const id=Number(x.dataset.fav);state.favorites=state.favorites.includes(id)?state.favorites.filter(a=>a!==id):[...state.favorites,id];saveLocal();render()});$$("[data-start]").forEach(x=>x.onclick=()=>startQuiz(x.dataset.start,Number(x.dataset.grade),null,x.dataset.lesson||""));$("#openLogin")?.addEventListener("click",openAuth);
  if(state.route==="tests")window.TermExamBank?.bind?.(startCustom);
  $("#globalSearchBtn")?.addEventListener("click",()=>{const q=$("#globalSearch").value;nav("subjects");setTimeout(()=>{$("#lessonSearch").value=q;filterLessons()},20)});$$(".quick-grades [data-grade]").forEach(x=>x.onclick=()=>{nav("subjects");setTimeout(()=>{$("#gradeFilter").value=x.dataset.grade;filterLessons()},20)});
