@@ -12,7 +12,7 @@ window.SupabaseApp=(()=>{
  async function ready(){
   if(readyPromise)return readyPromise;
   readyPromise=(async()=>{
-   config=await fetch("/api/public-config",{cache:"no-store"}).then(r=>r.json()).catch(()=>({supabase:{enabled:false}}));
+   config=await (window.__btPublicConfigPromise ||=fetch("/api/public-config",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("Cấu hình không khả dụng")))).catch(()=>({supabase:{enabled:false}}));
    if(config?.supabase?.enabled&&config.supabase.url&&config.supabase.publishableKey){
     const sdk=await loadSdk();client=sdk.createClient(config.supabase.url,config.supabase.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true},realtime:{params:{eventsPerSecond:10}}});
    }
