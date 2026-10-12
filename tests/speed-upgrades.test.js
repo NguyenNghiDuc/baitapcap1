@@ -65,3 +65,17 @@ test("admin p95 reporting requires authentication and SQL list migrations exist"
  assert.ok(sql.includes("idx_results_user_time_id"));
  assert.ok(sql.includes("idx_notifications_user_time"));
 });
+
+test("public config returns without starting the database and only one request is shared",()=>{
+ const server=read("server.js"),start=server.indexOf('if(p==="/api/public-config"&&req.method==="GET")return await handleSupabaseAuth');
+ assert.ok(start>=0,"public endpoint bypass must exist");
+ const bootstrap=server.indexOf("try{await bootstrap()}",start);
+ assert.ok(bootstrap>start,"public endpoint must run before database bootstrap");
+ for(const p of ["js/perf/runtime-guard.js","js/auth/supabase-client.js"])
+  assert.ok(read(p).includes("window.__btPublicConfigPromise"),p);
+});
+test("local learning history paginates DOM rows instead of mounting the full dataset",()=>{
+ const app=read("js/app.js");
+ assert.ok(app.includes("a.slice((historyPage-1)*20,historyPage*20)"));
+ assert.ok(app.includes('id="historyPrev"')&&app.includes('id="historyNext"'));
+});
