@@ -4,6 +4,7 @@ window.PerfLoader=(()=>{
   tests:["/js/exams/interaction.js","/js/exams/term-exams.js","/js/exams/runner.js","/js/exams/catalog.js"],
   profile:["/js/student/profile-page.js","/js/supabase/storage.js"],
   adminResults:["/js/admin/results.js"],
+  performanceMonitor:["/js/admin/performance-monitor.js"],
   accountSecurity:["/js/auth/account-security.js"],
   liveClassroom:["/js/supabase/realtime.js","/js/teacher/live-classroom.js"],
   today:["/js/student/dashboard.js"],goals:["/js/student/goals.js"],formulas:["/js/student/formulas.js"],vocab:["/js/student/vocab.js"],
