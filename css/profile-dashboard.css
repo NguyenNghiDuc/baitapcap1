@@ -79,3 +79,11 @@
 @media(max-width:520px){.profile-device-meta{grid-template-columns:1fr}.profile-device-meta>div:first-child{grid-column:auto}}
 :root[data-theme="dark"] .profile-device-item{background:#1b2d44;border-color:#33455e}
 :root[data-theme="dark"] .profile-device-current{color:#8ce4c1}
+
+/* Self-service email verification inside profile security panel */
+.profile-dashboard .profile-email-verify{display:flex;flex-direction:column;gap:10px;padding:3px 0 14px;border-bottom:1px solid var(--line);font-size:12px;line-height:1.7}
+.profile-dashboard .profile-email-actions{display:flex;flex-wrap:wrap;gap:8px}
+.profile-dashboard .profile-email-actions button{min-height:38px;border-radius:10px;padding:9px 12px;font-size:12px;line-height:1.4;white-space:normal;text-align:center}
+.profile-dashboard .profile-email-actions button:focus-visible{outline:3px solid rgba(22,117,223,.4);outline-offset:2px}
+.profile-dashboard .profile-email-actions button:disabled{opacity:.65;cursor:not-allowed}
+@media(max-width:480px){.profile-dashboard .profile-email-actions{flex-direction:column}.profile-dashboard .profile-email-actions button{width:100%}}
