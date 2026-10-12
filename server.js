@@ -302,6 +302,9 @@ async function handler(req,res){
   }
   if(p.startsWith("/api/")){
    apiPerformance.track(req,res,p);
+   // Public bootstrap assets never need to await database migrations or Supabase session lookup.
+   if(p==="/api/public-config"&&req.method==="GET")return await handleSupabaseAuth(req,res,p,{send,supabase});
+   if(p==="/api/app/version"&&req.method==="GET")return await handleApp(req,res,p,{send});
    try{await bootstrap()}catch(e){safeMonitorError("database_startup_failed",{message:e.message});return send(res,503,{error:"Cơ sở dữ liệu chưa sẵn sàng. Kiểm tra DATABASE_URL và migrations."})}
    return await api(req,res,p,ip)
   }
