@@ -25,6 +25,36 @@ test("student result can be exported to xlsx",async()=>{
   const out=await fetch(base+"/api/export/results.xlsx",{headers:{Authorization:"Bearer "+token}});
   assert.equal(out.status,200);assert.match(out.headers.get("content-type"),/spreadsheetml/);assert.ok((await out.arrayBuffer()).byteLength>100);
 });
+test("analytics shows the verified account name on each saved exam attempt",async()=>{
+ const login=async(email,password)=>{
+  const r=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
+  assert.equal(r.status,200);
+  return await r.json();
+ };
+ const student=await login("hocsinh@demo.vn","Demo1234!");
+ const admin=await login("admin@demo.vn","27032006");
+ const title="Analytics account attribution "+Date.now();
+ const saved=await fetch(base+"/api/results",{method:"POST",
+  headers:{"Content-Type":"application/json",Authorization:"Bearer "+student.token},
+  body:JSON.stringify({clientSubmissionId:"analytics-"+Date.now(),title,subject:"english",grade:4,score:75,correct:3,total:4,
+   accountName:"Fake account name",accountEmail:"fake@example.com"})});
+ assert.equal(saved.status,201);
+ const anon=await fetch(base+"/api/analytics");assert.equal(anon.status,401);
+ const request=async(token)=>{
+  const r=await fetch(base+"/api/analytics",{headers:{Authorization:"Bearer "+token}});
+  assert.equal(r.status,200);return r.json();
+ };
+ const own=await request(student.token);
+ const ownRow=own.recentResults.find(r=>r.title===title);
+ assert.ok(ownRow);
+ assert.equal(ownRow.studentName,student.user.name);
+ assert.equal(ownRow.studentEmail,student.user.email);
+ assert.notEqual(ownRow.studentName,"Fake account name");
+ assert.equal(own.scope,"student");
+ const all=await request(admin.token);
+ assert.equal(all.scope,"all");
+ assert.ok(all.recentResults.find(r=>r.title===title&&r.studentName===student.user.name));
+});
 test("admin-created accounts never grant administrator privileges by role input",async()=>{
  const login=await fetch(base+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:"admin@demo.vn",password:"27032006"})});
  assert.equal(login.status,200);
