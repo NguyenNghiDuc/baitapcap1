@@ -1,6 +1,7 @@
 const http=require("http"),fs=require("fs"),path=require("path"),crypto=require("crypto"),url=require("url"),staticServer=require("./lib/static-server");
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,STATIC_ROOT=process.env.STATIC_ROOT||((process.env.NODE_ENV==="production"&&fs.existsSync(path.join(ROOT,"dist")))?path.join(ROOT,"dist"):ROOT),DB_PATH=path.join(ROOT,"data","db.json"),UPLOAD_DIR=path.join(ROOT,"uploads");
 const loginDevices=require("./lib/login-devices");
+const apiPerformance=require("./lib/api-performance");
 const handleAdminResults=require("./routes/admin-results");
 const handlePresence=require("./routes/presence");
 const presence=require("./lib/presence");
@@ -68,6 +69,11 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword(crypto.randomBytes(32).toString("hex")),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
 
 async function api(req,res,p,ip){
+ if(req.method==="GET"&&p==="/api/admin/performance"){
+  const admin=await requireUser(req,res,["admin"]);if(!admin)return;
+  return send(res,200,apiPerformance.summary(),{"Cache-Control":"private, no-store"});
+ }
+
  if(await handleHealth(req,res,p,{send,storage,pg:pgStore,supabase}))return;
  if(["/api/metrics","/api/client-errors"].includes(p)&&!rate(ip,"telemetry",30,60e3))return send(res,429,{error:"Too many metrics"});
  if(await handleMetrics(req,res,p,{send,parseBody,monitor}))return;
@@ -295,6 +301,7 @@ async function handler(req,res){
    return send(res,200,{configured,endpointValid,modelConfigured:!!process.env.AI_MODEL,authRequired:true,provider:"openai-compatible",databaseCheck:"not_performed",message:!configured?"Thiếu cấu hình AI_API_URL hoặc AI_API_KEY":!endpointValid?"AI_API_URL cần trỏ đến endpoint HTTPS /chat/completions":"Đã nhận cấu hình AI. Chưa xác minh khóa hoặc quyền truy cập API."});
   }
   if(p.startsWith("/api/")){
+   apiPerformance.track(req,res,p);
    try{await bootstrap()}catch(e){safeMonitorError("database_startup_failed",{message:e.message});return send(res,503,{error:"Cơ sở dữ liệu chưa sẵn sàng. Kiểm tra DATABASE_URL và migrations."})}
    return await api(req,res,p,ip)
   }
