@@ -29,7 +29,35 @@ function tests(){return window.TermExamBank?.render?.()||pageHead("KIỂM TRA","
 function materials(){return pageHead("TÀI LIỆU","Kho tài liệu","Giáo viên/Admin có thể tải PDF, ảnh và audio lên backend.")+`<div class="panel teacher-only"><h3>⬆️ Upload tài liệu</h3><form id="uploadForm" class="stack"><label>Tiêu đề<input name="title" required></label><label>File<input id="uploadFile" type="file" accept=".pdf,image/png,image/jpeg,audio/mpeg,audio/wav" required></label><button class="primary">Tải lên</button></form></div><div class="list-card" id="materialList">${D.materials.map(m=>`<div class="material-row"><div class="pdf">PDF</div><div class="grow"><b>${esc(m.title)}</b><small>${m.subject||""} • Lớp ${m.grade||""} • ${m.size||""}</small></div><button class="outline">Xem</button></div>`).join("")}</div>`}
 function favorites(){const a=D.lessons.filter(x=>state.favorites.includes(x.id));return pageHead("ĐÃ LƯU","Yêu thích")+`<div class="list-card">${a.length?a.map(lessonRow).join(""):'<div class="empty">Chưa có bài yêu thích.</div>'}</div>`}
 function history(){const a=[...state.results].reverse(),avg=a.length?Math.round(a.reduce((x,y)=>x+y.score,0)/a.length):0;return pageHead("TIẾN ĐỘ","Kết quả học tập")+(state.user?.role==="admin"?'<div class="panel"><b>🛡️ Bạn đang dùng Admin.</b> Đây là lịch sử trên thiết bị hiện tại, không phải toàn bộ học sinh. <button class="primary" data-route="adminResults">📊 Xem bảng điểm tất cả tài khoản →</button></div>':"")+`<div class="panel"><button class="outline" id="exportXlsx">📊 Xuất Excel</button> <button class="outline" id="exportPdf">📄 Xuất PDF</button><p class="muted" style="margin:12px 0 0">Lịch sử ở đây lưu trên thiết bị; Excel/PDF lấy các bài đã đồng bộ lên server. Bài cũ không có thông tin tài khoản sẽ ghi “Chưa xác định”.</p></div>`+`<div class="metrics">${metric("📝",a.length,"Lượt làm")}${metric("🎯",avg+"%","Trung bình")}${metric("⭐",a.reduce((x,y)=>x+(y.points||0),0),"Điểm thưởng")}${metric("⏱",Math.round(a.reduce((x,y)=>x+(y.durationSec||0),0)/60)+"p","Thời gian")}</div><div class="panel"><div class="table-wrap"><table><thead><tr><th>Bài</th><th>Tài khoản làm bài</th><th>Môn</th><th>Điểm</th><th>Ngày</th></tr></thead><tbody>${a.map(r=>`<tr><td>${esc(r.title)}</td><td><b>${esc(window.ResultAccount?.describe?.(r)?.name||"Chưa xác định")}</b><small style="display:block;color:var(--muted,#718096)">${esc(window.ResultAccount?.describe?.(r)?.detail||"Bài cũ lưu trên thiết bị")}</small></td><td>${esc(subj(r.subject).name)}</td><td><b>${r.score}%</b></td><td>${esc(r.date||"")}</td></tr>`).join("")||'<tr><td colspan="5">Chưa có dữ liệu.</td></tr>'}</tbody></table></div></div>`}
-async function analytics(){if(!state.user)return loginRequired("Đăng nhập để xem phân tích.");let j;try{j=await API.get("/api/analytics")}catch(e){return errorBox(e.message)}return pageHead("PHÂN TÍCH","Điểm mạnh & điểm cần ôn","Dữ liệu tính từ kết quả đã lưu trên server.")+`<div class="metrics">${metric("📝",j.totalAttempts,"Lượt làm")}${metric("🎯",j.average+"%","Trung bình")}${metric("⏱",j.totalMinutes,"Phút học")}${metric("💡",j.weakest?.name||"—","Môn cần ôn")}</div><div class="panel"><h3>Theo môn</h3>${j.subjects.map(s=>`<div class="simple-row"><span>${subj(s.id).icon}</span><div class="grow"><b>${s.name}</b><small>${s.attempts} lượt • ${s.wrong} câu sai</small></div><strong>${s.avg}%</strong></div>`).join("")||"<p>Chưa có dữ liệu.</p>"}</div>`}
+async function analytics(){
+ if(!state.user)return loginRequired("Đăng nhập để xem phân tích.");
+ let j;try{j=await API.get("/api/analytics")}catch(e){return errorBox(e.message)}
+ const isAdmin=state.user.role==="admin";
+ const attempts=Array.isArray(j.recentResults)?j.recentResults:[];
+ const formatted=d=>{
+  const t=Date.parse(d||"");
+  return Number.isFinite(t)?new Date(t).toLocaleString("vi-VN"):"Chưa rõ";
+ };
+ const latest=attempts.map(r=>
+  '<tr><td><b>'+esc(r.studentName||"Chưa xác định tài khoản")+'</b>'+
+   (isAdmin&&r.studentEmail?'<small class="analytics-account-email">'+esc(r.studentEmail)+'</small>':"")+
+   '</td><td>'+esc(r.title||"Bài luyện tập")+'</td><td>'+esc(subj(r.subject).name)+'</td>'+
+   '<td><b>'+esc(Number(r.score||0))+'%</b></td><td>'+formatted(r.createdAt)+'</td></tr>'
+ ).join("");
+ return pageHead("PHÂN TÍCH","Điểm mạnh & điểm cần ôn","Dữ liệu tính từ kết quả đã lưu trên server.")+
+  '<div class="metrics">'+metric("📝",j.totalAttempts,"Lượt làm")+metric("🎯",j.average+"%","Trung bình")+
+   metric("⏱",j.totalMinutes,"Phút học")+metric("💡",j.weakest?.name||"—","Môn cần ôn")+'</div>'+
+  '<div class="panel"><h3>Theo môn</h3>'+(j.subjects||[]).map(x=>'<div class="simple-row"><span>'+esc(subj(x.id).icon)+'</span><div class="grow"><b>'+esc(x.name)+'</b><small>'+esc(x.attempts)+' lượt • '+esc(x.wrong)+' câu sai</small></div><strong>'+esc(x.avg)+'%</strong></div>').join("")+
+   ((j.subjects||[]).length?"":"<p>Chưa có dữ liệu.</p>")+'</div>'+
+  '<div class="panel analytics-account-results"><h3>👤 Ai đã làm bài kiểm tra?</h3>'+
+   '<p class="muted">'+(isAdmin?"Hiển thị 30 lượt làm mới nhất của các tài khoản.":"Hiển thị các lượt làm mới nhất thuộc tài khoản được phép xem.")+
+   ' Điểm tự động từ trình duyệt chưa phải điểm giáo viên duyệt.</p>'+
+   '<div class="table-wrap"><table><thead><tr><th>Tài khoản làm bài</th><th>Tên bài</th><th>Môn</th><th>Điểm</th><th>Ngày làm</th></tr></thead><tbody>'+
+   (latest||'<tr><td colspan="5">Chưa có bài đã đồng bộ lên server. Những bài chỉ lưu trên máy sẽ không hiển thị ở đây.</td></tr>')+
+   '</tbody></table></div>'+
+   (isAdmin?'<p class="muted">Muốn xem tất cả bài nộp, lọc theo tài khoản hoặc lớp? <a href="#adminResults">Mở bảng điểm học sinh →</a></p>':"")+
+  '</div>';
+}
 function loginRequired(msg="Bạn cần đăng nhập."){return `<div class="empty large"><h2>🔐 ${msg}</h2><button class="primary" id="openLogin">Đăng nhập / Đăng ký</button></div>`}
 function errorBox(m){return `<div class="empty large"><h2>⚠️ Có lỗi</h2><p>${esc(m)}</p></div>`}
 async function classes(){if(!state.user)return loginRequired();let j;try{j=await API.get("/api/classes")}catch(e){return errorBox(e.message)}const canCreate=["teacher","admin"].includes(state.user.role);return pageHead("LỚP HỌC","Lớp học của bạn","Giáo viên tạo lớp bằng mã, học sinh nhập mã để tham gia.")+`${canCreate?'<div class="panel"><h3>➕ Tạo lớp</h3><form id="classForm" class="form-grid"><label>Tên lớp<input name="name" required></label><label>Khối<select name="grade">'+[1,2,3,4,5].map(g=>'<option>'+g+'</option>').join('')+'</select></label><button class="primary">Tạo lớp</button></form></div>':''}${state.user.role==="student"?'<div class="panel"><h3>🔑 Vào lớp bằng mã</h3><form id="joinClassForm" class="chat-input"><input name="code" placeholder="Nhập mã lớp" required><button class="primary">Tham gia</button></form></div>':''}<div class="cards-3">${j.classes.map(c=>`<article class="test-card"><h3>🏫 ${esc(c.name)}</h3><p>Lớp ${c.grade}</p><div class="test-meta"><span>Mã: <b>${c.code}</b></span><span>👥 ${c.studentIds?.length||0}</span></div></article>`).join("")||'<div class="empty">Chưa có lớp học.</div>'}</div>`}
