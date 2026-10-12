@@ -1,0 +1,39 @@
+/* Admin student results — isolated styles for #history admin dashboard. */
+#content:has(#adminResultsFilter){--ar-accent:#258cf1;--ar-edge:var(--line);--ar-panel:var(--surface);--ar-soft:var(--surface2);--ar-ink:var(--text);--ar-muted:var(--muted);max-width:none;min-width:0;}
+#content:has(#adminResultsFilter) .page-head{margin:0 0 22px;padding:4px 0 0}
+#content:has(#adminResultsFilter) .page-head .eyebrow{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid rgba(37,140,241,.22);border-radius:999px;background:rgba(37,140,241,.09);color:var(--ar-accent);font-size:11px;letter-spacing:.09em}
+#content:has(#adminResultsFilter) .page-head h1{font-family:"Baloo 2",sans-serif;font-size:clamp(25px,2.6vw,35px);letter-spacing:-.025em;line-height:1.3;margin:8px 0}
+#content:has(#adminResultsFilter) .page-head p{font-size:13px;line-height:1.7;margin:3px 0;color:var(--ar-muted)}
+#content:has(#adminResultsFilter) .panel{border:1px solid var(--ar-edge);border-radius:19px;padding:20px 22px;margin:0 0 16px;background:var(--ar-panel);box-shadow:0 8px 28px rgba(13,33,63,.055);min-width:0}
+#content:has(#adminResultsFilter) .page-head+.panel{padding:16px 19px;border-left:4px solid var(--ar-accent);background:var(--ar-soft);font-size:13px;line-height:1.8;color:var(--ar-ink)}
+#content:has(#adminResultsFilter) .page-head+.panel b{color:var(--ar-accent)}
+#adminResultsFilter{display:grid!important;grid-template-columns:minmax(180px,1.1fr) minmax(240px,1.7fr) minmax(100px,.65fr) minmax(140px,.8fr) auto;gap:14px!important;align-items:end}
+#adminResultsFilter label{display:flex!important;flex-direction:column;min-width:0;gap:8px;color:var(--ar-ink);font-size:12px;font-weight:700;line-height:1.4}
+#adminResultsFilter input,#adminResultsFilter select{appearance:auto;display:block;width:100%;min-width:0;min-height:44px;margin:0!important;padding:0 12px!important;background:var(--ar-panel);border:1px solid var(--ar-edge);border-radius:11px;color:var(--ar-ink);font-size:13px;font-weight:500;outline:none;transition:border-color .2s,box-shadow .2s}
+#adminResultsFilter input::placeholder{color:var(--ar-muted);opacity:.8}
+#adminResultsFilter input:focus,#adminResultsFilter select:focus{border-color:var(--ar-accent);box-shadow:0 0 0 3px rgba(37,140,241,.14)}
+#adminResultsFilter button[type=submit]{min-height:44px;white-space:nowrap;padding:0 18px;border-radius:11px;font-size:13px;background:linear-gradient(135deg,#349dff,#176bd6);box-shadow:0 7px 17px rgba(26,113,212,.20)}
+#adminResultsFilter button[type=submit]:hover{filter:brightness(1.07);transform:translateY(-1px)}
+#content:has(#adminResultsFilter) #adminResultsFilter+.panel{padding:23px 22px}
+#content:has(#adminResultsFilter) #adminResultsFilter+.panel>h3{margin:0 0 21px;font:800 19px/1.4 "Baloo 2",sans-serif;color:var(--ar-ink)}
+#content:has(#adminResultsFilter) .table-wrap{max-width:100%;overflow-x:auto;border:1px solid var(--ar-edge);border-radius:14px;background:var(--ar-panel);scrollbar-width:thin}
+#content:has(#adminResultsFilter) .table-wrap table{width:100%;min-width:900px;border-collapse:separate;border-spacing:0;table-layout:auto;font-size:12.5px}
+#content:has(#adminResultsFilter) .table-wrap th{position:relative;background:var(--ar-soft);color:var(--ar-muted);text-align:left;font-size:11px;font-weight:800;letter-spacing:.02em;padding:15px 16px;border-bottom:1px solid var(--ar-edge);white-space:nowrap}
+#content:has(#adminResultsFilter) .table-wrap td{padding:16px;border-bottom:1px solid var(--ar-edge);vertical-align:middle;color:var(--ar-ink);line-height:1.55;overflow-wrap:anywhere}
+#content:has(#adminResultsFilter) .table-wrap tbody tr:last-child td{border-bottom:0}
+#content:has(#adminResultsFilter) .table-wrap tbody tr:hover{background:var(--ar-soft)}
+#content:has(#adminResultsFilter) .table-wrap td:first-child{min-width:170px}
+#content:has(#adminResultsFilter) .table-wrap td:nth-child(2){min-width:215px;font-weight:650}
+#content:has(#adminResultsFilter) .table-wrap td:nth-child(5)>b{display:inline-block;padding:5px 10px;border-radius:9px;background:rgba(37,140,241,.12);color:var(--ar-accent);font-size:13px;font-weight:800}
+#content:has(#adminResultsFilter) .table-wrap td small{font-size:10.5px;line-height:1.6;color:var(--ar-muted);font-weight:500}
+#content:has(#adminResultsFilter) .table-wrap td:first-child strong{display:block;font-weight:800}
+#content:has(#adminResultsFilter) .table-wrap td:last-child{white-space:nowrap;font-size:11.5px}
+#content:has(#adminResultsFilter) .exam-pagination{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;padding:24px 0 1px}
+#content:has(#adminResultsFilter) .exam-pagination span{font-size:12px;font-weight:800;color:var(--ar-muted)}
+#content:has(#adminResultsFilter) .exam-pagination button{min-height:39px;min-width:93px;padding:8px 14px;border:1px solid var(--ar-edge);border-radius:10px;background:var(--ar-panel);color:var(--ar-ink);font-weight:700;font-size:12px}
+#content:has(#adminResultsFilter) .exam-pagination button:not(:disabled):hover{background:var(--ar-soft);border-color:var(--ar-accent);color:var(--ar-accent)}
+#content:has(#adminResultsFilter) .exam-pagination button:disabled{cursor:not-allowed;opacity:.43}
+@media(max-width:1250px){#adminResultsFilter{grid-template-columns:repeat(2,minmax(0,1fr))}#adminResultsFilter button[type=submit]{grid-column:1/-1;width:100%}}
+@media(max-width:650px){#content:has(#adminResultsFilter) .panel{padding:16px;margin-bottom:12px;border-radius:14px}#content:has(#adminResultsFilter) #adminResultsFilter+.panel{padding:16px}#adminResultsFilter{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}#adminResultsFilter label:nth-child(1),#adminResultsFilter label:nth-child(2){grid-column:1/-1}#adminResultsFilter label{font-size:11px}#adminResultsFilter input,#adminResultsFilter select{font-size:12px}#content:has(#adminResultsFilter) .table-wrap table{min-width:790px}#content:has(#adminResultsFilter) .table-wrap td{padding:12px}#content:has(#adminResultsFilter) .table-wrap th{padding:12px}}
+@media(max-width:380px){#adminResultsFilter{grid-template-columns:1fr}#adminResultsFilter label{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){#adminResultsFilter button,#adminResultsFilter input,#adminResultsFilter select{transition:none}}
