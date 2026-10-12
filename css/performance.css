@@ -9,3 +9,12 @@ img[loading="lazy"]{content-visibility:auto}
 @media(max-width:600px){.perf-skeleton{padding:16px}.perf-skeleton span{height:68px}}
 
 .perf-list-controls{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:14px 0;flex-wrap:wrap}.perf-search{min-width:min(360px,100%);flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text)}.perf-pager{display:flex;align-items:center;gap:10px}.perf-pager span{font-size:13px;color:var(--muted);white-space:nowrap}@media(max-width:600px){.perf-list-controls{align-items:stretch}.perf-pager{justify-content:space-between;width:100%}}
+
+/* Route-aware skeleton: avoid a blank screen while authenticated data is loading. */
+.perf-skeleton{width:100%;max-width:none;gap:13px;min-height:250px;padding:16px 0;margin:0}
+.perf-skeleton>small{display:block;color:var(--muted);font-size:12px;font-weight:700}
+.perf-skeleton>span{border:1px solid var(--line);max-width:100%;min-height:65px}
+.perf-skeleton-list .perf-skeleton-filter{height:100px}
+.perf-skeleton-list .perf-skeleton-table{height:270px}
+@media(max-width:600px){.perf-skeleton{min-height:210px}.perf-skeleton-list .perf-skeleton-table{height:220px}}
+@media(prefers-reduced-motion:reduce){.perf-skeleton>span{animation:none}}
