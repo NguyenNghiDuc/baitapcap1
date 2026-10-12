@@ -15,7 +15,7 @@ window.ProfilePage=(()=>{
   section("📊 Tiến độ học tập",'<div class="profile-metrics"><div><b>'+fmt(r.completed)+'</b><small>Bài đã làm</small></div><div><b>'+(r.average===null?"—":fmt(r.average)+"%")+'</b><small>Điểm trung bình</small></div><div><b>'+(r.streak===null?"—":fmt(r.streak))+'</b><small>Ngày liên tiếp</small></div><div><b>'+(r.badges===null?"—":fmt(r.badges))+'</b><small>Huy hiệu</small></div></div><small class="muted">Số liệu lấy từ bài làm đã lưu trên máy chủ; dấu — là chưa có dữ liệu.</small><p><a href="#history">Xem kết quả học tập →</a></p>')+'</div>';
   const wallet=section("⭐ Ví & VIP",w.enabled?'<div class="profile-wallet"><div><small>Số dư thử nghiệm</small><h2>'+fmt(w.balance)+' đ ảo</h2></div><div><b>'+(w.active?"VIP đến "+new Date(w.until).toLocaleDateString("vi-VN"):"Gói miễn phí")+'</b><p>Không phải tiền thật</p></div><a class="outline small" href="#premium">Mở ví demo →</a></div>':'<p>Ví thử nghiệm hiện chưa bật. Không có giao dịch tiền thật.</p><a class="outline small" href="#premium">Xem trạng thái ví →</a>');
   const fields=section("👤 Thông tin cá nhân",'<form id="profileDetailsForm" class="profile-fields">'+input("name","Họ tên",p.name)+input("email","Email",p.email)+input("phone","Số điện thoại",p.phone,"tel")+input("birthday","Ngày sinh",p.birthday,"date")+sel("gender","Giới tính",[["","Chưa cập nhật"],["female","Nữ"],["male","Nam"],["other","Khác"]],p.gender)+sel("grade","Lớp",[1,2,3,4,5].map(v=>[v,"Lớp "+v]),p.grade)+input("school","Trường",p.school)+input("address","Địa chỉ",p.address)+'<div class="profile-form-actions"><button class="primary" type="submit">💾 Lưu thay đổi</button><button type="reset" class="outline">Hủy thay đổi</button></div></form>');
-  const security=section("🛡️ Bảo mật tài khoản",'<div class="profile-rows"><p>✉️ Email: <b>'+esc(p.emailVerified?"Đã xác minh":"Chưa xác minh")+'</b></p><p>🔐 Mật khẩu <a href="#accountSecurity">Đổi mật khẩu →</a></p><p>🛡️ Xác thực 2 bước: <a href="#accountSecurity">Xem cài đặt bảo mật →</a></p><p>💻 Thiết bị đăng nhập: <a href="#profileDevices">Xem thiết bị và địa chỉ IP ↓</a></p></div>');
+  const security=section("🛡️ Bảo mật tài khoản",'<div class="profile-rows"><p>✉️ Email: <b id="profileEmailVerifyStatus">'+esc(p.emailVerified?"Đã xác minh":"Chưa xác minh")+'</b></p><div class="profile-email-verify"><span class="muted">Xác minh địa chỉ email để bảo vệ tài khoản.</span><div class="profile-email-actions"><button type="button" class="outline small" id="profileResendVerifyEmail">✉️ Gửi email xác thực</button><button type="button" class="outline small" id="profileCheckEmailVerification">↻ Kiểm tra xác thực</button></div></div><p>🔐 Mật khẩu <a href="#accountSecurity">Đổi mật khẩu →</a></p><p>🛡️ Xác thực 2 bước: <a href="#accountSecurity">Xem cài đặt bảo mật →</a></p><p>💻 Thiết bị đăng nhập: <a href="#profileDevices">Xem thiết bị và địa chỉ IP ↓</a></p></div>');
   const deviceRows=(data.devices||[]).map(d=>{
    const first=d.firstSeenAt&&!Number.isNaN(Date.parse(d.firstSeenAt))?new Date(d.firstSeenAt).toLocaleString("vi-VN"):"Chưa rõ";
    const last=d.lastSeenAt&&!Number.isNaN(Date.parse(d.lastSeenAt))?new Date(d.lastSeenAt).toLocaleString("vi-VN"):"Chưa rõ";
@@ -29,6 +29,44 @@ window.ProfilePage=(()=>{
  }
  function bind(toast,refresh){
   document.querySelector("#profileEdit")?.addEventListener("click",()=>document.querySelector('#profileDetailsForm [name="name"]')?.focus());
+  const verifyStatus=document.querySelector("#profileEmailVerifyStatus");
+  const resend=document.querySelector("#profileResendVerifyEmail");
+  const check=document.querySelector("#profileCheckEmailVerification");
+  const setVerified=verified=>{
+   if(verifyStatus)verifyStatus.textContent=verified?"Đã xác minh":"Chưa xác minh";
+   if(resend){resend.disabled=verified;resend.textContent=verified?"✓ Email đã xác minh":"✉️ Gửi email xác thực"}
+  };
+  setVerified(!!data?.profile?.emailVerified);
+  const getVerifiedUser=async()=>{
+   await window.SupabaseApp?.ready();
+   if(!window.SupabaseApp?.enabled())throw new Error("Chỉ hỗ trợ xác thực email khi Supabase Auth được bật.");
+   const {data:result,error}=await window.SupabaseApp.client.auth.getUser();
+   if(error)throw error;
+   if(!result?.user?.email)throw new Error("Không tìm thấy email đăng nhập. Hãy đăng nhập lại.");
+   return result.user;
+  };
+  resend?.addEventListener("click",async()=>{
+   resend.disabled=true;
+   try{
+    const user=await getVerifiedUser();
+    if(user.email_confirmed_at){setVerified(true);toast("Email đã được xác minh.");return}
+    const {error}=await window.SupabaseApp.client.auth.resend({type:"signup",email:user.email,options:{emailRedirectTo:location.origin+"/#profile"}});
+    if(error)throw error;
+    toast("Đã yêu cầu gửi email xác thực. Hãy kiểm tra hộp thư và thư rác.");
+   }catch(err){toast(err.message||"Không gửi được email xác thực");}
+   finally{if(verifyStatus?.textContent!=="Đã xác minh")resend.disabled=false}
+  });
+  check?.addEventListener("click",async()=>{
+   check.disabled=true;
+   try{
+    const user=await getVerifiedUser(),verified=!!user.email_confirmed_at;
+    setVerified(verified);
+    toast(verified?"Email đã xác minh thành công.":"Email chưa được xác minh. Hãy mở liên kết trong hộp thư.");
+    if(verified)refresh();
+   }catch(err){toast(err.message||"Không kiểm tra được xác thực email")}
+   finally{check.disabled=false}
+  });
+
   document.querySelector("#profileDetailsForm")?.addEventListener("submit",async e=>{
    e.preventDefault();const b=e.currentTarget.querySelector('[type="submit"]');b.disabled=true;
    try{const d=Object.fromEntries(new FormData(e.currentTarget));d.grade=Number(d.grade);await API.patch("/api/profile/details",d);window.AppAuthBridge?.updateProfile?.(d);toast("Đã lưu thông tin hồ sơ");refresh()}catch(err){toast(err.message)}finally{b.disabled=false}
