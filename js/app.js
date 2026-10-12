@@ -174,7 +174,7 @@ async function render(){
   // Recover from stale exam locks that hid the navigation without displaying an exam.
   if(window.ExamLock?.isActive?.()&&!document.querySelector(".locked-exam-shell"))window.ExamLock.exit();
   shell();
-  $("#content").innerHTML='<div class="perf-skeleton"><span></span><span></span><span></span></div>';
+  $("#content").innerHTML=window.PerfLoader?.skeleton?.(route)||'<div class="perf-skeleton" role="status">Đang tải dữ liệu…</div>';
   await window.PerfLoader?.ensureRoute(route);
   if(sequence!==renderSequence||route!==state.route)return;
   if(route==="practice"){
