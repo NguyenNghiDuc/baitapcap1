@@ -192,7 +192,7 @@ async function render(){
    $("#content").innerHTML=content;bind();
    window.StudentRegistry.bind(route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
   }
-  const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),history:async()=>{if(state.user?.role==="admin"){await window.PerfLoader.ensureRoute("adminResults");return window.AdminResults.render(state.user)}return history()},storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
+  const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),performanceMonitor:async()=>window.PerformanceMonitor?.render(state.user)||errorBox("Giám sát API chưa tải"),history:async()=>{if(state.user?.role==="admin"){await window.PerfLoader.ensureRoute("adminResults");return window.AdminResults.render(state.user)}return history()},storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
   if(asyncMap[route]){
    const content=await asyncMap[route]();
    if(sequence!==renderSequence||route!==state.route)return;
