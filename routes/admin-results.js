@@ -30,11 +30,14 @@ module.exports=async function adminResults(req,res,p,ctx){
      AND ($3::int=0 OR r.grade=$3)
      AND ($4::text='' OR r.title ILIKE '%'||$4||'%' OR u.name ILIKE '%'||$4||'%' OR u.email ILIKE '%'||$4||'%')`;
    const params=[userId,subject,grade,search];
-   const count=await pg.query(`SELECT count(*)::int AS total FROM results r LEFT JOIN users u ON u.id=r.user_id ${where}`,params);
-   total=Number(count.rows[0]?.total||0);
-   const result=await pg.query(`SELECT r.id,r.user_id AS "userId",r.title,r.subject,r.grade,r.score,r.correct,r.total,r.duration_sec AS "durationSec",r.created_at AS "createdAt",u.name AS "ownerName",u.email AS "ownerEmail"
+   // Use pooled connections concurrently for independent read-only queries.
+   const [count,result]=await Promise.all([
+    pg.query(`SELECT count(*)::int AS total FROM results r LEFT JOIN users u ON u.id=r.user_id ${where}`,params),
+    pg.query(`SELECT r.id,r.user_id AS "userId",r.title,r.subject,r.grade,r.score,r.correct,r.total,r.duration_sec AS "durationSec",r.created_at AS "createdAt",u.name AS "ownerName",u.email AS "ownerEmail"
      FROM results r LEFT JOIN users u ON u.id=r.user_id ${where}
-     ORDER BY r.created_at DESC,r.id DESC LIMIT $5 OFFSET $6`,[...params,limit,(page-1)*limit]);
+     ORDER BY r.created_at DESC,r.id DESC LIMIT $5 OFFSET $6`,[...params,limit,(page-1)*limit])
+   ]);
+   total=Number(count.rows[0]?.total||0);
    items=result.rows.map(row);
   }else{
    const db=load(),users=new Map((db.users||[]).map(u=>[String(u.id),u]));
