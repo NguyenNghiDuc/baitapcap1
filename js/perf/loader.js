@@ -1,5 +1,5 @@
 window.PerfLoader=(()=>{
- const loaded=new Map();let hashPromise=null;
+ const loaded=new Map(),prefetched=new Set();let hashPromise=null,prefetchTimer=null;
  const routeFiles={
   tests:["/js/exams/interaction.js","/js/exams/term-exams.js","/js/exams/runner.js","/js/exams/catalog.js"],
   profile:["/js/student/profile-page.js","/js/supabase/storage.js"],
@@ -35,8 +35,43 @@ window.PerfLoader=(()=>{
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
   for(const src of routeFiles[route]||[])await script(src)
  }
- function prefetch(route){const files=routeFiles[route]||[];const run=()=>files.forEach(async src=>{if(loaded.has(src))return;const l=document.createElement("link");l.rel="prefetch";l.as="script";l.href=await versioned(src);document.head.appendChild(l)});("requestIdleCallback" in window)?requestIdleCallback(run,{timeout:2500}):setTimeout(run,1200)}
+ function prefetch(route){
+  const files=routeFiles[route]||[];
+  if(!files.length||navigator.connection?.saveData||navigator.connection?.effectiveType==="2g")return;
+  const run=async()=>{
+   for(const src of files.slice(0,4)){
+    if(loaded.has(src)||prefetched.has(src)||prefetched.size>=16)continue;
+    prefetched.add(src);
+    const link=document.createElement("link");
+    link.rel="prefetch";link.as="script";link.dataset.prefetchSrc=src;
+    link.href=await versioned(src);
+    document.head.appendChild(link);
+   }
+  };
+  if("requestIdleCallback" in window)requestIdleCallback(()=>run(),{timeout:1600});
+  else setTimeout(()=>run(),200);
+ }
+ function skeleton(route){
+  const isTable=["history","adminResults","adminUsers","submissions","questionBank"].includes(route);
+  const blocks=isTable?'<span class="perf-skeleton-filter"></span><span class="perf-skeleton-table"></span>':'<span></span><span></span><span></span>';
+  return '<div class="perf-skeleton'+(isTable?" perf-skeleton-list":"")+'" role="status" aria-live="polite" aria-label="Đang tải dữ liệu">'+
+   '<small>Đang tải dữ liệu…</small>'+blocks+'</div>';
+ }
+ // Warm only code assets, not authenticated API responses, on user intent.
+ document.addEventListener("pointerover",e=>{
+  const el=e.target.closest?.("a[href^='#'],[data-route]");
+  if(!el)return;
+  const route=el.dataset.route||el.getAttribute("href")?.slice(1);
+  clearTimeout(prefetchTimer);
+  if(routeFiles[route])prefetchTimer=setTimeout(()=>prefetch(route),140);
+ },{passive:true});
+ document.addEventListener("focusin",e=>{
+  const el=e.target.closest?.("a[href^='#'],[data-route]");
+  if(!el)return;
+  const route=el.dataset.route||el.getAttribute("href")?.slice(1);
+  if(routeFiles[route])prefetch(route);
+ });
  function cleanupRoute(){window.API?.abortAll?.();window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.();try{window.speechSynthesis?.cancel?.()}catch{}try{window._btSpeechRecognition?.abort?.()}catch{}if(window._btBreak){clearTimeout(window._btBreak);window._btBreak=null}}
  window.addEventListener("online",()=>window.OfflineSyncQueue?.flush?.());
- return {ensureRoute,prefetch,cleanupRoute,routeFiles}
+ return {ensureRoute,prefetch,cleanupRoute,skeleton,routeFiles}
 })();
