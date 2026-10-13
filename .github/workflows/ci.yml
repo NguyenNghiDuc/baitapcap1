@@ -18,6 +18,8 @@ jobs:
   ui:
     runs-on: ubuntu-latest
     needs: check
+    env:
+      E2E_ADMIN_PASSWORD: E2E-${{ github.run_id }}-LocalOnly!
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
