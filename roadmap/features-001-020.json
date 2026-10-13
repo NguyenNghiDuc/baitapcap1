@@ -1,0 +1,170 @@
+{
+  "range": [
+    1,
+    20
+  ],
+  "title": "Admin, tài khoản và quản trị cốt lõi",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 1,
+      "name": "Phân quyền Admin chính/phụ và quyền chi tiết",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 2,
+      "name": "Nhật ký hoạt động và thay đổi có kiểm toán",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 3,
+      "name": "Quản lý và duyệt bài kiểm tra",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 4,
+      "name": "Thống kê kết quả học sinh",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 5,
+      "name": "Xuất báo cáo Excel/PDF",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 6,
+      "name": "Quản lý thiết bị và phiên đăng nhập",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 7,
+      "name": "Khóa tài khoản có thời hạn và lý do",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 8,
+      "name": "Duyệt sửa điểm, lưu điểm trước và sau",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 9,
+      "name": "Trung tâm cảnh báo sự cố",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 10,
+      "name": "Sao lưu và khôi phục dữ liệu",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 11,
+      "name": "Trung tâm hỗ trợ học sinh",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 12,
+      "name": "Thao tác hàng loạt có kiểm soát",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 13,
+      "name": "Dashboard hoạt động thời gian thực",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 14,
+      "name": "Tìm kiếm toàn hệ thống",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 15,
+      "name": "Lên lịch mở/đóng đề kiểm tra",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 16,
+      "name": "Giám sát sự kiện kỹ thuật phòng thi",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 17,
+      "name": "Duyệt ngân hàng câu hỏi",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 18,
+      "name": "Lịch sử phiên bản đề thi",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 19,
+      "name": "Xác minh và duyệt giáo viên",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 20,
+      "name": "Gửi email tự động",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    }
+  ]
+}
