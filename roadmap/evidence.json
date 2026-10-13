@@ -87,7 +87,10 @@
       "routes/analytics.js"
     ],
     "36": [
-      "scripts/db-check.js"
+      "scripts/db-check.js",
+      "routes/admin-integrity.js",
+      "js/admin/integrity-center.js",
+      "css/admin-integrity.css"
     ],
     "37": [
       "routes/account.js"
@@ -228,7 +231,10 @@
       "scripts/db-check.js"
     ],
     "142": [
-      "scripts/db-check.js"
+      "scripts/db-check.js",
+      "routes/admin-integrity.js",
+      "js/admin/integrity-center.js",
+      "css/admin-integrity.css"
     ],
     "144": [
       "routes/student.js"

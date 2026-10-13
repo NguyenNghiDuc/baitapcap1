@@ -132,7 +132,11 @@
       "phase": "foundation",
       "risk": "high",
       "needsExternalReview": false,
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "tests": [
+        "tests/admin-integrity.test.js"
+      ],
+      "note": "Đã có API và giao diện chỉ đọc để kiểm tra phạm vi điểm, số lượt nộp, giá trị người dùng và bài kiểm tra thiếu chủ sở hữu trên PostgreSQL. Chỉ phát hiện bất thường theo quy tắc định sẵn, không tự sửa dữ liệu và chưa kiểm toán được tất cả bảng."
     },
     {
       "id": 37,

@@ -21,7 +21,7 @@ test("verified Admin UI bridge displays eight working menu groups and roadmap se
  await expect(page.locator("#adminCenterFilters")).toBeVisible();
  await expect(page.locator('[data-nav-group="admin"]')).toBeVisible();
  const allLinks=page.locator('[data-nav-group="admin"] .admin-only');
- await expect(allLinks).toHaveCount(19);
+ await expect(allLinks).toHaveCount(20);
  await page.locator('#adminCenterFilters input[name="search"]').fill("phân quyền");
  await page.locator('#adminCenterFilters button[type="submit"]').click();
  await expect(page.locator(".admin-center-feature")).not.toHaveCount(0);

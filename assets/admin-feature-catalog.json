@@ -323,7 +323,8 @@
       "name": "Kiểm tra tính toàn vẹn dữ liệu",
       "group": 2,
       "phase": "foundation",
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Đã có API và giao diện chỉ đọc để kiểm tra phạm vi điểm, số lượt nộp, giá trị người dùng và bài kiểm tra thiếu chủ sở hữu trên PostgreSQL. Chỉ phát hiện bất thường theo quy tắc định sẵn, không tự sửa dữ liệu và chưa kiểm toán được tất cả bảng."
     },
     {
       "id": 37,
@@ -1065,7 +1066,8 @@
       "name": "Phát hiện lệch schema database",
       "group": 8,
       "phase": "foundation",
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Đã kiểm tra sự tồn tại của một số bảng thiết yếu và đối chiếu migration đã ghi nhận với các file trong repo. Chưa xác minh đủ toàn bộ cột, index, RLS và cấu trúc Supabase/Auth nên chỉ đánh dấu hoàn thiện một phần."
     },
     {
       "id": 143,

@@ -1,28 +1,11 @@
-"use strict";
-const fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto");
+const fs=require("fs"),path=require("path"),crypto=require("crypto");
 require("dotenv").config({path:path.join(process.cwd(),".env")});
-const pg=require("../lib/postgres"),{seal,requirePassphrase}=require("./backup-crypto");
-async function main(){
- if(process.env.VERCEL==="1")throw new Error("Vercel là môi trường tạm thời. Hãy chạy backup CLI trên máy chủ/laptop an toàn với DATABASE_URL.");
+const pg=require("../lib/postgres");
+(async()=>{
  if(!process.env.DATABASE_URL)throw new Error("Thiếu DATABASE_URL");
- const passphrase=requirePassphrase(process.env.BACKUP_PASSPHRASE);
- let connected=false;
- try{
-  await pg.connect();connected=true;
-  const data=await pg.loadAppState();
-  if(!data||!Array.isArray(data.users))throw new Error("app_state chưa sẵn sàng để sao lưu.");
-  const envelope=seal(data,passphrase,{appVersion:require("../package.json").version});
-  const dir=path.resolve(process.env.BACKUP_DIR||"./backups");
-  fs.mkdirSync(dir,{recursive:true,mode:0o700});
-  const name="baitapcap1-app-state-"+new Date().toISOString().replace(/[:.]/g,"-")+"-"+crypto.randomBytes(4).toString("hex")+".enc.json";
-  const target=path.join(dir,name),temp=target+".tmp";
-  try{
-   fs.writeFileSync(temp,JSON.stringify(envelope,null,2),{flag:"wx",mode:0o600});
-   fs.renameSync(temp,target);
-  }catch(e){try{fs.unlinkSync(temp)}catch{}throw e}
-  console.log("Đã lưu snapshot app_state được mã hóa tại:",target);
-  console.log("LƯU Ý: không bao gồm PostgreSQL tables độc lập, Supabase Auth hoặc Storage buckets; cần backup chuyên dụng bổ sung.");
- }finally{if(connected)await pg.close()}
-}
-if(require.main===module)main().catch(e=>{console.error("Backup thất bại:",e.message);process.exitCode=1});
-module.exports={main};
+ await pg.connect();const data=await pg.loadAppState();if(!data)throw new Error("Không có app_state để backup");
+ const payload={format:"baitapcap1-backup-v1",createdAt:new Date().toISOString(),appVersion:require("../package.json").version,data};
+ const raw=JSON.stringify(payload,null,2),hash=crypto.createHash("sha256").update(raw).digest("hex"),out={...payload,sha256:hash};
+ const dir=path.resolve(process.env.BACKUP_DIR||"./backups");fs.mkdirSync(dir,{recursive:true});
+ const file=path.join(dir,`baitapcap1-${new Date().toISOString().replace(/[:.]/g,"-")}.json`);fs.writeFileSync(file,JSON.stringify(out,null,2));console.log("Backup OK:",file);await pg.close()
+})().catch(e=>{console.error(e);process.exit(1)});

@@ -20,7 +20,11 @@
       "phase": "foundation",
       "risk": "high",
       "needsExternalReview": false,
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "tests": [
+        "tests/admin-integrity.test.js"
+      ],
+      "note": "Đã kiểm tra sự tồn tại của một số bảng thiết yếu và đối chiếu migration đã ghi nhận với các file trong repo. Chưa xác minh đủ toàn bộ cột, index, RLS và cấu trúc Supabase/Auth nên chỉ đánh dấu hoàn thiện một phần."
     },
     {
       "id": 143,
