@@ -62,7 +62,13 @@ function pageList(list,req,{searchFn}={}){
 function mime(file){return ({".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".svg":"image/svg+xml",".pdf":"application/pdf",".webmanifest":"application/manifest+json"})[path.extname(file).toLowerCase()]||"application/octet-stream"}
 
 function routeMatch(p,pattern){const a=p.split("/").filter(Boolean),b=pattern.split("/").filter(Boolean);if(a.length!==b.length)return null;const params={};for(let i=0;i<b.length;i++){if(b[i].startsWith(":"))params[b[i].slice(1)]=decodeURIComponent(a[i]);else if(a[i]!==b[i])return null}return params}
-function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO==="1"&&process.env.NODE_ENV!=="production"){const now=new Date().toISOString();db.users.push(
+function seedAdmin(){const db=load();
+ // E2E-only disposable credential: enabled exclusively on a local test server.
+ if(process.env.NODE_ENV==="test"&&process.env.SEED_DEMO==="1"&&process.env.E2E_ADMIN_PASSWORD){
+  const t=db.users.find(x=>x.email==="admin@demo.vn");
+  if(t){t.password=hashPassword(process.env.E2E_ADMIN_PASSWORD);save(db)}
+ }
+if(!db.users.length&&process.env.SEED_DEMO==="1"&&process.env.NODE_ENV!=="production"){const now=new Date().toISOString();db.users.push(
 {id:"demo-student",name:"Bé Minh Anh",email:"hocsinh@demo.vn",password:hashPassword("Demo1234!"),role:"student",grade:3,avatar:"👧🏻",emailVerified:true,createdAt:now},
 {id:"demo-teacher",name:"Cô Lan",email:"giaovien@demo.vn",password:hashPassword("Demo1234!"),role:"teacher",avatar:"👩🏻‍🏫",emailVerified:true,createdAt:now},
 {id:"demo-parent",name:"Phụ huynh Minh Anh",email:"phuhuynh@demo.vn",password:hashPassword("Demo1234!"),role:"parent",avatar:"👩🏻",emailVerified:true,children:["demo-student"],createdAt:now},
