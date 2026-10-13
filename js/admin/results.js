@@ -22,13 +22,22 @@ window.AdminResults=(()=>{
   let j;
   try{j=await API.get(url,{cancelPrevious:false})}catch(e){return '<section class="page-head"><h1>📊 Kết quả toàn bộ học sinh</h1></section>'+form()+'<div class="panel" role="alert">Không tải được bảng điểm: '+escape(e?.message||"Có lỗi")+'</div>'}
   const rows=state.kind==="exam"?(j.results||[]):(j.submissions||[]);
+  let reviewed=new Map();
+  if(state.kind==="exam"&&rows.some(x=>x.review?.needsReview)){
+   try{
+    const ids=rows.filter(x=>x.review?.needsReview).map(x=>String(x.id).slice(0,128));
+    const q=new URLSearchParams();ids.forEach(id=>q.append("resultId",id));
+    const log=await API.get("/api/admin/result-reviews?"+q.toString(),{noCache:true,cancelPrevious:false});
+    reviewed=new Map((log.reviews||[]).map(x=>[String(x.resultId),x]));
+   }catch{reviewed=new Map()}
+  }
   const total=Number(j.pagination?.total||0),pages=Math.max(1,Number(j.pagination?.pages||1));
   const sampleNotice=total>0&&total<30?'<p class="admin-results-sample-warning" role="status">⚠️ Mẫu dữ liệu nhỏ ('+total+' lượt theo bộ lọc). Chưa đủ cơ sở để kết luận xu hướng hay so sánh chất lượng học tập; một học sinh có thể nộp nhiều lượt.</p>':"";
   const dist=state.kind==="exam"?j.distribution:null;
   const reviewNotice=state.kind==="exam"&&state.review==="flagged"?'<p class="admin-results-sample-warning">Chỉ hiển thị các bài có dấu hiệu dữ liệu bất thường theo quy tắc kỹ thuật. Đây không phải kết luận gian lận và không làm thay đổi điểm.</p>':"";
   const distributionHtml=dist&&Array.isArray(dist.bands)?'<section class="admin-results-distribution" aria-label="Phân bố điểm bài kiểm tra"><h3>📈 Phân bố điểm toàn bộ kết quả theo bộ lọc</h3><p class="muted">Tính trên '+Number(dist.valid||0)+' lượt có điểm hợp lệ, không chỉ trang hiện tại. Điểm do học sinh tự gửi, chưa được xác minh; không đại diện cho số học sinh duy nhất.</p><div class="admin-results-bars">'+dist.bands.map(b=>{const count=Math.max(0,Number(b.count)||0),pct=dist.valid?Math.round(count/dist.valid*100):0;return '<div class="admin-results-bar"><span>'+escape(b.label)+'</span><div class="admin-results-track" role="img" aria-label="'+escape(b.label+': '+count+' lượt, '+pct+'%')+'"><i style="width:'+Math.min(100,pct)+'%"></i></div><strong>'+count+' ('+pct+'%)</strong></div>'}).join("")+'</div>'+(dist.excluded?'<small>Loại trừ '+Number(dist.excluded)+' kết quả có điểm không hợp lệ hoặc thiếu.</small>':'')+'</section>':"";
   const body=state.kind==="exam"
-   ?rows.map(r=>'<tr><td><strong>'+escape(r.owner?.name||"Chưa xác định")+'</strong><small style="display:block">'+escape(r.owner?.email||"")+'</small></td><td>'+escape(r.title)+'</td><td>'+escape(subjects[r.subject]||r.subject||"—")+'</td><td>'+escape(r.grade??"—")+'</td><td><b>'+scoreLabel(r.score)+'</b><small style="display:block">Tự chấm • chưa xác minh</small>'+(r.review?.needsReview?'<span class="admin-review-flag" title="'+escape((r.review.reasons||[]).join("; "))+'">⚠️ Cần kiểm tra: '+escape((r.review.reasons||[]).join("; "))+'</span>':"")+'</td><td>'+escape(r.correct??"—")+'/'+escape(r.total??"—")+'</td><td>'+when(r.createdAt)+'</td></tr>').join("")
+   ?rows.map(r=>'<tr><td><strong>'+escape(r.owner?.name||"Chưa xác định")+'</strong><small style="display:block">'+escape(r.owner?.email||"")+'</small></td><td>'+escape(r.title)+'</td><td>'+escape(subjects[r.subject]||r.subject||"—")+'</td><td>'+escape(r.grade??"—")+'</td><td><b>'+scoreLabel(r.score)+'</b><small style="display:block">Tự chấm • chưa xác minh</small>'+(r.review?.needsReview?'<span class="admin-review-flag">⚠️ '+escape((r.review.reasons||[]).join("; "))+'</span>'+(reviewed.has(String(r.id))?'<small class="admin-review-done">Đã xử lý: '+escape(reviewed.get(String(r.id)).status==="dismissed"?"Bỏ cảnh báo":"Đã xem xét")+' · '+when(reviewed.get(String(r.id)).reviewedAt)+'</small>':'<form class="admin-review-decision" data-result-id="'+escape(r.id)+'"><select name="status" aria-label="Quyết định"><option value="reviewed">Đã xem xét</option><option value="dismissed">Bỏ cảnh báo</option></select><input name="reason" required minlength="10" maxlength="500" placeholder="Lý do (10–500 ký tự)" aria-label="Lý do quyết định"><button type="submit" class="outline">Lưu nhận xét</button></form>'):"")+'</td><td>'+escape(r.correct??"—")+'/'+escape(r.total??"—")+'</td><td>'+when(r.createdAt)+'</td></tr>').join("")
    :rows.map(r=>'<tr><td><strong>'+escape(r.student?.name||"Chưa xác định")+'</strong><small style="display:block">'+escape(r.student?.email||"")+'</small></td><td>'+escape(r.assignment?.title||"Bài được giao")+'</td><td>'+escape(r.assignment?.subject||"—")+'</td><td>'+escape(r.assignment?.grade??"—")+'</td><td><b>'+scoreLabel(r.score)+'</b><small style="display:block">'+(r.gradingStatus==="teacher_graded"?"Đã được giáo viên chấm":"Đang chờ chấm")+'</small></td><td>'+escape(r.feedback||"—")+'</td><td>'+when(r.gradedAt||r.submittedAt)+'</td></tr>').join("");
   const header='<thead><tr><th>Tài khoản</th><th>Bài làm</th><th>Môn</th><th>Lớp</th><th>Điểm</th><th>'+(state.kind==="exam"?"Đúng/Tổng":"Nhận xét")+'</th><th>Ngày</th></tr></thead>';
   return '<section class="page-head"><span class="eyebrow">QUẢN TRỊ • ĐIỂM SỐ</span><h1>📊 Kết quả toàn bộ học sinh</h1><p>Tổng hợp các bài đã gửi lên server, xem tên và email tài khoản nộp.</p></section>'+
@@ -51,6 +60,16 @@ window.AdminResults=(()=>{
   });
   document.querySelector("#adminScoresPrev")?.addEventListener("click",()=>{state.page=Math.max(1,state.page-1);render()});
   document.querySelector("#adminScoresNext")?.addEventListener("click",()=>{state.page++;render()});
+  document.querySelectorAll(".admin-review-decision").forEach(el=>el.addEventListener("submit",async e=>{
+   e.preventDefault();
+   const f=e.currentTarget,btn=f.querySelector('button[type="submit"]'),reason=String(f.elements.reason.value||"").trim();
+   if(reason.length<10||reason.length>500){toast("Lý do phải dài từ 10 đến 500 ký tự");return}
+   btn.disabled=true;
+   try{
+    await API.post("/api/admin/result-reviews/decision",{resultId:f.dataset.resultId,status:f.elements.status.value,reason});
+    toast("Đã lưu kết quả xem xét");render();
+   }catch(err){toast(err.message||"Không thể lưu quyết định");btn.disabled=false}
+  }));
   document.querySelector("#adminResultsExportCsv")?.addEventListener("click",async e=>{
    const btn=e.currentTarget;btn.disabled=true;
    const params=new URLSearchParams();
