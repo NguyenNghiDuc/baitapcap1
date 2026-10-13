@@ -18,3 +18,6 @@
 .admin-alerts-item[data-severity="info"]{border-left:4px solid #5b94ef}
 .admin-alerts-empty{padding:25px;text-align:center;border-radius:13px;background:rgba(40,181,143,.08);color:var(--text);font-size:13px;font-weight:700}
 @media(max-width:650px){.admin-alerts-stats{gap:8px}.admin-alerts-stats>div{padding:12px}.admin-alerts-stats strong{font-size:22px}.admin-alerts-stats small{font-size:10px}.admin-alerts-item{padding:12px;gap:10px}.admin-alerts-heading{flex-wrap:wrap}}
+
+/* Admin sunset feature polish */
+.admin-alerts-stats>div{box-shadow:0 10px 28px rgba(142,69,21,.075);border-radius:18px}.admin-alerts-stats>div:hover{border-color:rgba(233,121,40,.4)}@media(max-width:650px){.admin-alerts-stats{grid-template-columns:1fr}}
