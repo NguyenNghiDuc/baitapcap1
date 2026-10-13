@@ -36,7 +36,7 @@ window.API={
   const cached=ttl?this.cache.get(cacheKey):null;
   if(cached&&cached.exp>Date.now())return cached.data;
   if(dedupe&&options.cancelPrevious!==true&&this.pending.has(cacheKey))return this.pending.get(cacheKey);
-  const retries=options.retries??(method==="GET"?2:0),timeout=options.timeout??15000;
+  const retries=options.retries??(method==="GET"?1:0),timeout=options.timeout??12000;
   const generation=this.generation,token=this.token;
   const run=async()=>{
    let lastErr;
@@ -65,8 +65,9 @@ window.API={
      lastErr=e;
      // Navigation, logout and explicit cancellation must never be retried.
      if((ctrl.signal.aborted&&!timedOut)||external?.aborted)throw e;
-     const retryable=attempt<retries&&(timedOut||(!e.status&&e.name!=="AbortError")||e.status>=500||e.status===429);
+     const retryable=attempt<retries&&(timedOut||(!e.status&&e.name!=="AbortError")||[502,503,504].includes(e.status));
      if(!retryable)throw e;
+     if(typeof navigator!=="undefined"&&navigator.onLine===false)throw e;
      await new Promise(resolve=>setTimeout(resolve,Math.min(1500,250*Math.pow(2,attempt))));
     }finally{
      clearTimeout(timer);
@@ -91,6 +92,8 @@ window.API={
   if(next)localStorage.setItem("bt_token",next);else localStorage.removeItem("bt_token");
  },
  get(p,o={}){return this.request(p,{...o,method:"GET"})},
+ // Independent read calls run in parallel; partial failures stay visible to callers.
+ getMany(paths,options={}){return Promise.allSettled(paths.map(path=>this.get(path,options)))},
  post(p,d,o={}){this.invalidate();return this.request(p,{...o,method:"POST",body:JSON.stringify(d)})},
  patch(p,d,o={}){this.invalidate();return this.request(p,{...o,method:"PATCH",body:JSON.stringify(d)})},
  delete(p,o={}){this.invalidate();return this.request(p,{...o,method:"DELETE"})}
