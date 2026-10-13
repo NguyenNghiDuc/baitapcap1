@@ -29,3 +29,39 @@ test("security center renders server-confirmed permissions and only current user
  await expect(page.locator(".admin-security-page")).toContainText("Thiết bị này");
  await expect(page.locator('link[data-lazy-style-src="/css/admin-security.css"]')).toHaveCount(1);
 });
+
+
+test("Admin sees IPs of other accounts and can search device history",async({page})=>{
+ const requests=[];
+ await page.route("**/api/public-config",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({supabase:{enabled:false}})
+ }));
+ await page.route("**/api/admin/security",r=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+  permissions:{title:"Admin",ownerConfigured:false,capabilities:{}},devices:[],notice:""
+ })}));
+ await page.route("**/api/admin/device-logs?**",r=>{
+  const q=new URL(r.request().url()).searchParams;
+  requests.push(q.get("search")||"");
+  const all=[{name:"Minh Anh",email:"student@example.test",device:"iPhone",browser:"Safari",ip:"203.0.113.5",lastSeenAt:"2026-10-14T00:00:00Z"},
+  {name:"Cô Lan",email:"teacher@example.test",device:"Windows",browser:"Chrome",ip:"198.51.100.6",lastSeenAt:"2026-10-13T00:00:00Z"}];
+  const matching=all.filter(d=>!q.get("search")||d.email.includes(q.get("search"))||d.ip.includes(q.get("search")));
+  return r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+   devices:matching,source:"postgres",pagination:{page:1,limit:20,total:matching.length,pages:1,hasMore:false}
+  })});
+ });
+ await page.goto("/#adminSecurity");
+ await expect(page.locator("#content")).toContainText("Chỉ quản trị viên",{timeout:12000});
+ await page.evaluate(async()=>{
+  await window.SupabaseApp?.ready();
+  window.AppAuthBridge.setUser({id:"admin-own",name:"Admin",email:"admin@example.test",role:"admin"});
+ });
+ await expect(page.locator(".admin-device-history")).toBeVisible({timeout:12000});
+ await expect(page.locator(".admin-device-history tbody tr")).toHaveCount(2);
+ await expect(page.locator(".admin-device-history")).toContainText("203.0.113.5");
+ await expect(page.locator(".admin-device-history")).toContainText("198.51.100.6");
+ await page.locator('#adminDeviceSearchForm input[name="search"]').fill("teacher@example.test");
+ await page.locator('#adminDeviceSearchForm button[type="submit"]').click();
+ await expect(page.locator(".admin-device-history tbody tr")).toHaveCount(1);
+ await expect(page.locator(".admin-device-history")).toContainText("198.51.100.6");
+ expect(requests).toContain("teacher@example.test");
+});

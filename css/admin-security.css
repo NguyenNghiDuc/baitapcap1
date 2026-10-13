@@ -26,3 +26,34 @@
 
 /* Admin sunset feature polish */
 .admin-sec-stats>div{border-radius:18px;box-shadow:0 10px 28px rgba(142,69,21,.075)}.admin-sec-stats>div:hover{border-color:rgba(233,121,40,.4)}@media(max-width:650px){.admin-sec-stats{grid-template-columns:1fr}}
+
+/* Admin-only cross-account device history */
+#content[data-admin-view="adminSecurity"] .admin-device-history{min-width:0}
+#content[data-admin-view="adminSecurity"] .admin-device-description{font-size:12px;line-height:1.7;color:var(--muted)}
+#content[data-admin-view="adminSecurity"] .admin-device-filter{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px;
+ padding:15px;border-radius:14px;border:1px solid var(--line);
+ background:linear-gradient(110deg,rgba(251,149,63,.08),transparent 75%),var(--surface2);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-filter label{display:grid;gap:7px;min-width:0;font-weight:750;font-size:12px}
+#content[data-admin-view="adminSecurity"] .admin-device-filter input{
+ width:100%;min-width:0;min-height:43px;padding:10px 13px;border:1px solid var(--line);border-radius:10px;
+ background:var(--surface);color:var(--text);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-filter button{min-height:43px;padding:10px 18px}
+#content[data-admin-view="adminSecurity"] .admin-device-history table{min-width:820px}
+#content[data-admin-view="adminSecurity"] .admin-device-history td:first-child b{display:block}
+#content[data-admin-view="adminSecurity"] .admin-device-history td small{display:block;max-width:230px;overflow-wrap:anywhere}
+#content[data-admin-view="adminSecurity"] .admin-device-history code{
+ display:inline-block;padding:5px 9px;border-radius:8px;
+ color:#b7520d;background:rgba(243,136,49,.09);font-size:11px;user-select:text
+}
+#content[data-admin-view="adminSecurity"] .admin-device-pager{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin-top:13px}
+#content[data-admin-view="adminSecurity"] .admin-device-pager span{font-size:12px;color:var(--muted)}
+#content[data-admin-view="adminSecurity"] .admin-device-pager button{min-height:38px}
+:root[data-theme="dark"] #content[data-admin-view="adminSecurity"] .admin-device-history code{color:#ffd0a6}
+@media(max-width:590px){
+ #content[data-admin-view="adminSecurity"] .admin-device-filter{grid-template-columns:1fr}
+ #content[data-admin-view="adminSecurity"] .admin-device-filter button{width:100%}
+ #content[data-admin-view="adminSecurity"] .admin-device-pager{justify-content:center}
+}

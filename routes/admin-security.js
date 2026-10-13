@@ -1,5 +1,6 @@
 "use strict";
 const devices=require("../lib/login-devices");
+const adminDeviceLogs=require("../lib/admin-device-logs");
 
 // Device history is an observation log, not proof of active sessions.
 // Never return device identifiers, tokens, session IDs, or other users' devices.
@@ -26,14 +27,30 @@ function privileges(user){
   }
  };
 }
-module.exports=async function handleSecurity(req,res,p,{send,requireUser,load,storage}){
- if(p!=="/api/account/devices"&&p!=="/api/admin/security")return false;
- const isAdminRoute=p==="/api/admin/security";
+module.exports=async function handleSecurity(req,res,p,{send,requireUser,load,storage,pg}){
+ if(p!=="/api/account/devices"&&p!=="/api/admin/security"&&p!=="/api/admin/device-logs")return false;
+ const isAdminRoute=p!=="/api/account/devices";
  const u=await requireUser(req,res,isAdminRoute?["admin"]:undefined);
  if(!u)return true;
  const extra={"Cache-Control":"private, no-store"};
  if(req.method!=="GET"){send(res,405,{error:"Chỉ hỗ trợ xem thông tin bảo mật"},{"Allow":"GET",...extra});return true}
  try{
+  if(p==="/api/admin/device-logs"){
+   const {URL}=require("node:url");
+   const q=new URL(req.url,"http://localhost").searchParams;
+   const query={page:q.get("page")??"1",search:q.getAll("search")};
+   if(query.search.length>1){send(res,400,{error:"Bộ lọc không hợp lệ"},extra);return true}
+   query.search=query.search[0]||"";
+   let parsed;try{parsed=adminDeviceLogs.filters(query)}
+   catch{send(res,400,{error:"Bộ lọc không hợp lệ"},extra);return true}
+   // PostgreSQL shared state, not a potentially stale serverless instance cache.
+   const db=process.env.DATABASE_URL?await pg.loadAppState():load();
+   if(!db||!Array.isArray(db.users))throw Error("Device database unavailable");
+   const out=adminDeviceLogs.list(db,parsed);
+   send(res,200,{...out,source:process.env.DATABASE_URL?"postgres":"local",
+    note:"Lịch sử đăng nhập đã ghi nhận, không phải thiết bị đang trực tuyến. IP có thể thay đổi hoặc thuộc VPN/mạng dùng chung."},extra);
+   return true;
+  }
   const db=load();
   const rows=safeDevices(db,u,req);
   const common={

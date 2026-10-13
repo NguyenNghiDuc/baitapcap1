@@ -44,7 +44,7 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
    catch(e){monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id});return send(res,503,{error:"Không thể đồng bộ quyền tài khoản vào PostgreSQL"}),true}
   }
   if(modified){save(db);if(flush)await flush()}
-  else if(deviceModified)save(db);
+  else if(deviceModified){save(db);if(flush)await flush()}
   monitor.info("supabase_auth_sync",{userId:u.id,role:u.role});
   return send(res,200,{user:{id:u.id,email:u.email,name:u.name,role:u.role,grade:u.grade,avatar:u.avatar,avatarPath:u.avatarPath||null,emailVerified:!!u.emailVerified}}),true;
  }

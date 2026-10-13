@@ -16,7 +16,7 @@ function req(path,opts={}){
   load:()=>db,storage:{status:()=>({mode:"supabase"})}
  };
  const request={url:path,method:opts.method||"GET",headers:{"x-client-device-id":opts.deviceId||"btdev_current123456789","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0.0.0"},socket:{remoteAddress:"127.0.0.1"}};
- return route(request,{},path,ctx).then(handled=>({handled,output,calledRoles}));
+ return route(request,{},path.split("?")[0],ctx).then(handled=>({handled,output,calledRoles}));
 }
 test("security routes reject anonymous callers and non-Admin roles",async()=>{
  const a=await req("/api/account/devices");assert.equal(a.output.status,401);
@@ -57,4 +57,51 @@ test("device and security endpoints are GET only and return no-store",async()=>{
  const r=await req("/api/admin/security",{user:{id:"u",role:"admin"},method:"DELETE"});
  assert.equal(r.output.status,405);assert.equal(r.output.headers["Allow"],"GET");
  assert.equal(r.output.headers["Cache-Control"],"private, no-store");
+});
+
+test("Non-admins cannot read other accounts IPs from global device history",async()=>{
+ const db={users:[{id:"u1",name:"Student",email:"student@example.test",role:"student"}],loginDevices:[
+  {userId:"u1",deviceId:"never-expose",device:"iPhone",browser:"Safari",ip:"203.0.113.5",lastSeenAt:"2026-10-14T00:00:00Z"}
+ ]};
+ for(const role of ["student","teacher","parent"]){
+  const r=await req("/api/admin/device-logs",{db,user:{id:"own",role}});
+  assert.equal(r.output.status,403);
+  assert.equal(JSON.stringify(r.output).includes("203.0.113.5"),false);
+ }
+ const admin=await req("/api/admin/device-logs",{db,user:{id:"admin",role:"admin"}});
+ assert.equal(admin.output.status,200);
+ assert.equal(admin.output.body.devices.length,1);
+ assert.equal(admin.output.body.devices[0].ip,"203.0.113.5");
+ assert.equal(JSON.stringify(admin.output.body).includes("never-expose"),false);
+ assert.equal(admin.output.headers["Cache-Control"],"private, no-store");
+});
+test("Device history endpoint rejects writes and invalid search parameters",async()=>{
+ const u={id:"admin",role:"admin"},db={users:[],loginDevices:[]};
+ const method=await req("/api/admin/device-logs",{user:u,db,method:"DELETE"});
+ assert.equal(method.output.status,405);
+ const tooLong=await req("/api/admin/device-logs?search="+("x".repeat(101)),{user:u,db});
+ assert.equal(tooLong.output.status,400);
+});
+
+test("Admin device history reads PostgreSQL shared state instead of stale instance cache",async()=>{
+ const old=process.env.DATABASE_URL;process.env.DATABASE_URL="postgres://mock.invalid/db";
+ let response;let reads=0;
+ try{
+  await route({method:"GET",url:"/api/admin/device-logs",headers:{}},{},
+   "/api/admin/device-logs",{
+    requireUser:async()=>({id:"admin",role:"admin"}),
+    load:()=>({users:[],loginDevices:[]}),
+    pg:{loadAppState:async()=>{reads++;return {
+     users:[{id:"student",name:"Học sinh",email:"student@example.test",role:"student"}],
+     loginDevices:[{userId:"student",deviceId:"secret-device",
+      device:"iPhone",browser:"Safari",ip:"198.51.100.25",lastSeenAt:"2026-10-14T03:00:00Z"}]
+    }}},
+    send:(_r,status,body)=>{response={status,body}}
+   });
+  assert.equal(reads,1);
+  assert.equal(response.status,200);
+  assert.equal(response.body.source,"postgres");
+  assert.equal(response.body.devices[0].ip,"198.51.100.25");
+  assert.equal(response.body.devices[0].deviceId,undefined);
+ }finally{if(old===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=old}
 });

@@ -126,7 +126,7 @@ async function api(req,res,p,ip){
  if(await handleAdminResults(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handleAdminResultReviews(req,res,p,{send,parseBody,requireUser,load,save,storage,pg:pgStore,audit}))return;
  if(await handleAdminAudit(req,res,p,{send,requireUser,load,pg:pgStore}))return;
- if(await handleAdminSecurity(req,res,p,{send,requireUser,load,storage}))return;
+ if(await handleAdminSecurity(req,res,p,{send,requireUser,load,storage,pg:pgStore}))return;
  if(await handleAdminBackup(req,res,p,{send,requireUser,pg:pgStore,storage}))return;
  if(await handleAdminIntegrity(req,res,p,{send,requireUser,pg:pgStore}))return;
  if(await handleClassInsights(req,res,p,{send,requireUser,load}))return;
