@@ -3,6 +3,7 @@ const PORT=Number(process.env.PORT||3000),ROOT=__dirname,STATIC_ROOT=process.env
 const loginDevices=require("./lib/login-devices");
 const apiPerformance=require("./lib/api-performance");
 const handleAdminResults=require("./routes/admin-results");
+const handleAdminAudit=require("./routes/admin-audit");
 const handlePresence=require("./routes/presence");
 const presence=require("./lib/presence");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
@@ -111,6 +112,7 @@ async function api(req,res,p,ip){
  if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleAdminResults(req,res,p,{send,requireUser,load,pg:pgStore}))return;
+ if(await handleAdminAudit(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handlePresence(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,flush:storage.flush,supabase,monitor,pg:pgStore}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor,audit:auditStore,pg:pgStore}))return;
