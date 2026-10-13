@@ -40,3 +40,20 @@ test("Decision API checks result within the existing PostgreSQL transaction clie
   assert.equal(queries.filter(x=>x.via==="pool").length,1);
  }finally{if(prior===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=prior}
 });
+
+test("Review refuses to save when PostgreSQL mutator omits transaction client",async()=>{
+ const prior=process.env.DATABASE_URL;process.env.DATABASE_URL="postgres://test.invalid/db";
+ let output;const state={users:[],resultReviewDecisions:[],audit:[]};
+ try{
+  await handler({method:"POST",url:"/api/admin/result-reviews/decision"},{}, "/api/admin/result-reviews/decision",{
+   pg:{query:async()=>({rows:[{id:"r1",score:101,correct:10,total:10,durationSec:40}]}),
+    mutateAppState:async fn=>({...await fn(state),state})},
+   storage:{flush:async()=>{},adopt:()=>{}},
+   requireUser:async()=>({id:"admin",role:"admin"}),
+   parseBody:async()=>({resultId:"r1",status:"reviewed",reason:"Đã kiểm tra tính nhất quán"}),
+   send:(_r,status)=>{output=status}
+  });
+  assert.equal(output,503);
+  assert.equal(state.resultReviewDecisions.length,0);
+ }finally{if(prior===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=prior}
+});
