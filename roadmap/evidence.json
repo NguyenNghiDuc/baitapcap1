@@ -1,0 +1,236 @@
+{
+  "disclaimer": "Paths are evidence of related code, NOT proof that the entire feature works in production. Review with unit/integration/UI tests.",
+  "features": {
+    "1": [
+      "server.js",
+      "routes/supabase-auth.js"
+    ],
+    "2": [
+      "lib/audit.js"
+    ],
+    "3": [
+      "js/exams/catalog.js",
+      "routes/exam-settings.js"
+    ],
+    "4": [
+      "routes/analytics.js"
+    ],
+    "5": [
+      "server.js"
+    ],
+    "6": [
+      "lib/login-devices.js"
+    ],
+    "7": [
+      "server.js"
+    ],
+    "8": [
+      "routes/admin-results.js"
+    ],
+    "9": [
+      "lib/alerting.js"
+    ],
+    "10": [
+      "scripts/db-backup.js",
+      "scripts/db-restore.js"
+    ],
+    "11": [
+      "js/student/help-feedback.js"
+    ],
+    "13": [
+      "routes/presence.js"
+    ],
+    "14": [
+      "js/sidebar-nav.js"
+    ],
+    "15": [
+      "routes/exam-settings.js"
+    ],
+    "16": [
+      "js/student/exam-proctor.js"
+    ],
+    "17": [
+      "server.js"
+    ],
+    "22": [
+      "server.js"
+    ],
+    "23": [
+      "routes/ai.js"
+    ],
+    "24": [
+      "routes/analytics.js"
+    ],
+    "26": [
+      ".github/workflows/ci.yml"
+    ],
+    "27": [
+      "server.js"
+    ],
+    "32": [
+      "routes/analytics.js"
+    ],
+    "36": [
+      "scripts/db-check.js"
+    ],
+    "37": [
+      "routes/account.js"
+    ],
+    "38": [
+      "js/perf/runtime-guard.js"
+    ],
+    "39": [
+      "server.js"
+    ],
+    "40": [
+      "js/student/help-feedback.js"
+    ],
+    "41": [
+      "routes/captcha.js"
+    ],
+    "42": [
+      "js/perf/runtime-guard.js"
+    ],
+    "43": [
+      "routes/presence.js"
+    ],
+    "44": [
+      "routes/profile-overview.js"
+    ],
+    "45": [
+      "routes/ai.js"
+    ],
+    "46": [
+      "lib/ai/math-engine.js"
+    ],
+    "49": [
+      "routes/analytics.js"
+    ],
+    "53": [
+      "lib/api-performance.js"
+    ],
+    "54": [
+      "lib/redis-session.js"
+    ],
+    "58": [
+      "routes/app.js"
+    ],
+    "59": [
+      "server.js"
+    ],
+    "60": [
+      "routes/health.js"
+    ],
+    "63": [
+      "server.js"
+    ],
+    "65": [
+      "db/schema.sql"
+    ],
+    "66": [
+      "server.js"
+    ],
+    "70": [
+      "db/schema.sql"
+    ],
+    "74": [
+      "lib/login-devices.js"
+    ],
+    "76": [
+      "lib/audit.js"
+    ],
+    "81": [
+      "js/data.js"
+    ],
+    "85": [
+      "js/data.js"
+    ],
+    "86": [
+      "js/exams/term-exams.js"
+    ],
+    "92": [
+      "routes/exam-drafts.js"
+    ],
+    "94": [
+      "routes/exam-drafts.js"
+    ],
+    "95": [
+      "routes/exam-drafts.js"
+    ],
+    "96": [
+      "js/exams/term-exams.js"
+    ],
+    "97": [
+      "js/exams/term-exams.js"
+    ],
+    "98": [
+      "js/student/exam-proctor.js"
+    ],
+    "105": [
+      "server.js"
+    ],
+    "107": [
+      "routes/app.js"
+    ],
+    "111": [
+      "routes/account.js"
+    ],
+    "116": [
+      "routes/app.js"
+    ],
+    "117": [
+      "server.js"
+    ],
+    "118": [
+      "routes/analytics.js"
+    ],
+    "121": [
+      "routes/ai.js"
+    ],
+    "122": [
+      "lib/ai/prompts.js"
+    ],
+    "124": [
+      "scripts/math-eval.js"
+    ],
+    "128": [
+      "routes/ai.js"
+    ],
+    "132": [
+      "routes/analytics.js"
+    ],
+    "133": [
+      "server.js"
+    ],
+    "138": [
+      "routes/analytics.js"
+    ],
+    "139": [
+      "js/student/goals.js"
+    ],
+    "141": [
+      "scripts/db-check.js"
+    ],
+    "142": [
+      "scripts/db-check.js"
+    ],
+    "144": [
+      "routes/student.js"
+    ],
+    "153": [
+      "js/student/i18n.js"
+    ],
+    "154": [
+      "sw.js"
+    ],
+    "155": [
+      ".github/workflows/ci.yml"
+    ],
+    "156": [
+      "js/student/accessibility.js"
+    ],
+    "159": [
+      "routes/health.js"
+    ]
+  }
+}
