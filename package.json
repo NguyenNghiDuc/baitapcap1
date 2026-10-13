@@ -21,7 +21,9 @@
     "build": "node scripts/build-production.js",
     "perf:load": "node scripts/load-test.js",
     "perf:lighthouse": "node scripts/lighthouse-audit.js",
-    "ai:math-eval": "node scripts/math-eval.js"
+    "ai:math-eval": "node scripts/math-eval.js",
+    "roadmap:audit": "node scripts/audit-roadmap.js",
+    "roadmap:audit:json": "node scripts/audit-roadmap.js --json"
   },
   "engines": {
     "node": "22.x"
