@@ -3,7 +3,7 @@ window.AdminCenter=(()=>{
  const sections=[
   {id:"overview",icon:"🧭",title:"Tổng quan",description:"Bảng điều khiển và danh mục phát triển",links:[["admin","Dashboard"],["adminCenter","Danh mục 160 mục"]]},
   {id:"users",icon:"👥",title:"Người dùng",description:"Tài khoản và phân quyền đang sử dụng",links:[["adminUsers","Quản lý tài khoản"]]},
-  {id:"learning",icon:"🏫",title:"Học tập & lớp học",description:"Công cụ lớp học và người giám hộ",links:[["classes","Lớp học"],["teacher","Giáo viên"],["parent","Phụ huynh"]]},
+  {id:"learning",icon:"🏫",title:"Học tập & lớp học",description:"Công cụ lớp học và người giám hộ",links:[["classes","Lớp học"],["classInsights","Thống kê lớp"],["teacher","Giáo viên"],["parent","Phụ huynh"]]},
   {id:"exams",icon:"📝",title:"Đề thi & chấm điểm",description:"Câu hỏi, phòng thi và bài đã nộp",links:[["questionBank","Ngân hàng câu hỏi"],["examRooms","Phòng thi"],["submissions","Chấm bài"]]},
   {id:"ai",icon:"🤖",title:"AI học tập",description:"Trải nghiệm trợ giảng, chưa phải bảng cấu hình AI",links:[["ai","Trợ giảng AI"]]},
   {id:"reports",icon:"📊",title:"Báo cáo & thống kê",description:"Điểm học sinh và phân tích kết quả",links:[["adminResults","Bảng điểm"],["analytics","Phân tích"]]},
