@@ -126,7 +126,7 @@
       "group": 1,
       "phase": "foundation",
       "assessment": "partial",
-      "note": "Đã có yêu cầu sửa điểm với lý do, Admin duyệt/từ chối, lịch sử điểm và audit. Chấm lần đầu, tạo yêu cầu và duyệt dùng khóa hàng PostgreSQL trong một transaction, có kiểm thử hai yêu cầu đồng thời/rollback. Chưa an toàn toàn hệ thống vì các endpoint legacy khác vẫn ghi toàn bộ app_state từ cache và có thể ghi đè; cần tiếp tục chuyển các luồng này sang transaction."
+      "note": "Chấm lần đầu, tạo và duyệt yêu cầu sửa điểm dùng giao dịch khóa hàng PostgreSQL. Đường lưu trạng thái cũ nay chỉ ghép các thay đổi vào snapshot mới nhất, không thể sửa điểm đã tồn tại hay thay thế gradeReviews; có test xung đột, rollback và lưu trùng. Vẫn chưa đảm bảo an toàn cho mọi endpoint ngoài app_state, các mảng không có định danh ổn định, hoặc thao tác legacy không đợi xác nhận ghi."
     },
     {
       "id": 9,
