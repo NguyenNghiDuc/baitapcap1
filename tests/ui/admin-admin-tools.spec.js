@@ -1,5 +1,17 @@
 "use strict";
 const {test,expect}=require("@playwright/test");
+async function expectAdminView(page,selector){
+ try{await expect(page.locator(selector)).toBeVisible({timeout:12000})}
+ catch(err){
+  const debug=await page.evaluate(()=>({
+   hash:location.hash,role:document.querySelector("#sideRole")?.textContent,
+   content:document.querySelector("#content")?.textContent?.slice(0,1000),
+   loaded:[...document.querySelectorAll("script[data-lazy-src],link[data-lazy-style-src]")].map(e=>e.dataset.lazySrc||e.dataset.lazyStyleSrc)
+  }));
+  console.log("ADMIN_UI_DIAGNOSTICS",JSON.stringify(debug));
+  throw err;
+ }
+}
 async function adminSession(page,route){
  // Fake API fixture only: do not race real Supabase startup with a second hashchange,
  // especially on slower Mobile WebKit.
@@ -22,7 +34,7 @@ test("alert center renders severity cards from authenticated API response",async
   counts:{critical:1,warning:0,info:0},windowMinutes:15,sampleCount:12,generatedAt:new Date().toISOString(),scope:"current-server-instance"
  })}));
  await adminSession(page,"adminAlerts");
- await expect(page.locator(".admin-alerts-page")).toBeVisible({timeout:12000});
+ await expectAdminView(page,".admin-alerts-page");
  await expect(page.locator(".admin-alerts-item")).toHaveCount(1);
  await expect(page.locator(".admin-alerts-item")).toContainText("Database không sẵn sàng");
  await expect(page.locator('link[data-lazy-style-src="/css/admin-alerts.css"]')).toHaveCount(1);
@@ -40,7 +52,7 @@ test("filtered Admin scores can be exported to an Excel-readable CSV",async({pag
   return r.fulfill({status:200,headers:{"Content-Type":"text/csv; charset=utf-8"},body:"\ufeffTên,Điểm\r\nA,90\r\n"});
  });
  await adminSession(page,"adminResults");
- await expect(page.locator("#adminResultsExportCsv")).toBeVisible({timeout:12000});
+ await expectAdminView(page,"#adminResultsExportCsv");
  await page.locator('#adminResultsFilter select[name="grade"]').selectOption("4");
  await page.locator('#adminResultsFilter select[name="subject"]').selectOption("math");
  await page.locator('#adminResultsFilter button[type="submit"]').click();
