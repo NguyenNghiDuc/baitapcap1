@@ -56,3 +56,6 @@
 @media(max-width:1250px){.admin-center-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-center-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-center-filters button{grid-column:1/-1}}
 @media(max-width:710px){.admin-center-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-center-grid{grid-template-columns:1fr}.admin-center-group-heading{min-height:0}.admin-center-feature{flex-wrap:wrap}.admin-center-state{margin-left:54px}.admin-center-filters{grid-template-columns:1fr}.admin-center-filters button{grid-column:auto}.admin-center-stats>div{padding:14px}.admin-center-stats strong{font-size:24px}}
 @media(prefers-reduced-motion:reduce){.admin-center-group{transition:none}.admin-center-group:hover{transform:none}}
+
+/* Admin sunset feature polish */
+.admin-center-group,.admin-center-stats>div{box-shadow:0 10px 28px rgba(142,69,21,.075)}.admin-center-group:hover{border-color:rgba(233,121,40,.45)}.admin-center-icon{background:rgba(238,119,33,.12)}.admin-center-links a:hover{border-color:rgba(233,121,40,.42)}@media(max-width:650px){.admin-center-filters{grid-template-columns:1fr}.admin-center-grid{grid-template-columns:1fr}}
