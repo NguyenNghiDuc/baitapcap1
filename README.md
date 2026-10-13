@@ -59,6 +59,10 @@ Mật khẩu demo học sinh / giáo viên / phụ huynh: `Demo1234!`
 
 Xem chi tiết: [FEATURES.md](FEATURES.md) và [docs/PRODUCTION.md](docs/PRODUCTION.md).
 
+**Danh mục mở rộng 1–160:** [roadmap/README.md](roadmap/README.md). Các hạng mục mới được kiểm kê riêng, không coi là hoàn thành cho đến khi có kiểm thử. Chạy `npm run roadmap:audit` để kiểm tra danh mục và bằng chứng mã nguồn.
+
+**Nhật ký Admin mới:** mở menu **Admin → Nhật ký hoạt động**; tính năng xem và lọc nhật ký chỉ dành cho Admin và không hiển thị metadata nhạy cảm.
+
 ## Kiểm tra code
 
 ```bash
