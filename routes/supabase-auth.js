@@ -9,6 +9,7 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"}),true}
   const token=String(d.accessToken||"");const su=await supabase.getUserFromToken(token);if(!su)return send(res,401,{error:"Supabase session không hợp lệ"}),true;
   const db=load();let u=db.users.find(x=>x.authUserId===su.id);
+  const existing=u?{email:u.email,role:u.role,emailVerified:u.emailVerified,authUserId:u.authUserId}:null;
   const md=su.user_metadata||{};
   // Admin provisioning must be tied to the exact Supabase Auth user UUID,
   // configured by the site owner. Never trust email or user_metadata.role.
@@ -22,13 +23,28 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
    if(isConfiguredAdmin)u.role="admin";
    else if(u.role!=="admin"&&["student","parent"].includes(md.role))u.role=md.role;
   }
+  let access=null;
   if(u&&process.env.DATABASE_URL){
-   try{const access=await pg.getUserAccess(u.id);if(access){u.role=access.role;u.locked=!!access.locked}}
-   catch(e){monitor.warn("auth_user_access_failed",{message:e.message});return send(res,503,{error:"Không thể kiểm tra quyền tài khoản với PostgreSQL"}),true}
+   try{
+    access=await pg.getUserAccess(u.id);
+    if(access){
+     // The configured Admin UUID is an explicit trusted provisioning rule.
+     // All other roles are read from the authoritative PostgreSQL record.
+     u.role=isConfiguredAdmin?"admin":access.role;
+     u.locked=!!access.locked;
+    }
+   }catch(e){monitor.warn("auth_user_access_failed",{message:e.message});return send(res,503,{error:"Không thể kiểm tra quyền tài khoản với PostgreSQL"}),true}
   }
   if(u.locked)return send(res,423,{error:"Tài khoản đã bị Admin khóa. Vui lòng liên hệ quản trị viên."}),true;
-  loginDevices.record(db,u,req);
-  await save(db);await pg.upsertUser(u).catch(e=>monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id}));monitor.info("supabase_auth_sync",{userId:u.id,authUserId:su.id,role:u.role});
+  const modified=!existing||existing.email!==u.email||existing.role!==u.role||existing.emailVerified!==u.emailVerified||existing.authUserId!==u.authUserId;
+  // Do not serialize and re-upload the entire app state on every page refresh.
+  const deviceModified=loginDevices.record(db,u,req);
+  if(process.env.DATABASE_URL&&(!access||(isConfiguredAdmin&&access.role!=="admin"))){
+   try{await pg.upsertUser(u)}
+   catch(e){monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id});return send(res,503,{error:"Không thể đồng bộ quyền tài khoản vào PostgreSQL"}),true}
+  }
+  if(modified||deviceModified)await save(db);
+  monitor.info("supabase_auth_sync",{userId:u.id,role:u.role});
   return send(res,200,{user:{id:u.id,email:u.email,name:u.name,role:u.role,grade:u.grade,avatar:u.avatar,avatarPath:u.avatarPath||null,emailVerified:!!u.emailVerified}}),true;
  }
  return false;
