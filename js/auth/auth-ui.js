@@ -27,10 +27,10 @@ window.AuthUI=(()=>{
    // with minimum privileges until the server returns the authoritative role.
    const verified=data.user||data.session.user;
    API.setToken(data.session.access_token);
-   bridge.setUser?.({id:verified.id,email:verified.email||d.email,name:String(verified.user_metadata?.name||verified.email?.split("@")[0]||"Người dùng"),role:"student",grade:Number(verified.user_metadata?.grade)||4,avatar:"👧🏻",pendingProfile:true});
+   bridge.setUser?.({id:verified.id,email:verified.email||d.email,name:String(verified.user_metadata?.name||verified.email?.split("@")[0]||"Người dùng"),role:"pending",avatar:"👤",pendingProfile:true});
    close();
    if(location.hash!=="#home")location.hash="#home";
-   bridge.toast?.("Đăng nhập thành công");
+   bridge.toast?.("Đã đăng nhập, đang xác thực quyền tài khoản...");
    window.SupabaseApp.sync(data.session).then(u=>{
     if(!u)throw new Error("Chưa nhận được hồ sơ tài khoản");
     bridge.setUser?.(u);
