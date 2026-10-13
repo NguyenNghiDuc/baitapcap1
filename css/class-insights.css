@@ -1,0 +1,23 @@
+/* Staff-only class overview; isolated from the existing class creation UI. */
+.class-insights-page{display:grid;gap:17px;min-width:0;padding-bottom:24px}
+.class-insights-page>.page-head{margin:0}
+.class-insights-toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;padding:17px 19px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.class-insights-toolbar strong{color:var(--text);font-size:15px}
+.class-insights-toolbar p{margin:5px 0 0;font-size:11px;line-height:1.7}
+.class-insights-shortcuts{display:flex;gap:7px;flex-wrap:wrap}
+.class-insights-shortcuts a{min-height:35px;display:inline-flex;align-items:center;padding:8px 12px;text-decoration:none;font-size:11px;border-radius:9px}
+.class-insights-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.class-insights-card{border:1px solid var(--line);border-radius:17px;padding:20px;background:var(--surface);box-shadow:0 9px 26px rgba(22,65,135,.055);min-width:0}
+.class-insights-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.class-insights-heading h3{margin:8px 0 0;font:800 19px/1.3 "Baloo 2",sans-serif;color:var(--text);overflow-wrap:anywhere}
+.class-insights-grade{font-size:10px;font-weight:850;padding:6px 9px;border-radius:8px;background:rgba(73,139,241,.12);color:var(--blue)}
+.class-insights-count{font-size:11px;font-weight:750;color:var(--muted);text-align:right}
+.class-insights-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:19px}
+.class-insights-grid>div{display:grid;gap:6px;border:1px solid var(--line);background:var(--surface2);border-radius:11px;padding:10px 8px;min-width:0}
+.class-insights-grid strong{color:var(--text);font:800 22px/1.15 "Baloo 2",sans-serif}
+.class-insights-grid small{color:var(--muted);font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+.class-insights-caption,.class-insights-disclaimer{color:var(--muted);font-size:11px;line-height:1.75;margin:14px 0 0}
+.class-insights-pager{display:flex;align-items:center;justify-content:center;gap:13px;margin:4px 0}
+.class-insights-pager span{font-size:12px;color:var(--muted);font-weight:750}
+@media(max-width:1150px){.class-insights-list{grid-template-columns:1fr}}
+@media(max-width:510px){.class-insights-card{padding:15px}.class-insights-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.class-insights-heading{flex-wrap:wrap}.class-insights-toolbar{padding:13px}}

@@ -17,7 +17,7 @@ window.AdminCenter=(()=>{
  const labels={"not-verified":"Chưa xác minh","partial":"Đã làm một phần","verified":"Đã kiểm thử","blocked":"Cần điều kiện triển khai"};
  async function catalog(){
   if(cached)return cached;
-  const r=await fetch("/assets/admin-feature-catalog.json?revision=20261013-admin5",{cache:"reload"});
+  const r=await fetch("/assets/admin-feature-catalog.json?revision=20261013-admin6",{cache:"reload"});
   if(!r.ok)throw Error("Không tải được danh mục chức năng.");
   const data=await r.json();
   if(data.schema!==1||data.features?.length!==160||data.groups?.length!==8)throw Error("Danh mục chưa được đồng bộ từ lộ trình.");

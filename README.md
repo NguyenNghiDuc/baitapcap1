@@ -63,6 +63,8 @@ Xem chi tiết: [FEATURES.md](FEATURES.md) và [docs/PRODUCTION.md](docs/PRODUCT
 
 **Nhật ký Admin:** chỉ Admin có thể xem và lọc nhật ký; metadata nhạy cảm không được hiển thị.
 
+**Thống kê lớp học:** giáo viên/Admin mở `/#classInsights` từ bảng điều khiển giáo viên hoặc menu Admin. Báo cáo chỉ tổng hợp số học sinh hiện có trong lớp, bài đã giao, lượt nộp, bài chờ chấm và tỷ lệ học sinh–bài có nộp. Giáo viên chỉ được xem lớp mình phụ trách; API không trả tên/email, ID học sinh hay mã mời lớp. Đây chưa phải báo cáo học lực cá nhân hay kết quả xác minh chính thức.
+
 **Trung tâm kiểm tra dữ liệu:** `/#adminIntegrity` dành cho Admin, sử dụng API chỉ đọc để xem sự tồn tại của các bảng quan trọng, tình trạng migration, điểm bất thường và bài kiểm tra thiếu tài khoản. Kết quả có thể là *Đạt / Cần kiểm tra / Cảnh báo / Chưa xác minh*. Không trả bản ghi học sinh, không tự sửa hoặc chạy migration; kết quả không thay thế cho kiểm toán đầy đủ.
 
 **Trung tâm sao lưu:** `/#adminBackup` chỉ dành cho Admin chính và chỉ **xem trạng thái sẵn sàng**. Lệnh CLI được nâng cấp tạo snapshot `app_state` mã hóa AES-256-GCM (`BACKUP_PASSPHRASE` tối thiểu 16 ký tự). Kiểm tra an toàn: `npm run db:restore -- backups/file.enc.json --verify`; không dùng nút khôi phục trên website. Lưu ý snapshot không bao gồm các bảng PostgreSQL độc lập, Supabase Auth hoặc Storage; phải bổ sung bản sao lưu đầy đủ bằng dịch vụ quản trị Supabase/`pg_dump`. Khôi phục thực tế yêu cầu `--confirm-restore` và biến `RESTORE_CONFIRMATION=I_UNDERSTAND_RESTORE_MAY_OVERWRITE_DATA`, sau khi đã có bản sao dự phòng và lịch bảo trì. File backup v1 chưa mã hóa chỉ được xác minh với `--allow-legacy` và checksum đúng.

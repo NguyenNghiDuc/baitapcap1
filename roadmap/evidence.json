@@ -123,7 +123,10 @@
       "lib/ai/math-engine.js"
     ],
     "49": [
-      "routes/analytics.js"
+      "routes/analytics.js",
+      "routes/class-insights.js",
+      "js/teacher/class-insights.js",
+      "css/class-insights.css"
     ],
     "53": [
       "lib/api-performance.js"

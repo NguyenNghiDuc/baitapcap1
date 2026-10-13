@@ -2,6 +2,7 @@ window.PerfLoader=(()=>{
  const loaded=new Map(),stylesLoaded=new Map(),prefetched=new Set();let hashPromise=null,prefetchTimer=null;
  // Styles for private/secondary screens are not render-blocking for the home page.
  const routeStyles={
+  classInsights:["/css/class-insights.css"],
   adminCenter:["/css/admin-console.css","/css/admin-center.css"],
   adminAlerts:["/css/admin-console.css","/css/admin-alerts.css"],
   adminSecurity:["/css/admin-console.css","/css/admin-security.css"],
@@ -19,6 +20,7 @@ window.PerfLoader=(()=>{
   submissions:["/css/admin-console.css"]
  };
  const routeFiles={
+  classInsights:["/js/teacher/class-insights.js"],
   adminCenter:["/js/admin/center.js"],
   adminAlerts:["/js/admin/alerts.js"],
   adminSecurity:["/js/admin/security-center.js"],
@@ -65,14 +67,14 @@ window.PerfLoader=(()=>{
   })();
   stylesLoaded.set(src,p);return p;
  }
- async function ensureRoute(route,{isAdmin=false}={}){
+ async function ensureRoute(route,{isAdmin=false,isStaff=false}={}){
   // Exam modules are preloaded in index.html. Do not block exams on config or asset-hash requests.
   if(route==="tests"&&window.TermExamBank&&window.TermExamCatalog&&window.ExamRunner&&window.ExamInteraction)return;
   // Feature flags are fetched in the background; do not hold every page on this API.
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
   const files=routeFiles[route]||[];
-  const css=isAdmin?(routeStyles[route]||[]):[];
+  const css=(isAdmin||(route==="classInsights"&&isStaff))?(routeStyles[route]||[]):[];
   const cssReady=Promise.all(css.map(style));
   const scriptsReady=(async()=>{
    if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));

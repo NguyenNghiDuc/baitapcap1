@@ -76,7 +76,11 @@
       "phase": "learning",
       "risk": "medium",
       "needsExternalReview": false,
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Đã bổ sung tổng hợp theo lớp cho giáo viên/Admin: số học sinh, bài giao, lượt nộp/chờ chấm và tỷ lệ học sinh–bài có nộp. Chỉ thống kê lớp được phân công; chưa phân tích học lực cá nhân, xu hướng nhiều kỳ, điểm được xác minh hay báo cáo chuyên sâu toàn diện.",
+      "tests": [
+        "tests/class-insights.test.js"
+      ]
     },
     {
       "id": 50,
