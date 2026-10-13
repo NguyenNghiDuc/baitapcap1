@@ -25,3 +25,6 @@
 .admin-integrity-note{font-size:11px;padding:13px;border-radius:10px;background:rgba(62,126,237,.08);line-height:1.7;color:var(--text);margin:14px 0}
 @media(max-width:850px){.admin-integrity-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:530px){.admin-integrity-metric{padding:12px}.admin-integrity-heading{flex-wrap:wrap}.admin-integrity-check{flex-wrap:wrap}.admin-integrity-state{margin-left:45px}}
+
+/* Admin sunset feature polish */
+.admin-integrity-metric{border-radius:18px;box-shadow:0 10px 28px rgba(142,69,21,.075)}.admin-integrity-metric:hover{border-color:rgba(233,121,40,.4)}@media(max-width:650px){.admin-integrity-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
