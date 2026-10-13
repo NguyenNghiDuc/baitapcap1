@@ -49,6 +49,7 @@ async function handler(req,res,p,ctx){
    if(!signals.length){send(res,409,{error:"Bài không còn dấu hiệu bất thường để xem xét."},HEADERS);return true}
    const out=await execute(ctx,async(db,audit,client)=>{
     // Recheck the authoritative result while holding the app_state transaction lock.
+    if(process.env.DATABASE_URL&&!client)throw Error("Missing transaction client for review");
     const latest=await findResult(ctx,resultId,client);
     if(!latest)return {status:404,data:{error:"Bài kiểm tra không còn tồn tại."}};
     const currentSignals=reviewSignals(latest);
