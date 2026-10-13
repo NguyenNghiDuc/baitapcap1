@@ -1,0 +1,243 @@
+/* Admin Users 2026 — scoped to #adminUsers; no global table/form overrides. */
+.admin-users-page{
+ --au-ink:var(--text);--au-muted:var(--muted);--au-panel:var(--surface);
+ --au-soft:var(--surface2);--au-border:var(--line);--au-blue:#217ce9;
+ --au-indigo:#5b5fee;--au-shadow:0 14px 38px rgba(19,64,115,.075);
+ display:grid;gap:21px;width:100%;min-width:0;padding-bottom:30px;
+}
+.admin-users-page .page-head{
+ position:relative;isolation:isolate;overflow:hidden;margin:0!important;
+ background:linear-gradient(114deg,#102d61 0%,#174c9c 51%,#347eec 100%);
+ border:1px solid rgba(255,255,255,.15);border-radius:22px;
+ padding:32px 35px!important;box-shadow:0 16px 35px rgba(27,79,150,.17);
+}
+.admin-users-page .page-head:after{
+ content:"";position:absolute;right:-36px;top:-94px;width:315px;height:315px;
+ border:55px solid rgba(255,255,255,.055);border-radius:50%;pointer-events:none;z-index:-1;
+}
+.admin-users-page .page-head .eyebrow{
+ display:inline-flex;align-items:center;gap:7px;padding:6px 11px;
+ border-radius:999px;background:rgba(255,255,255,.13);
+ color:#c9e4ff!important;letter-spacing:.13em;font-size:10.5px;font-weight:800;
+}
+.admin-users-page .page-head h1{
+ margin:10px 0 5px!important;font-family:"Baloo 2",sans-serif;
+ font-size:clamp(25px,2.8vw,34px);font-weight:800;color:#fff!important;
+ letter-spacing:-.025em;line-height:1.25;
+}
+.admin-users-page .page-head p{margin:0;color:#d8eaff!important;font-size:13px;line-height:1.8;max-width:740px}
+.admin-users-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.admin-users-stat{
+ position:relative;display:flex;align-items:center;gap:16px;
+ padding:21px 20px;min-height:124px;background:var(--au-panel);
+ border:1px solid var(--au-border);border-radius:18px;
+ box-shadow:var(--au-shadow);min-width:0;overflow:hidden;
+}
+.admin-users-stat:after{position:absolute;content:"";top:-40px;right:-28px;width:125px;height:125px;
+ border-radius:50%;background:rgba(41,131,237,.047);pointer-events:none}
+.admin-users-stat-icon{display:grid;place-items:center;flex:0 0 55px;height:55px;
+ border-radius:17px;background:rgba(43,128,241,.10);font-size:25px}
+.admin-users-stat-online .admin-users-stat-icon{background:rgba(16,185,129,.12)}
+.admin-users-stat:nth-child(3) .admin-users-stat-icon{background:rgba(117,98,238,.1)}
+.admin-users-stat>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.admin-users-stat small{font-size:12px;line-height:1.3;font-weight:750;color:var(--au-muted)}
+.admin-users-stat strong{font-family:"Baloo 2",sans-serif;color:var(--au-ink);font-size:31px;line-height:1.06;font-weight:800}
+.admin-users-stat>div>span{font-size:10.5px;color:var(--au-muted);line-height:1.6}
+.admin-users-page .panel{margin:0;min-width:0;border:1px solid var(--au-border);border-radius:19px;
+ box-shadow:var(--au-shadow);background:var(--au-panel)}
+.admin-users-page .admin-users-warning{padding:16px 20px;border-left:4px solid #e7ab45;line-height:1.7;font-size:12.5px}
+.admin-users-page .admin-users-warning p{margin:6px 0 0}
+.admin-users-page .admin-users-live-banner{
+ display:flex;align-items:center;gap:12px;min-height:53px;padding:13px 17px;
+ border:1px solid rgba(29,155,110,.19);border-radius:13px;
+ background:linear-gradient(90deg,rgba(16,185,129,.075),var(--au-panel) 90%);
+ color:var(--au-ink);font-weight:600;font-size:12px;line-height:1.6;
+}
+.admin-users-page .admin-users-live-banner:before{
+ content:"●";display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;
+ background:rgba(16,185,129,.10);border-radius:50%;color:#18a778;font-size:16px;
+}
+.admin-users-page .admin-users-live-banner[data-available="0"]{
+ border-color:var(--au-border);background:var(--au-soft)}
+.admin-users-page .admin-users-live-banner[data-available="0"]:before{background:rgba(107,114,128,.12);color:var(--au-muted)}
+.admin-users-page .admin-users-grant{padding:26px 27px;background:
+ linear-gradient(113deg,rgba(48,136,255,.075),transparent 68%),var(--au-panel)}
+.admin-users-grant-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;min-width:0}
+.admin-users-grant-icon{display:grid;place-items:center;flex:0 0 48px;height:48px;
+ border:1px solid rgba(45,130,237,.15);border-radius:15px;background:rgba(48,136,255,.12);font-size:24px}
+.admin-users-grant-head h3{font-family:"Baloo 2",sans-serif;font-weight:800;
+ font-size:20px;line-height:1.25;color:var(--au-ink);margin:0 0 6px}
+.admin-users-grant-head p{font-size:12px;line-height:1.8;margin:0!important;color:var(--au-muted)}
+.admin-users-grant-form{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:15px}
+.admin-users-grant-form label{display:flex;flex-direction:column;gap:8px;
+ min-width:0;color:var(--au-ink);font-size:11.5px;font-weight:750}
+.admin-users-grant-form input{
+ display:block;width:100%;min-width:0;min-height:47px;margin:0!important;
+ padding:0 16px;border:1px solid var(--au-border);border-radius:11px;
+ background:var(--au-panel);color:var(--au-ink);font-size:13px;font-weight:500;
+ transition:box-shadow .2s,border-color .2s;
+}
+.admin-users-grant-form input::placeholder{color:var(--au-muted);opacity:.75}
+.admin-users-grant-form input:focus{outline:none;border-color:#368cf1;box-shadow:0 0 0 4px rgba(40,133,241,.14)}
+.admin-users-grant-form button{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ min-height:47px;padding:0 23px!important;border-radius:11px!important;
+ white-space:nowrap;font-size:12.5px;
+ background:linear-gradient(120deg,#2c96f5,#1b65d4);color:#fff;
+ box-shadow:0 8px 19px rgba(28,110,211,.20);
+}
+.admin-users-grant-form button:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.admin-users-directory{display:grid;gap:0;min-width:0;margin-top:1px}
+.admin-users-directory-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:3px 2px 2px}
+.admin-users-eyebrow{display:inline-block;font-size:10px;color:var(--au-blue);font-weight:850;letter-spacing:.12em}
+.admin-users-directory-heading h3{font-size:23px;font-family:"Baloo 2",sans-serif;
+ font-weight:800;color:var(--au-ink);margin:4px 0 2px}
+.admin-users-directory-heading p{font-size:12px;color:var(--au-muted);line-height:1.7;margin:0}
+.admin-users-count{display:inline-flex;align-items:center;white-space:nowrap;
+ padding:9px 12px;border-radius:999px;font-size:11.5px;font-weight:750;
+ color:var(--au-blue);background:rgba(41,131,237,.10);border:1px solid rgba(41,131,237,.12)}
+.admin-users-page .perf-list-controls{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+ gap:15px;margin:17px 0 13px;min-width:0;
+}
+.admin-users-page .perf-search{
+ display:block;min-width:0;width:100%;height:46px;margin:0;
+ padding:0 15px;border:1px solid var(--au-border);border-radius:12px;
+ background:var(--au-panel);color:var(--au-ink);font-size:12.5px;font-weight:500;
+ box-shadow:0 3px 10px rgba(23,63,106,.025);
+}
+.admin-users-page .perf-search::placeholder{color:var(--au-muted);opacity:.85}
+.admin-users-page .perf-search:focus{outline:none;border-color:#348cf1;box-shadow:0 0 0 4px rgba(52,140,241,.12)}
+.admin-users-page .perf-pager{display:flex;align-items:center;gap:9px}
+.admin-users-page .perf-pager span{font-size:11.5px;font-weight:750;color:var(--au-muted)}
+.admin-users-page .perf-pager button{
+ display:grid;place-items:center;flex:0 0 38px;min-width:38px;width:38px;height:38px;
+ padding:0;border:1px solid var(--au-border);border-radius:11px;
+ background:var(--au-panel);color:var(--au-blue);font-size:17px;font-weight:800;
+ box-shadow:none;
+}
+.admin-users-page .perf-pager button:not(:disabled):hover{border-color:#358ef2;background:rgba(53,142,242,.08)}
+.admin-users-page .perf-pager button:disabled{opacity:.38;cursor:not-allowed}
+.admin-users-page .admin-users-table-card{padding:0;overflow:hidden}
+.admin-users-page .admin-users-table-card .table-wrap{max-width:100%;overflow:auto;
+ border-radius:19px;scrollbar-width:thin;scrollbar-color:var(--au-border) transparent;
+ -webkit-overflow-scrolling:touch}
+.admin-users-page .admin-users-table-card .table-wrap:focus-visible{outline:3px solid rgba(33,124,233,.35);outline-offset:-4px}
+.admin-users-page .admin-users-table-card table{
+ border-collapse:separate;border-spacing:0;table-layout:auto;min-width:1000px;
+ width:100%;margin:0;background:var(--au-panel);font-size:12.5px;
+}
+.admin-users-page .admin-users-table-card thead{background:var(--au-soft)}
+.admin-users-page .admin-users-table-card th{
+ text-align:left;padding:18px 15px!important;white-space:nowrap;
+ color:var(--au-muted);font-size:10.5px;text-transform:uppercase;
+ letter-spacing:.045em;font-weight:800;border-bottom:1px solid var(--au-border);
+ background:var(--au-soft);
+}
+.admin-users-page .admin-users-table-card td{
+ padding:15px!important;vertical-align:middle;border-bottom:1px solid var(--au-border);
+ color:var(--au-ink);font-size:12px;line-height:1.65;white-space:normal;
+}
+.admin-users-page .admin-users-table-card tbody tr:last-child td{border-bottom:0}
+.admin-users-page .admin-users-table-card tbody tr{transition:background-color .15s}
+.admin-users-page .admin-users-table-card tbody tr:hover{background:rgba(46,134,234,.045)}
+.admin-users-page .admin-users-table-card tbody tr.is-locked{background:rgba(235,92,102,.025)}
+.admin-users-page .admin-users-table-card td:nth-child(1){min-width:160px}
+.admin-users-page .admin-users-table-card td:nth-child(2){min-width:195px}
+.admin-users-page .admin-users-table-card td:nth-child(3){min-width:137px}
+.admin-users-page .admin-users-table-card td:nth-child(4){min-width:78px}
+.admin-users-page .admin-users-table-card td:nth-child(5){min-width:115px}
+.admin-users-page .admin-users-table-card td:nth-child(6){min-width:145px}
+.admin-users-page .admin-users-table-card td:nth-child(7){min-width:214px}
+.admin-user-identity{display:flex;align-items:center;gap:11px;min-width:0}
+.admin-user-avatar{
+ display:grid;place-items:center;flex:0 0 37px;width:37px;height:37px;
+ border-radius:12px;color:#1a6bc7;background:rgba(34,131,245,.12);
+ border:1px solid rgba(46,134,234,.13);font-weight:850;font-size:14px;
+}
+.admin-users-page tbody tr:nth-child(4n+2) .admin-user-avatar{color:#7150cc;background:rgba(130,91,230,.11)}
+.admin-users-page tbody tr:nth-child(4n+3) .admin-user-avatar{color:#168c78;background:rgba(27,171,142,.10)}
+.admin-users-page tbody tr:nth-child(4n+4) .admin-user-avatar{color:#b16c22;background:rgba(223,145,64,.12)}
+.admin-user-name{font-weight:800;font-size:12.5px;line-height:1.4;overflow-wrap:anywhere}
+.admin-user-email{font-size:11.5px;color:var(--au-muted);overflow-wrap:anywhere}
+.admin-user-role-select{
+ appearance:auto;width:100%;min-width:130px;min-height:39px;
+ padding:8px 9px;border-radius:10px;border:1px solid var(--au-border);
+ background:var(--au-soft);color:var(--au-ink);font-size:11.5px;
+ font-weight:750;cursor:pointer;outline:none;
+}
+.admin-user-role-select:focus{border-color:var(--au-blue);box-shadow:0 0 0 3px rgba(33,124,233,.15)}
+.admin-user-role-select:has(option[value="admin"]:checked){color:#7c4fba;border-color:rgba(125,83,196,.30);background:rgba(125,83,196,.09)}
+.admin-user-grade{color:var(--au-muted);font-weight:750;font-size:11.5px;white-space:nowrap}
+.admin-account-state{display:inline-flex;align-items:center;gap:4px;
+ padding:6px 10px;border-radius:999px;font-size:10.5px;font-weight:800;white-space:nowrap}
+.admin-account-state.active{color:#15845e;background:rgba(16,185,129,.105)}
+.admin-account-state.locked{color:#bd4b59;background:rgba(235,92,102,.10)}
+.admin-users-page .admin-live-indicator{border-radius:999px;padding:6px 9px;font-size:10.5px;line-height:1.2;font-weight:800}
+.admin-users-page [data-live-last]{display:block;color:var(--au-muted);
+ font-size:10px;margin-top:5px;line-height:1.6;max-width:185px}
+.admin-users-page .admin-user-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
+.admin-users-page .admin-user-actions button{
+ display:inline-flex;align-items:center;justify-content:center;min-height:37px;
+ padding:8px 11px;font-size:10.5px;font-weight:750;line-height:1.4;
+ border:1px solid var(--au-border);border-radius:10px;
+ white-space:nowrap;box-shadow:none;flex:0 0 auto;
+}
+.admin-users-page .admin-user-save{background:rgba(40,134,237,.075);border-color:rgba(42,131,237,.20)!important;color:var(--au-blue)}
+.admin-users-page .admin-user-save:not(:disabled):hover{background:rgba(40,134,237,.15)}
+.admin-users-page .admin-user-lock.lock{color:#b45157;background:rgba(227,87,96,.055);border-color:rgba(227,87,96,.17)!important}
+.admin-users-page .admin-user-lock.unlock{color:#15845e;background:rgba(16,185,129,.065);border-color:rgba(16,185,129,.19)!important}
+.admin-users-page .admin-user-actions button:not(:disabled):hover{filter:brightness(.97);transform:translateY(-1px)}
+.admin-users-page .admin-user-actions button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+:root[data-theme="dark"] .admin-users-page .admin-users-stat{box-shadow:0 9px 26px rgba(0,0,0,.14)}
+:root[data-theme="dark"] .admin-users-page .admin-user-role-select:has(option[value="admin"]:checked){color:#d1b2ff}
+:root[data-theme="dark"] .admin-users-page .admin-account-state.active{color:#72e3b5}
+:root[data-theme="dark"] .admin-users-page .admin-account-state.locked{color:#ffadb3}
+:root[data-theme="dark"] .admin-users-page .admin-user-save{color:#8bc6ff}
+:root[data-theme="dark"] .admin-users-page .admin-user-lock.lock{color:#ffadb3}
+:root[data-theme="dark"] .admin-users-page .admin-user-lock.unlock{color:#72e3b5}
+:root[data-theme="dark"] .admin-users-page .admin-user-avatar{color:#8dc3ff}
+@media(max-width:1200px){
+ .admin-users-page .admin-users-summary{gap:11px}
+ .admin-users-page .admin-users-stat{padding:17px 14px;gap:12px}
+ .admin-users-page .admin-users-stat-icon{flex-basis:45px;height:45px;font-size:22px}
+ .admin-users-page .admin-users-stat strong{font-size:27px}
+ .admin-users-page .admin-users-grant{padding:22px}
+}
+@media(max-width:850px){
+ .admin-users-page{gap:17px}
+ .admin-users-page .page-head{padding:25px!important}
+ .admin-users-page .admin-users-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-users-page .admin-users-summary article:last-child{grid-column:1/-1}
+ .admin-users-page .admin-users-grant-form{grid-template-columns:1fr}
+ .admin-users-page .admin-users-grant-form button{width:100%}
+}
+@media(max-width:590px){
+ .admin-users-page{gap:14px}
+ .admin-users-page .page-head{padding:23px 20px!important;border-radius:17px}
+ .admin-users-page .page-head:after{right:-135px}
+ .admin-users-page .admin-users-summary{grid-template-columns:1fr;gap:10px}
+ .admin-users-page .admin-users-summary article:last-child{grid-column:auto}
+ .admin-users-page .admin-users-stat{min-height:94px;padding:14px 15px;border-radius:14px}
+ .admin-users-page .admin-users-stat strong{font-size:26px}
+ .admin-users-page .admin-users-grant{padding:18px;border-radius:15px}
+ .admin-users-page .admin-users-grant-head{gap:10px}
+ .admin-users-page .admin-users-grant-icon{flex-basis:39px;height:39px;font-size:21px}
+ .admin-users-page .admin-users-grant-head h3{font-size:17px}
+ .admin-users-page .admin-users-live-banner{padding:12px;font-size:11px}
+ .admin-users-page .admin-users-directory-heading{gap:8px;align-items:flex-start}
+ .admin-users-page .admin-users-directory-heading h3{font-size:20px}
+ .admin-users-page .admin-users-directory-heading p{font-size:11px}
+ .admin-users-page .admin-users-count{font-size:10px;padding:7px 9px}
+ .admin-users-page .perf-list-controls{grid-template-columns:1fr;gap:10px}
+ .admin-users-page .perf-pager{justify-content:space-between;width:100%}
+ .admin-users-page .perf-search{height:45px}
+ .admin-users-page .admin-users-table-card .table-wrap{border-radius:15px}
+ .admin-users-page .admin-users-table-card th{padding:13px 11px!important}
+ .admin-users-page .admin-users-table-card td{padding:11px!important}
+ .admin-users-page .admin-user-actions button{min-height:38px;width:auto}
+}
+@media(prefers-reduced-motion:reduce){
+ .admin-users-page .admin-users-table-card tbody tr,.admin-users-page .admin-user-actions button,.admin-users-page .admin-users-grant-form button{transition:none}
+ .admin-users-page .admin-user-actions button:not(:disabled):hover,.admin-users-page .admin-users-grant-form button:hover{transform:none}
+}
