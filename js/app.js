@@ -328,11 +328,11 @@ function bind(){
  if(state.route==="classInsights")window.ClassInsights?.bind(render);
  if(state.route==="gradeReviews")window.GradeReviews?.bind(toast,render);
  if(state.route==="submissions"){
-  $("[data-grade-toggle]").forEach(btn=>btn.addEventListener("click",()=>{
-   const form=$("[data-grade-form]").find(f=>f.dataset.gradeForm===btn.dataset.gradeToggle);
+  $$("[data-grade-toggle]").forEach(btn=>btn.addEventListener("click",()=>{
+   const form=$$("[data-grade-form]").find(f=>f.dataset.gradeForm===btn.dataset.gradeToggle);
    if(!form)return;form.hidden=!form.hidden;btn.setAttribute("aria-expanded",String(!form.hidden));
   }));
-  $("[data-grade-form]").forEach(form=>form.addEventListener("submit",async e=>{
+  $$("[data-grade-form]").forEach(form=>form.addEventListener("submit",async e=>{
    e.preventDefault();const submit=form.querySelector('button[type="submit"]');
    const d=Object.fromEntries(new FormData(form)),graded=form.dataset.graded==="1";
    submit.disabled=true;
