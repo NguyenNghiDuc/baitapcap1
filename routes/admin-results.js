@@ -7,7 +7,7 @@ const selectUser=r=>({name:r.ownerName||"Tài khoản chưa xác định",email:
 function row(r){return {
  id:String(r.id),userId:String(r.userId||""),owner:selectUser(r),
  title:String(r.title||"Bài kiểm tra"),subject:String(r.subject||""),grade:r.grade||null,
- score:Number(r.score),correct:Number(r.correct),total:Number(r.total),
+ score:r.score===null||r.score===undefined||r.score===""?null:Number(r.score),correct:Number(r.correct),total:Number(r.total),
  durationSec:Number(r.durationSec||0),createdAt:r.createdAt||null,
  gradingStatus:r.verified?"verified":"self_reported",verified:!!r.verified
 };}
@@ -38,7 +38,7 @@ module.exports=async function adminResults(req,res,p,ctx){
     pg.query(`SELECT r.id,r.user_id AS "userId",r.title,r.subject,r.grade,r.score,r.correct,r.total,r.duration_sec AS "durationSec",r.created_at AS "createdAt",u.name AS "ownerName",u.email AS "ownerEmail"
      FROM results r LEFT JOIN users u ON u.id=r.user_id ${where}
      ORDER BY r.created_at DESC,r.id DESC LIMIT $5 OFFSET $6`,[...params,limit,(page-1)*limit]),
-    pg.query(`SELECT COUNT(*) FILTER (WHERE score >= 0 AND score < 50) AS b0, COUNT(*) FILTER (WHERE score >= 50 AND score < 70) AS b1, COUNT(*) FILTER (WHERE score >= 70 AND score < 90) AS b2, COUNT(*) FILTER (WHERE score >= 90 AND score <= 100) AS b3, COUNT(*) FILTER (WHERE score IS NULL OR score < 0 OR score > 100) AS excluded FROM results r LEFT JOIN users u ON u.id=r.user_id ${where}`,params)
+    pg.query(`SELECT COUNT(*) FILTER (WHERE r.score >= 0 AND r.score < 50) AS b0, COUNT(*) FILTER (WHERE r.score >= 50 AND r.score < 70) AS b1, COUNT(*) FILTER (WHERE r.score >= 70 AND r.score < 90) AS b2, COUNT(*) FILTER (WHERE r.score >= 90 AND r.score <= 100) AS b3, COUNT(*) FILTER (WHERE r.score IS NULL OR r.score < 0 OR r.score > 100) AS excluded FROM results r LEFT JOIN users u ON u.id=r.user_id ${where}`,params)
    ]);
    total=Number(count.rows[0]?.total||0);
    items=result.rows.map(row);
