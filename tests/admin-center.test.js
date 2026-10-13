@@ -26,7 +26,7 @@ test("Admin menu shows eight searchable sections and only existing page routes",
  const sections=[...admin.matchAll(/data-admin-section="([^"]+)"/g)].map(m=>m[1]);
  const urls=[...admin.matchAll(/class="admin-only" href="#([^"]+)"/g)].map(m=>m[1]);
  assert.equal(sections.length,8);assert.equal(urls.length,16);
- assert.equal(new Set(sections).size,8);assert.equal(new Set(urls).size,16);
+ assert.equal(new Set(sections).size,8);assert.equal(new Set(urls).size,17);
  for(const link of urls){
   assert.match(link,/^[A-Za-z][A-Za-z0-9]*$/);
   assert.ok(center.includes('["'+link+'","'),"Admin Center missing working UI route: "+link);
