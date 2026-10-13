@@ -61,7 +61,8 @@ test("Admin audit frontend is lazy, role-restricted and independently styled",()
  assert.ok(app.includes('adminAudit:async()=>window.AdminAudit?.render(state.user)'));
  assert.ok(app.includes('window.AdminAudit?.bind(toast,render)'));
  assert.ok(html.includes('class="admin-only" href="#adminAudit"'));
- assert.ok(html.includes('href="css/admin-audit.css"'));
+ assert.ok(loader.includes('adminAudit:["/css/admin-console.css","/css/admin-audit.css"]'));
+ assert.equal(html.includes('href="css/admin-audit.css"'),false);
  assert.ok(server.includes('handleAdminAudit(req,res,p,{send,requireUser,load,pg:pgStore})'));
  assert.ok(js.includes('if(user?.role!=="admin")'));
 });
