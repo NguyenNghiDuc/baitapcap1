@@ -42,3 +42,8 @@
  .sidebar .sidebar-shortcuts a,.sidebar .sidebar-nav-items a{min-height:43px;font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){.sidebar-nav-chevron,.sidebar-search-field{transition:none}}
+
+.sidebar .sidebar-retry-role{margin-top:6px;padding:3px 0;background:none;border:0;border-radius:4px;color:var(--blue);font-size:10px;text-align:left;font-weight:800}
+.sidebar .sidebar-retry-role:hover{text-decoration:underline}
+.sidebar .sidebar-retry-role:focus-visible{outline:2px solid var(--blue)}
+.sidebar .sidebar-retry-role[hidden]{display:none!important}
