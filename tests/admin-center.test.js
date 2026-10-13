@@ -46,3 +46,10 @@ test("Admin Center scripts and styles load only for a verified Admin route",()=>
  assert.ok(!html.includes('src="js/admin/center.js"'));
  for(const mark of ["admin-center-grid","admin-center-filters","prefers-reduced-motion",'[data-theme="dark"]'])assert.ok(css.includes(mark),mark);
 });
+
+test("Admin Center can reset search, group, status, and pagination",()=>{
+ const js=read("js/admin/center.js"),css=read("css/admin-center.css");
+ assert.ok(js.includes('id="adminCenterClear"'));
+ assert.ok(js.includes('state.search="";state.group="all";state.status="all";state.page=1;rerender()'));
+ assert.ok(css.includes(".admin-center-filter-actions"));
+});
