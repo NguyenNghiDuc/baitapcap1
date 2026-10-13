@@ -186,6 +186,15 @@ async function render(){
   // Recover from stale exam locks that hid the navigation without displaying an exam.
   if(window.ExamLock?.isActive?.()&&!document.querySelector(".locked-exam-shell"))window.ExamLock.exit();
   shell();
+  // Do not fetch private-page scripts/styles before a verified role can use them.
+  // Server APIs still perform their own authoritative authorization checks.
+  const adminOnly=new Set(["admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth"]);
+  if(adminOnly.has(route)&&state.user?.role!=="admin"){
+   $("#content").innerHTML=loginRequired("Chỉ quản trị viên được truy cập.");bind();return;
+  }
+  if(route==="profile"&&!state.user){
+   $("#content").innerHTML=loginRequired("Đăng nhập để xem hồ sơ.");bind();return;
+  }
   $("#content").innerHTML=window.PerfLoader?.skeleton?.(route)||'<div class="perf-skeleton" role="status">Đang tải dữ liệu…</div>';
   await window.PerfLoader?.ensureRoute(route,{isAdmin:state.user?.role==="admin"});
   if(sequence!==renderSequence||route!==state.route)return;
