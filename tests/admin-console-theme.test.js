@@ -2,11 +2,13 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
 const root=path.join(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p),"utf8");
-test("unified Admin theme loads after older feature styles",()=>{
- const h=read("index.html");
- const old=h.indexOf('href="css/admin-users.css"'),results=h.indexOf('href="css/admin-results.css"');
- const theme=h.indexOf('href="css/admin-console.css"');
- assert.ok(old>0&&results>0&&theme>old&&theme>results,"Admin CSS must win the cascade");
+test("Admin theme is lazy and ordered after its feature-specific CSS",()=>{
+ const h=read("index.html"),loader=read("js/perf/loader.js");
+ for(const f of ["admin-users.css","admin-results.css","admin-console.css","admin-audit.css"])
+  assert.equal(h.includes('href="css/'+f+'"'),false,"Admin styles must not block guest home: "+f);
+ assert.ok(loader.includes('adminUsers:["/css/admin-users.css","/css/admin-console.css"]'));
+ assert.ok(loader.includes('adminResults:["/css/admin-results.css","/css/admin-console.css"]'));
+ assert.ok(loader.includes('adminAudit:["/css/admin-console.css","/css/admin-audit.css"]'));
 });
 test("Admin CSS is isolated to verified Admin view and covers all five menu screens",()=>{
  const css=read("css/admin-console.css"),app=read("js/app.js");
