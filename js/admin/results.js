@@ -1,6 +1,6 @@
 window.AdminResults=(()=>{
  const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- const state={kind:"exam",page:1,search:"",grade:"",subject:"",review:"all"};
+ const state={kind:"exam",page:1,search:"",grade:"",subject:"",review:"all",historyStatus:"all",historyPage:1};
  const subjects={math:"Toán",vietnamese:"Tiếng Việt",english:"Tiếng Anh"};
  const when=d=>{const t=Date.parse(d||"");return Number.isFinite(t)?new Date(t).toLocaleString("vi-VN"):"—"};
  const scoreLabel=n=>n===null||n===undefined||n===""?"Chưa chấm":escape(Number(n).toLocaleString("vi-VN")+"%");
@@ -31,6 +31,15 @@ window.AdminResults=(()=>{
     reviewed=new Map((log.reviews||[]).map(x=>[String(x.resultId),x]));
    }catch{reviewed=new Map()}
   }
+  let historyHtml="";
+  if(state.kind==="exam"){
+   try{
+    const h=await API.get("/api/admin/result-reviews?"+new URLSearchParams({status:state.historyStatus,page:String(state.historyPage)}),{noCache:true,cancelPrevious:false});
+    const options=[["all","Tất cả"],["reviewed","Đã xem xét"],["dismissed","Đã bỏ cảnh báo"]].map(([v,t])=>'<option value="'+v+'" '+(state.historyStatus===v?"selected":"")+'>'+t+'</option>').join("");
+    const records=(h.reviews||[]).map(x=>'<tr><td>'+escape(x.resultId)+'</td><td>'+escape(x.status==="reviewed"?"Đã xem xét":"Bỏ cảnh báo")+'</td><td>'+escape(x.reason)+'</td><td>'+escape(x.reviewerId)+'</td><td>'+when(x.reviewedAt)+'</td></tr>').join("");
+    historyHtml='<section class="panel admin-review-history"><h3>📋 Lịch sử xử lý kết quả bất thường</h3><p class="muted">Lịch sử ghi nhận quyết định, không thay đổi điểm chính thức.</p><label>Trạng thái <select id="adminHistoryStatus">'+options+'</select></label><div class="table-wrap"><table><thead><tr><th>Mã bài</th><th>Quyết định</th><th>Lý do</th><th>Mã Admin</th><th>Thời gian</th></tr></thead><tbody>'+(records||'<tr><td colspan="5">Chưa có quyết định phù hợp.</td></tr>')+'</tbody></table></div><div class="exam-pagination"><button id="adminHistoryPrev" type="button" class="outline" '+(state.historyPage<=1?"disabled":"")+'>← Trước</button><span>Trang '+state.historyPage+'/'+Math.max(1,Number(h.pagination?.pages||1))+'</span><button id="adminHistoryNext" type="button" class="outline" '+(h.pagination?.hasMore?"":"disabled")+'>Tiếp →</button></div></section>';
+   }catch{historyHtml='<section class="panel" role="alert">Không đọc được lịch sử xử lý lúc này.</section>'}
+  }
   const total=Number(j.pagination?.total||0),pages=Math.max(1,Number(j.pagination?.pages||1));
   const sampleNotice=total>0&&total<30?'<p class="admin-results-sample-warning" role="status">⚠️ Mẫu dữ liệu nhỏ ('+total+' lượt theo bộ lọc). Chưa đủ cơ sở để kết luận xu hướng hay so sánh chất lượng học tập; một học sinh có thể nộp nhiều lượt.</p>':"";
   const dist=state.kind==="exam"?j.distribution:null;
@@ -47,7 +56,7 @@ window.AdminResults=(()=>{
    (state.kind==="exam"?'<div class="admin-results-export"><button type="button" class="outline" id="adminResultsExportCsv">📥 Xuất CSV mở bằng Excel</button><small>Tối đa 2.000 kết quả theo bộ lọc đang chọn. Dữ liệu có tên và email, chỉ lưu trữ ở nơi an toàn.</small></div>':"")+
    '<div class="table-wrap"><table>'+header+'<tbody>'+ (body||'<tr><td colspan="7">Chưa có kết quả được đồng bộ trên máy chủ theo bộ lọc này. Những bài chỉ lưu trên điện thoại sẽ không hiển thị.</td></tr>')+'</tbody></table></div>'+
    '<div class="exam-pagination"><button id="adminScoresPrev" type="button" class="outline" '+(state.page<=1?"disabled":"")+'>← Trước</button>'+
-   '<span>Trang '+state.page+'/'+pages+'</span><button id="adminScoresNext" type="button" class="outline" '+(j.pagination?.hasMore?"":"disabled")+'>Tiếp →</button></div></div>';
+   '<span>Trang '+state.page+'/'+pages+'</span><button id="adminScoresNext" type="button" class="outline" '+(j.pagination?.hasMore?"":"disabled")+'>Tiếp →</button></div></div>'+historyHtml;
  }
  function bind(toast,render){
   const form=document.querySelector("#adminResultsFilter");
@@ -58,6 +67,9 @@ window.AdminResults=(()=>{
    if(state.kind==="exam"){state.grade=String(f.get("grade")||"");state.subject=String(f.get("subject")||"");state.review=String(f.get("review")||"all")==="flagged"?"flagged":"all"}
    state.page=1;render();
   });
+  document.querySelector("#adminHistoryStatus")?.addEventListener("change",e=>{state.historyStatus=e.target.value;state.historyPage=1;render()});
+  document.querySelector("#adminHistoryPrev")?.addEventListener("click",()=>{state.historyPage=Math.max(1,state.historyPage-1);render()});
+  document.querySelector("#adminHistoryNext")?.addEventListener("click",()=>{state.historyPage++;render()});
   document.querySelector("#adminScoresPrev")?.addEventListener("click",()=>{state.page=Math.max(1,state.page-1);render()});
   document.querySelector("#adminScoresNext")?.addEventListener("click",()=>{state.page++;render()});
   document.querySelectorAll(".admin-review-decision").forEach(el=>el.addEventListener("submit",async e=>{
