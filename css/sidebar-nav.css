@@ -47,3 +47,6 @@
 .sidebar .sidebar-retry-role:hover{text-decoration:underline}
 .sidebar .sidebar-retry-role:focus-visible{outline:2px solid var(--blue)}
 .sidebar .sidebar-retry-role[hidden]{display:none!important}
+
+.sidebar .sidebar-sync-detail{display:block;max-width:170px;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.sidebar .sidebar-sync-detail[hidden]{display:none!important}
