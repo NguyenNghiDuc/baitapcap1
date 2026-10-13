@@ -21,8 +21,15 @@ async function handler(req,res,p,ctx){
    const q=new URL(req.url,"http://localhost").searchParams;
    const ids=q.getAll("resultId").filter(x=>x.length>0&&x.length<=128).slice(0,50);
    const db=await readLatest(ctx);
-   const records=(db.resultReviewDecisions||[]).filter(x=>ids.includes(String(x.resultId))).map(publicRecord);
-   send(res,200,{reviews:records},HEADERS);
+   const all=(db.resultReviewDecisions||[]);
+   const page=Number(q.get("page")||1),limit=20,status=q.get("status")||"all";
+   if(!Number.isSafeInteger(page)||page<1||page>10000||!["all","reviewed","dismissed"].includes(status)){
+    send(res,400,{error:"Bộ lọc lịch sử không hợp lệ"},HEADERS);return true;
+   }
+   const records=all.filter(x=>(!ids.length||ids.includes(String(x.resultId)))&&(status==="all"||x.status===status))
+    .sort((a,b)=>String(b.reviewedAt||"").localeCompare(String(a.reviewedAt||"")));
+   const pages=Math.ceil(records.length/limit);
+   send(res,200,{reviews:records.slice((page-1)*limit,page*limit).map(publicRecord),pagination:{page,limit,total:records.length,pages,hasMore:page<pages}},HEADERS);
   }catch{send(res,503,{error:"Không đọc được lịch sử xem xét."},HEADERS)}
   return true;
  }
