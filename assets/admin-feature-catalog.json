@@ -140,7 +140,8 @@
       "name": "Sao lưu và khôi phục dữ liệu",
       "group": 1,
       "phase": "foundation",
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Đã làm cứng công cụ backup app_state: snapshot mã hóa AES-256-GCM, kiểm tra tính toàn vẹn/chống sửa đổi, chế độ --verify không ghi dữ liệu và khôi phục cần xác nhận kép. Có dashboard chỉ đọc dành cho Admin chính. Chưa có backup đầy đủ PostgreSQL/Auth/Storage, lịch tự động, bản sao ngoài máy chủ hay kiểm thử phục hồi production."
     },
     {
       "id": 11,

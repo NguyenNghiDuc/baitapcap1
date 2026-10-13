@@ -63,6 +63,8 @@ Xem chi tiết: [FEATURES.md](FEATURES.md) và [docs/PRODUCTION.md](docs/PRODUCT
 
 **Nhật ký Admin:** chỉ Admin có thể xem và lọc nhật ký; metadata nhạy cảm không được hiển thị.
 
+**Trung tâm sao lưu:** `/#adminBackup` chỉ dành cho Admin chính và chỉ **xem trạng thái sẵn sàng**. Lệnh CLI được nâng cấp tạo snapshot `app_state` mã hóa AES-256-GCM (`BACKUP_PASSPHRASE` tối thiểu 16 ký tự). Kiểm tra an toàn: `npm run db:restore -- backups/file.enc.json --verify`; không dùng nút khôi phục trên website. Lưu ý snapshot không bao gồm các bảng PostgreSQL độc lập, Supabase Auth hoặc Storage; phải bổ sung bản sao lưu đầy đủ bằng dịch vụ quản trị Supabase/`pg_dump`. Khôi phục thực tế yêu cầu `--confirm-restore` và biến `RESTORE_CONFIRMATION=I_UNDERSTAND_RESTORE_MAY_OVERWRITE_DATA`, sau khi đã có bản sao dự phòng và lịch bảo trì. File backup v1 chưa mã hóa chỉ được xác minh với `--allow-legacy` và checksum đúng.
+
 **Trung tâm bảo mật Admin:** `/#adminSecurity` hiển thị quyền Admin chính/phụ (xác minh qua `ADMIN_SUPABASE_UID`) và lịch sử **thiết bị của chính tài khoản đang đăng nhập**, không trả thông tin thiết bị của học sinh. Đây là lịch sử ghi nhận, không phải danh sách phiên đang hoạt động; chưa hỗ trợ thu hồi phiên từ xa.
 
 **Trung tâm cảnh báo:** vào **Admin → Hệ thống → Trung tâm cảnh báo** để kiểm tra lỗi API, PostgreSQL/Redis từ một instance. Đây là ảnh chụp tại thời điểm truy vấn, chưa phải cảnh báo lưu trữ lâu dài.

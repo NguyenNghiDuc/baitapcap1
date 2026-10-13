@@ -5,6 +5,7 @@ const apiPerformance=require("./lib/api-performance");
 const handleAdminResults=require("./routes/admin-results");
 const handleAdminAudit=require("./routes/admin-audit");
 const handleAdminSecurity=require("./routes/admin-security");
+const handleAdminBackup=require("./routes/admin-backup");
 const handleAdminAlerts=require("./routes/admin-alerts");
 const handleAdminExport=require("./routes/admin-results-export");
 const handlePresence=require("./routes/presence");
@@ -119,6 +120,7 @@ async function api(req,res,p,ip){
  if(await handleAdminResults(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handleAdminAudit(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handleAdminSecurity(req,res,p,{send,requireUser,load,storage}))return;
+ if(await handleAdminBackup(req,res,p,{send,requireUser,pg:pgStore,storage}))return;
  if(await handlePresence(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,flush:storage.flush,supabase,monitor,pg:pgStore}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor,audit:auditStore,pg:pgStore}))return;

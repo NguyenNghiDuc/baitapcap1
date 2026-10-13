@@ -44,7 +44,11 @@
     ],
     "10": [
       "scripts/db-backup.js",
-      "scripts/db-restore.js"
+      "scripts/db-restore.js",
+      "scripts/backup-crypto.js",
+      "routes/admin-backup.js",
+      "js/admin/backup-center.js",
+      "css/admin-backup.css"
     ],
     "11": [
       "js/student/help-feedback.js"

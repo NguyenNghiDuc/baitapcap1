@@ -10,9 +10,9 @@ test("Admin Center catalog exactly matches the eight 20-feature roadmap files",(
  assert.equal(data.features.length,160);
  assert.deepEqual(data.features.map(x=>x.id),Array.from({length:160},(_,i)=>i+1));
  assert.ok(data.features.every(f=>typeof f.name==="string"&&f.name.length>5));
- assert.equal(data.features.filter(x=>x.assessment==="partial").length,5);
+ assert.equal(data.features.filter(x=>x.assessment==="partial").length,6);
  assert.equal(data.features.filter(x=>x.assessment==="verified").length,0);
- assert.equal(data.features.filter(x=>x.assessment==="not-verified").length,155);
+ assert.equal(data.features.filter(x=>x.assessment==="not-verified").length,154);
  for(const item of data.features){
   assert.equal("email" in item,false);
   assert.equal("tests" in item,false);
@@ -25,8 +25,8 @@ test("Admin menu shows eight searchable sections and only existing page routes",
  const admin=html.slice(a,b);
  const sections=[...admin.matchAll(/data-admin-section="([^"]+)"/g)].map(m=>m[1]);
  const urls=[...admin.matchAll(/class="admin-only" href="#([^"]+)"/g)].map(m=>m[1]);
- assert.equal(sections.length,8);assert.equal(urls.length,18);
- assert.equal(new Set(sections).size,8);assert.equal(new Set(urls).size,18);
+ assert.equal(sections.length,8);assert.equal(urls.length,19);
+ assert.equal(new Set(sections).size,8);assert.equal(new Set(urls).size,19);
  for(const link of urls){
   assert.match(link,/^[A-Za-z][A-Za-z0-9]*$/);
   assert.ok(center.includes('["'+link+'","'),"Admin Center missing working UI route: "+link);

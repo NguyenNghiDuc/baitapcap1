@@ -8,7 +8,7 @@ window.AdminCenter=(()=>{
   {id:"ai",icon:"🤖",title:"AI học tập",description:"Trải nghiệm trợ giảng, chưa phải bảng cấu hình AI",links:[["ai","Trợ giảng AI"]]},
   {id:"reports",icon:"📊",title:"Báo cáo & thống kê",description:"Điểm học sinh và phân tích kết quả",links:[["adminResults","Bảng điểm"],["analytics","Phân tích"]]},
   {id:"security",icon:"🛡️",title:"Bảo mật",description:"Nhật ký Admin và bảo mật tài khoản đang đăng nhập",links:[["adminSecurity","Trung tâm bảo mật"],["adminAudit","Nhật ký"],["accountSecurity","Bảo mật của tôi"]]},
-  {id:"system",icon:"⚙️",title:"Hệ thống",description:"Theo dõi API và cơ sở dữ liệu",links:[["adminAlerts","Cảnh báo hệ thống"],["performanceMonitor","Hiệu năng API"],["storageHealth","PostgreSQL/Redis"]]}
+  {id:"system",icon:"⚙️",title:"Hệ thống",description:"Theo dõi API và cơ sở dữ liệu",links:[["adminAlerts","Cảnh báo hệ thống"],["performanceMonitor","Hiệu năng API"],["storageHealth","PostgreSQL/Redis"],["adminBackup","Sao lưu & khôi phục"]]}
  ];
  const state={search:"",group:"all",status:"all",page:1},LIMIT=12;
  let cached=null;
@@ -17,7 +17,7 @@ window.AdminCenter=(()=>{
  const labels={"not-verified":"Chưa xác minh","partial":"Đã làm một phần","verified":"Đã kiểm thử","blocked":"Cần điều kiện triển khai"};
  async function catalog(){
   if(cached)return cached;
-  const r=await fetch("/assets/admin-feature-catalog.json?revision=20261013-admin3",{cache:"reload"});
+  const r=await fetch("/assets/admin-feature-catalog.json?revision=20261013-admin4",{cache:"reload"});
   if(!r.ok)throw Error("Không tải được danh mục chức năng.");
   const data=await r.json();
   if(data.schema!==1||data.features?.length!==160||data.groups?.length!==8)throw Error("Danh mục chưa được đồng bộ từ lộ trình.");

@@ -1,10 +1,36 @@
-const fs=require("fs"),path=require("path"),crypto=require("crypto");
+"use strict";
+const fs=require("node:fs"),path=require("node:path");
 require("dotenv").config({path:path.join(process.cwd(),".env")});
-const pg=require("../lib/postgres");
-(async()=>{
- const file=process.argv[2];if(!file)throw new Error("Dùng: npm run db:restore -- backups/<file>.json");
- const payload=JSON.parse(fs.readFileSync(path.resolve(file),"utf8"));if(payload.format!=="baitapcap1-backup-v1"||!payload.data)throw new Error("Backup không hợp lệ");
- const copy={...payload};delete copy.sha256;const raw=JSON.stringify(copy,null,2),hash=crypto.createHash("sha256").update(raw).digest("hex");
- if(payload.sha256&&payload.sha256!==hash)console.warn("Cảnh báo: checksum không khớp do format/whitespace. Tiếp tục vì JSON parse hợp lệ.");
- await pg.connect();await pg.migrate();await pg.saveAppState(payload.data);await pg.importJsonDatabase(payload.data);console.log("Restore OK:",file);await pg.close()
-})().catch(e=>{console.error(e);process.exit(1)});
+const pg=require("../lib/postgres"),backup=require("./backup-crypto");
+const CONFIRM="I_UNDERSTAND_RESTORE_MAY_OVERWRITE_DATA";
+async function main(args=process.argv.slice(2)){
+ const filename=args.find(x=>!x.startsWith("--"));
+ if(!filename)throw new Error("Dùng: npm run db:restore -- backups/file.enc.json --verify (hoặc --confirm-restore với RESTORE_CONFIRMATION)");
+ const verify=args.includes("--verify"),restore=args.includes("--confirm-restore");
+ if(verify===restore)throw new Error("Chọn chính xác một chế độ --verify HOẶC --confirm-restore");
+ const selected=path.resolve(filename),raw=fs.readFileSync(selected,"utf8");
+ if(Buffer.byteLength(raw)>80*1024*1024)throw new Error("File backup vượt giới hạn 80 MiB.");
+ const envelope=JSON.parse(raw);
+ const payload=backup.inspect(envelope,{passphrase:process.env.BACKUP_PASSPHRASE,allowLegacy:args.includes("--allow-legacy")});
+ if(verify){
+  console.log("Backup hợp lệ. Định dạng:",envelope.format,"| phạm vi: app_state | ngày:",payload.createdAt);
+  console.log("Không có thao tác ghi database.");
+  return;
+ }
+ if(process.env.VERCEL==="1")throw new Error("Không cho phép chạy restore trên Vercel.");
+ if(process.env.RESTORE_CONFIRMATION!==CONFIRM)throw new Error("Thiếu RESTORE_CONFIRMATION="+CONFIRM);
+ if(!process.env.DATABASE_URL)throw new Error("Thiếu DATABASE_URL");
+ let connected=false;
+ try{
+  await pg.connect();connected=true;
+  // Existing PostgreSQL import is not transactional; an independent pg_dump and a
+  // maintenance window are required before using this CLI on real data.
+  await pg.migrate();
+  await pg.importJsonDatabase(payload.data);
+  await pg.saveAppState(payload.data);
+  console.log("Đã khôi phục snapshot app_state và nhập dữ liệu tương ứng từ:",selected);
+  console.warn("LƯU Ý: không phục hồi toàn bộ bảng PostgreSQL/Auth/Storage. Kiểm tra dữ liệu sau thao tác.");
+ }finally{if(connected)await pg.close()}
+}
+if(require.main===module)main().catch(e=>{console.error("Khôi phục thất bại:",e.message);process.exitCode=1});
+module.exports={main};
