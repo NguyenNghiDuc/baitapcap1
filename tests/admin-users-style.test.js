@@ -3,8 +3,9 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
 const root=path.join(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p),"utf8");
 test("Admin users stylesheet is loaded and its rules are isolated",()=>{
- const html=read("index.html"),css=read("css/admin-users.css");
- assert.ok(html.includes('href="css/admin-users.css"'));
+ const html=read("index.html"),css=read("css/admin-users.css"),loader=read("js/perf/loader.js");
+ assert.equal(html.includes('href="css/admin-users.css"'),false);
+ assert.ok(loader.includes('adminUsers:["/css/admin-users.css","/css/admin-console.css"]'));
  assert.ok(css.includes(".admin-users-page .admin-users-table-card"));
  assert.ok(css.includes(".admin-users-page .admin-user-role-select"));
  assert.ok(css.includes('@media(max-width:590px)'));
