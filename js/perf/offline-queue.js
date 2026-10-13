@@ -12,7 +12,7 @@ window.OfflineSyncQueue=(()=>{
  }
  const key=()=>PREFIX+owner,draftKey=()=>DRAFT+(owner||"guest");
  function list(){if(!owner)return [];try{const items=JSON.parse(localStorage.getItem(key())||"[]");return Array.isArray(items)?items:[]}catch{return []}}
- function save(items){if(!owner)return;localStorage.setItem(key(),JSON.stringify(items.slice(-200)))}
+ function save(items){if(!owner)return;if(items.length>1000)throw new Error("Bộ nhớ nộp bài đã đầy. Hãy đồng bộ bài cũ trước.");localStorage.setItem(key(),JSON.stringify(items))}
  const id=()=>crypto.randomUUID?.()||("q-"+Date.now()+"-"+Math.random().toString(36).slice(2));
  function enqueueResult(payload){
   if(!owner)throw new Error("Cần đăng nhập để đồng bộ điểm.");
@@ -65,8 +65,22 @@ window.OfflineSyncQueue=(()=>{
   if(target&&owner&&API.token&&navigator.onLine)
    API.delete("/api/exam-drafts",{body:JSON.stringify({clientExamId:target}),headers:{"Content-Type":"application/json"},retries:0}).catch(()=>{});
  }
+ function legacyCount(){try{const old=JSON.parse(localStorage.getItem("bt_offline_queue_v1")||"[]");return Array.isArray(old)?old.length:0}catch{return 0}}
+ function claimLegacy(){
+  if(!owner)throw new Error("Vui lòng đăng nhập trước khi khôi phục.");
+  const old=JSON.parse(localStorage.getItem("bt_offline_queue_v1")||"[]");
+  if(!Array.isArray(old))throw new Error("Dữ liệu cũ không hợp lệ.");
+  const current=list(),known=new Set(current.map(x=>x.clientSubmissionId));
+  let added=0;
+  for(const item of old){
+   if(item?.type!=="result"||!item.clientSubmissionId||!item.payload||known.has(item.clientSubmissionId))continue;
+   current.push(item);known.add(item.clientSubmissionId);added++;
+  }
+  save(current);localStorage.removeItem("bt_offline_queue_v1");
+  return added;
+ }
  function count(){return list().length}
  function status(){return {pending:count(),accountReady:!!owner,online:navigator.onLine}}
  window.addEventListener("online",()=>flush());
- return {setOwner,enqueueResult,flush,saveDraft,loadDraft,clearDraft,count,status}
+ return {setOwner,enqueueResult,flush,saveDraft,loadDraft,clearDraft,count,status,legacyCount,claimLegacy}
 })();
