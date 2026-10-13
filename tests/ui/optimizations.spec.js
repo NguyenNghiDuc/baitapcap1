@@ -1,12 +1,13 @@
 const {test,expect}=require("@playwright/test");
 
 test("long local result history mounts only visible rows",async({page})=>{
- await page.goto("/");
- await page.evaluate(()=>{
+ // Seed local storage before any app script reads it, including during navigation.
+ await page.addInitScript(()=>{
   const all=Array.from({length:600},(_,i)=>({title:"Bài thử "+i,subject:"math",score:60,date:"13/10/2026",clientSubmissionId:"test-"+i}));
   localStorage.setItem("bt_results",JSON.stringify(all));
  });
  await page.goto("/#history");
+ await expect(page.locator("#content .page-head")).toBeVisible();
  await expect(page.locator("#historyVirtualScroll .virtual-viewport")).toBeVisible();
  const count=await page.locator(".virtual-history-row").count();
  expect(count).toBeGreaterThan(0);
