@@ -1,0 +1,170 @@
+{
+  "range": [
+    141,
+    160
+  ],
+  "title": "Dữ liệu, hạ tầng, nhiều trường và trợ năng",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 141,
+      "name": "Kiểm tra trước migration",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 142,
+      "name": "Phát hiện lệch schema database",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 143,
+      "name": "Khôi phục database theo thời điểm",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 144,
+      "name": "Idempotency chống nộp bài trùng",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 145,
+      "name": "Dead Letter Queue cho tác vụ thất bại",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 146,
+      "name": "Circuit Breaker cho dịch vụ ngoài",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 147,
+      "name": "Rate Limit phân tán",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 148,
+      "name": "Tải file theo từng phần",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 149,
+      "name": "Database Read Replica",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 150,
+      "name": "Triển khai Blue/Green",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 151,
+      "name": "Quản lý nhiều trường với dữ liệu riêng",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 152,
+      "name": "Tùy chỉnh thương hiệu từng trường",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 153,
+      "name": "Đa ngôn ngữ toàn hệ thống",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 154,
+      "name": "Chế độ mạng yếu",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 155,
+      "name": "Kiểm thử tương thích thiết bị",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 156,
+      "name": "Kiểm toán accessibility WCAG",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 157,
+      "name": "Kiểm tra accessibility học liệu",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 158,
+      "name": "Tích hợp chuẩn dữ liệu giáo dục",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 159,
+      "name": "Trang trạng thái hệ thống công khai",
+      "phase": "scale",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 160,
+      "name": "Diễn tập phục hồi thảm họa",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    }
+  ]
+}
