@@ -11,7 +11,8 @@ test("Two Admin decisions serialize and only first is recorded in PostgreSQL app
   query:async()=>({rows:[result]}),
   mutateAppState:fn=>{
    const pending=chain.then(async()=>{
-    const out=await fn(state);
+    const client={query:async()=>({rows:[result]})};
+    const out=await fn(state,client);
     return {...out,state};
    });
    chain=pending.then(()=>undefined,()=>undefined);
@@ -37,7 +38,7 @@ test("Changed result data blocks saving a stale review",async()=>{
  const state={users:[],resultReviewDecisions:[],audit:[]};
  let reads=0,out;
  const pg={query:async()=>({rows:[{id:"exam1",score:++reads===1?105:106,correct:10,total:10,durationSec:50}]}),
-  mutateAppState:async fn=>({...await fn(state),state})};
+  mutateAppState:async fn=>({...await fn(state,{query:async()=>({rows:[{id:"exam1",score:106,correct:10,total:10,durationSec:50}]})}),state})};
  try{
   await handler({method:"POST",url:"/api/admin/result-reviews/decision"},{}, "/api/admin/result-reviews/decision",{
    pg,storage:{flush:async()=>{},adopt:()=>{}},requireUser:async()=>({id:"admin",role:"admin"}),
