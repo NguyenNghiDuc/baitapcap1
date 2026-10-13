@@ -35,14 +35,16 @@ module.exports=async function adminResults(req,res,p,ctx){
  const userId=String(q.get("userId")||"").trim().slice(0,128);
  const subject=String(q.get("subject")||"").trim().slice(0,40);
  const grade=Number(q.get("grade"))||0;
+ const flagged=q.get("review")==="flagged";
  if(grade&&(!Number.isInteger(grade)||grade<1||grade>5))return send(res,400,{error:"Lớp không hợp lệ"}),true;
  try{
   let total,items,stats;
   if(process.env.DATABASE_URL){
+   const reviewWhere=flagged?` AND ((r.score IS NOT NULL AND (r.score < 0 OR r.score > 100)) OR (r.total > 0 AND (r.correct < 0 OR r.correct > r.total)) OR (r.duration_sec > 0 AND r.duration_sec < 5 AND r.total >= 10))`:"";
    const where=`WHERE ($1::text='' OR r.user_id=$1)
      AND ($2::text='' OR r.subject=$2)
      AND ($3::int=0 OR r.grade=$3)
-     AND ($4::text='' OR r.title ILIKE '%'||$4||'%' OR u.name ILIKE '%'||$4||'%' OR u.email ILIKE '%'||$4||'%')`;
+     AND ($4::text='' OR r.title ILIKE '%'||$4||'%' OR u.name ILIKE '%'||$4||'%' OR u.email ILIKE '%'||$4||'%')${reviewWhere}`;
    const params=[userId,subject,grade,search];
    // Use pooled connections concurrently for independent read-only queries.
    const [count,result,aggregate]=await Promise.all([
@@ -61,11 +63,11 @@ module.exports=async function adminResults(req,res,p,ctx){
    const filtered=(db.results||[]).map(normalize).filter(r=>
      (!userId||r.userId===userId)&&(!subject||r.subject===subject)&&(!grade||Number(r.grade)===grade)&&
      (!search||[r.title,r.owner.name,r.owner.email].some(v=>String(v||"").toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))))
-   ).sort((a,b)=>Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0));
+   ).filter(r=>!flagged||r.review.needsReview).sort((a,b)=>Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0));
    total=filtered.length;stats=distribution(filtered.map(x=>x.score));items=filtered.slice((page-1)*limit,page*limit);
   }
   return send(res,200,{results:items,pagination:{page,limit,total,pages:Math.ceil(total/limit),hasMore:page*limit<total},
-    distribution:stats,source:process.env.DATABASE_URL?"postgres":"local",note:"Điểm bài kiểm tra được gửi từ thiết bị học sinh, chưa được xác minh bởi giáo viên."}),true;
+    reviewFilter:flagged?"flagged":"all",distribution:stats,source:process.env.DATABASE_URL?"postgres":"local",note:"Điểm bài kiểm tra được gửi từ thiết bị học sinh, chưa được xác minh bởi giáo viên."}),true;
  }catch(e){console.error("[admin-results]",e.message);return send(res,503,{error:"Chưa đọc được dữ liệu kết quả trên máy chủ. Vui lòng kiểm tra PostgreSQL."}),true}
 };
 module.exports.distribution=distribution;
