@@ -36,3 +36,6 @@
  .admin-audit-heading{flex-wrap:wrap}
  #content[data-admin-view="adminAudit"] .admin-audit-list{padding:16px}
 }
+
+/* Admin sunset feature polish */
+.admin-audit-stat{box-shadow:0 10px 28px rgba(142,69,21,.075);border-radius:18px}.admin-audit-stat>span{background:rgba(238,119,33,.12);color:#d46619}@media(max-width:600px){.admin-audit-summary{grid-template-columns:1fr}}
