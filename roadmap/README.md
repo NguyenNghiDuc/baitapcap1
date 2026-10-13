@@ -63,4 +63,4 @@ npm run test:ui -- --project=chromium
 
 ## Giới hạn đợt này
 
-Đợt này tạo **danh mục và hệ thống kiểm tra**; **không thay thế cho việc triển khai 160 chức năng**. Mục đích là ngăn thêm tính năng ồ ạt trong khi đăng nhập, quyền Admin hoặc CI vẫn có lỗi.
+Đợt này tạo **danh mục và hệ thống kiểm tra**, đồng thời triển khai độc lập **bộ xem nhật ký Admin (mục 2, một phần)** gồm `routes/admin-audit.js`, `js/admin/audit-log.js`, `css/admin-audit.css` và `tests/admin-audit.test.js`. Chức năng xem/tìm kiếm/phân trang đã có kiểm thử unit; tính đầy đủ của mọi sự kiện và khả năng hoạt động trên production vẫn cần xác minh. **Không thay thế cho việc triển khai 160 chức năng**.
