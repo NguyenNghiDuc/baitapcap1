@@ -3,6 +3,7 @@ window.PerfLoader=(()=>{
  // Styles for private/secondary screens are not render-blocking for the home page.
  const routeStyles={
   classInsights:["/css/class-insights.css"],
+  gradeReviews:["/css/grade-reviews.css"],
   adminCenter:["/css/admin-console.css","/css/admin-center.css"],
   adminAlerts:["/css/admin-console.css","/css/admin-alerts.css"],
   adminSecurity:["/css/admin-console.css","/css/admin-security.css"],
@@ -21,6 +22,7 @@ window.PerfLoader=(()=>{
  };
  const routeFiles={
   classInsights:["/js/teacher/class-insights.js"],
+  gradeReviews:["/js/teacher/grade-reviews.js"],
   adminCenter:["/js/admin/center.js"],
   adminAlerts:["/js/admin/alerts.js"],
   adminSecurity:["/js/admin/security-center.js"],
