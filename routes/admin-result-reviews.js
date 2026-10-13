@@ -5,9 +5,10 @@ const {reviewSignals}=require("./admin-results");
 const HEADERS={"Cache-Control":"private, no-store"};
 const STATUSES=new Set(["reviewed","dismissed"]);
 function publicRecord(x){return {resultId:x.resultId,status:x.status,reason:x.reason,reviewerId:x.reviewerId,reviewedAt:x.reviewedAt,scoreAtReview:x.scoreAtReview,flagReasons:x.flagReasons};}
-async function findResult(ctx,id){
+async function findResult(ctx,id,client){
  if(process.env.DATABASE_URL){
-  const r=await ctx.pg.query('SELECT id,score,correct,total,duration_sec AS "durationSec" FROM results WHERE id=$1',[id]);
+  const sql='SELECT id,score,correct,total,duration_sec AS "durationSec" FROM results WHERE id=$1'+(client?' FOR SHARE':'');
+  const r=await (client||ctx.pg).query(sql,[id]);
   return r.rows[0]||null;
  }
  return (ctx.load().results||[]).find(x=>String(x.id)===id)||null;
@@ -46,9 +47,9 @@ async function handler(req,res,p,ctx){
    if(!found){send(res,404,{error:"Không tìm thấy bài kiểm tra"},HEADERS);return true}
    const signals=reviewSignals(found);
    if(!signals.length){send(res,409,{error:"Bài không còn dấu hiệu bất thường để xem xét."},HEADERS);return true}
-   const out=await execute(ctx,async(db,audit)=>{
+   const out=await execute(ctx,async(db,audit,client)=>{
     // Recheck the authoritative result while holding the app_state transaction lock.
-    const latest=await findResult(ctx,resultId);
+    const latest=await findResult(ctx,resultId,client);
     if(!latest)return {status:404,data:{error:"Bài kiểm tra không còn tồn tại."}};
     const currentSignals=reviewSignals(latest);
     if(!currentSignals.length)return {status:409,data:{error:"Dấu hiệu bất thường đã thay đổi. Tải lại dữ liệu."}};
