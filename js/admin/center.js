@@ -4,7 +4,7 @@ window.AdminCenter=(()=>{
   {id:"overview",icon:"🧭",title:"Tổng quan",description:"Bảng điều khiển và danh mục phát triển",links:[["admin","Dashboard"],["adminCenter","Danh mục 160 mục"]]},
   {id:"users",icon:"👥",title:"Người dùng",description:"Tài khoản và phân quyền đang sử dụng",links:[["adminUsers","Quản lý tài khoản"]]},
   {id:"learning",icon:"🏫",title:"Học tập & lớp học",description:"Công cụ lớp học và người giám hộ",links:[["classes","Lớp học"],["classInsights","Thống kê lớp"],["teacher","Giáo viên"],["parent","Phụ huynh"]]},
-  {id:"exams",icon:"📝",title:"Đề thi & chấm điểm",description:"Câu hỏi, phòng thi và bài đã nộp",links:[["questionBank","Ngân hàng câu hỏi"],["examRooms","Phòng thi"],["submissions","Chấm bài"]]},
+  {id:"exams",icon:"📝",title:"Đề thi & chấm điểm",description:"Câu hỏi, phòng thi và bài đã nộp",links:[["questionBank","Ngân hàng câu hỏi"],["examRooms","Phòng thi"],["submissions","Chấm bài"],["gradeReviews","Duyệt sửa điểm"]]},
   {id:"ai",icon:"🤖",title:"AI học tập",description:"Trải nghiệm trợ giảng, chưa phải bảng cấu hình AI",links:[["ai","Trợ giảng AI"]]},
   {id:"reports",icon:"📊",title:"Báo cáo & thống kê",description:"Điểm học sinh và phân tích kết quả",links:[["adminResults","Bảng điểm"],["analytics","Phân tích"]]},
   {id:"security",icon:"🛡️",title:"Bảo mật",description:"Nhật ký Admin và bảo mật tài khoản đang đăng nhập",links:[["adminSecurity","Trung tâm bảo mật"],["adminAudit","Nhật ký"],["accountSecurity","Bảo mật của tôi"]]},
@@ -17,7 +17,7 @@ window.AdminCenter=(()=>{
  const labels={"not-verified":"Chưa xác minh","partial":"Đã làm một phần","verified":"Đã kiểm thử","blocked":"Cần điều kiện triển khai"};
  async function catalog(){
   if(cached)return cached;
-  const r=await fetch("/assets/admin-feature-catalog.json?revision=20261013-admin6",{cache:"reload"});
+  const r=await fetch("/assets/admin-feature-catalog.json?revision=20261013-admin7",{cache:"reload"});
   if(!r.ok)throw Error("Không tải được danh mục chức năng.");
   const data=await r.json();
   if(data.schema!==1||data.features?.length!==160||data.groups?.length!==8)throw Error("Danh mục chưa được đồng bộ từ lộ trình.");

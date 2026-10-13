@@ -3,6 +3,7 @@ window.PerfLoader=(()=>{
  // Styles for private/secondary screens are not render-blocking for the home page.
  const routeStyles={
   classInsights:["/css/class-insights.css"],
+  gradeReviews:["/css/grade-reviews.css"],
   adminCenter:["/css/admin-console.css","/css/admin-center.css"],
   adminAlerts:["/css/admin-console.css","/css/admin-alerts.css"],
   adminSecurity:["/css/admin-console.css","/css/admin-security.css"],
@@ -17,10 +18,11 @@ window.PerfLoader=(()=>{
   storageHealth:["/css/admin-console.css"],
   questionBank:["/css/admin-console.css"],
   examRooms:["/css/admin-console.css"],
-  submissions:["/css/admin-console.css"]
+  submissions:["/css/grade-reviews.css","/css/admin-console.css"]
  };
  const routeFiles={
   classInsights:["/js/teacher/class-insights.js"],
+  gradeReviews:["/js/teacher/grade-reviews.js"],
   adminCenter:["/js/admin/center.js"],
   adminAlerts:["/js/admin/alerts.js"],
   adminSecurity:["/js/admin/security-center.js"],
@@ -74,7 +76,7 @@ window.PerfLoader=(()=>{
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
   const files=routeFiles[route]||[];
-  const css=(isAdmin||(route==="classInsights"&&isStaff))?(routeStyles[route]||[]):[];
+  const css=(isAdmin||(isStaff&&["classInsights","gradeReviews","submissions"].includes(route)))?(routeStyles[route]||[]):[];
   const cssReady=Promise.all(css.map(style));
   const scriptsReady=(async()=>{
    if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));
