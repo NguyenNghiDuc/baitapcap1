@@ -8,7 +8,7 @@ window.PerformanceMonitor={
    if(document.hidden)return;
    try{const d=await API.get("/api/admin/performance",{noCache:true});
     const el=document.querySelector("#adminPerfRows");if(!el)return;
-    const escape=s=>String(s??"").replace(/[&<>"\']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",\'"\':"&quot;","\'":"&#39;"}[c]));
+    const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
     el.innerHTML=(d.routes||[]).map(r=>"<tr><td><strong>"+escape(r.route)+"</strong></td><td>"+Number(r.calls)+"</td><td>"+Number(r.avgMs)+" ms</td><td><b>"+Number(r.p95Ms)+" ms</b></td><td>"+Number(r.maxMs)+" ms</td><td>"+Number(r.slow)+"</td><td>"+Number(r.errors)+"</td></tr>").join("")||'<tr><td colspan="7">Chưa có dữ liệu mới.</td></tr>';
     const count=document.querySelector("#adminPerfSampleCount");if(count)count.textContent=String(d.sampleCount||0);
    }catch{}
