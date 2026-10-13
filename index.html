@@ -107,13 +107,47 @@
       </details>
       <details class="sidebar-nav-group" data-nav-group="admin" hidden>
         <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">🛡️</span><span>ADMIN</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
-        <div class="sidebar-nav-items">
-        <a class="admin-only" href="#admin">🛡️ Admin</a>
-        <a class="admin-only" href="#adminUsers">👥 Quản lý user</a>
-        <a class="admin-only" href="#adminResults">📊 Bảng điểm học sinh</a>
-        <a class="admin-only" href="#adminAudit">📋 Nhật ký hoạt động</a>
-        <a class="admin-only" href="#performanceMonitor">🚀 Hiệu năng API</a>
-        <a class="admin-only" href="#storageHealth">🐘 PostgreSQL/Redis</a>
+        <div class="sidebar-nav-items admin-nav-categories">
+          <section class="admin-nav-section" data-admin-section="overview" aria-label="TỔNG QUAN">
+            <p class="admin-nav-section-label">TỔNG QUAN</p>
+            <a class="admin-only" href="#adminCenter">🧭 Trung tâm quản trị</a>
+            <a class="admin-only" href="#admin">📊 Dashboard Admin</a>
+          </section>
+          <section class="admin-nav-section" data-admin-section="users" aria-label="NGƯỜI DÙNG">
+            <p class="admin-nav-section-label">NGƯỜI DÙNG</p>
+            <a class="admin-only" href="#adminUsers">👥 Tài khoản & phân quyền</a>
+          </section>
+          <section class="admin-nav-section" data-admin-section="learning" aria-label="HỌC TẬP & LỚP HỌC">
+            <p class="admin-nav-section-label">HỌC TẬP & LỚP HỌC</p>
+            <a class="admin-only" href="#classes">🏫 Quản lý lớp học</a>
+            <a class="admin-only" href="#teacher">👩‍🏫 Công cụ giáo viên</a>
+            <a class="admin-only" href="#parent">👨‍👩‍👧 Theo dõi phụ huynh</a>
+          </section>
+          <section class="admin-nav-section" data-admin-section="exams" aria-label="ĐỀ THI & CHẤM ĐIỂM">
+            <p class="admin-nav-section-label">ĐỀ THI & CHẤM ĐIỂM</p>
+            <a class="admin-only" href="#questionBank">🧮 Ngân hàng câu hỏi</a>
+            <a class="admin-only" href="#examRooms">🧪 Phòng thi</a>
+            <a class="admin-only" href="#submissions">📨 Chấm bài đã nộp</a>
+          </section>
+          <section class="admin-nav-section" data-admin-section="ai" aria-label="TRỢ GIẢNG AI">
+            <p class="admin-nav-section-label">TRỢ GIẢNG AI</p>
+            <a class="admin-only" href="#ai">🤖 Trải nghiệm trợ giảng AI</a>
+          </section>
+          <section class="admin-nav-section" data-admin-section="reports" aria-label="BÁO CÁO & THỐNG KÊ">
+            <p class="admin-nav-section-label">BÁO CÁO & THỐNG KÊ</p>
+            <a class="admin-only" href="#adminResults">📈 Bảng điểm học sinh</a>
+            <a class="admin-only" href="#analytics">📉 Phân tích học tập</a>
+          </section>
+          <section class="admin-nav-section" data-admin-section="security" aria-label="BẢO MẬT & KIỂM TOÁN">
+            <p class="admin-nav-section-label">BẢO MẬT & KIỂM TOÁN</p>
+            <a class="admin-only" href="#adminAudit">📋 Nhật ký hoạt động</a>
+            <a class="admin-only" href="#accountSecurity">🔐 Bảo mật tài khoản của tôi</a>
+          </section>
+          <section class="admin-nav-section" data-admin-section="system" aria-label="HỆ THỐNG & HẠ TẦNG">
+            <p class="admin-nav-section-label">HỆ THỐNG & HẠ TẦNG</p>
+            <a class="admin-only" href="#performanceMonitor">🚀 Hiệu năng API</a>
+            <a class="admin-only" href="#storageHealth">🐘 PostgreSQL / Redis</a>
+          </section>
         </div>
       </details>
       <details class="sidebar-nav-group" data-nav-group="account">

@@ -28,7 +28,7 @@ window.SidebarNav=(()=>{
   if(user!==undefined)role=String(user?.role||"");
   const term=clean(search.value),href=activeHref(),count={value:0};
   for(const link of links){
-   const group=link.closest(".sidebar-nav-group"),category=group?.querySelector(".sidebar-nav-toggle")?.textContent||"";
+   const group=link.closest(".sidebar-nav-group"),category=(group?.querySelector(".sidebar-nav-toggle")?.textContent||"")+" "+(link.closest("[data-admin-section]")?.querySelector(".admin-nav-section-label")?.textContent||"");
    const match=!term||clean(link.textContent+" "+category).includes(term);
    const visible=allowed(link)&&match;
    link.hidden=!visible;
@@ -38,6 +38,10 @@ window.SidebarNav=(()=>{
    else link.removeAttribute("aria-current");
    if(visible)count.value++;
   }
+  // Hide Admin subcategories with no visible links; keep search and keyboard navigation accurate.
+  sidebar.querySelectorAll("[data-admin-section]").forEach(section=>{
+   section.hidden=![...section.querySelectorAll("a[href]")].some(link=>!link.hidden);
+  });
   for(const group of groups){
    const adminGroup=group.dataset.navGroup==="admin";
    group.hidden=adminGroup&&role!=="admin";

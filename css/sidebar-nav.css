@@ -50,3 +50,15 @@
 
 .sidebar .sidebar-sync-detail{display:block;max-width:170px;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
 .sidebar .sidebar-sync-detail[hidden]{display:none!important}
+
+/* Category labels are structural, never interactive or "coming soon" placeholders. */
+.sidebar .admin-nav-categories{gap:6px;padding:8px 6px 10px}
+.sidebar .admin-nav-section{padding:4px 2px 7px;border-bottom:1px solid var(--line);min-width:0}
+.sidebar .admin-nav-section:last-child{border-bottom:0;padding-bottom:0}
+.sidebar .admin-nav-section[hidden]{display:none!important}
+.sidebar .admin-nav-section-label{margin:7px 10px 6px;font-size:9.5px;line-height:1.5;font-weight:850;letter-spacing:.105em;color:var(--muted)}
+.sidebar .admin-nav-section a{display:flex;align-items:center;min-height:34px;padding:8px 10px;margin:2px 0;border-radius:9px;font-size:11.7px}
+.sidebar .admin-nav-section a:hover{background:rgba(59,130,246,.08)}
+.sidebar .admin-nav-section a[aria-current="page"]{background:rgba(59,130,246,.13);color:var(--blue);font-weight:850}
+:root[data-theme="dark"] .sidebar .admin-nav-section a:hover{background:rgba(101,163,255,.11)}
+@media(max-width:900px){.sidebar .admin-nav-section a{min-height:43px;font-size:12.5px}}

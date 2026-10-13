@@ -1,0 +1,1192 @@
+{
+  "schema": 1,
+  "groups": [
+    {
+      "id": 1,
+      "name": "Admin, tài khoản và quản trị cốt lõi",
+      "range": [
+        1,
+        20
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Vận hành, an toàn, nội dung và phân quyền",
+      "range": [
+        21,
+        40
+      ]
+    },
+    {
+      "id": 3,
+      "name": "AI, báo cáo, giám sát và khắc phục sự cố",
+      "range": [
+        41,
+        60
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Danh tính, người giám hộ, dữ liệu và bảo mật",
+      "range": [
+        61,
+        80
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Chương trình học, ngân hàng đề và chấm điểm",
+      "range": [
+        81,
+        100
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Giáo viên, lớp học và phụ huynh",
+      "range": [
+        101,
+        120
+      ]
+    },
+    {
+      "id": 7,
+      "name": "AI giáo dục và phân tích thống kê",
+      "range": [
+        121,
+        140
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Dữ liệu, hạ tầng, nhiều trường và trợ năng",
+      "range": [
+        141,
+        160
+      ]
+    }
+  ],
+  "features": [
+    {
+      "id": 1,
+      "name": "Phân quyền Admin chính/phụ và quyền chi tiết",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 2,
+      "name": "Nhật ký hoạt động và thay đổi có kiểm toán",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "partial",
+      "note": "Đã có trang xem/tìm kiếm/phân trang nhật ký dành riêng cho Admin và API chỉ đọc, ẩn metadata nhạy cảm. Chưa xác minh ghi đủ mọi thao tác hay khả năng kiểm toán nhiều instance trên production."
+    },
+    {
+      "id": 3,
+      "name": "Quản lý và duyệt bài kiểm tra",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 4,
+      "name": "Thống kê kết quả học sinh",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 5,
+      "name": "Xuất báo cáo Excel/PDF",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 6,
+      "name": "Quản lý thiết bị và phiên đăng nhập",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 7,
+      "name": "Khóa tài khoản có thời hạn và lý do",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 8,
+      "name": "Duyệt sửa điểm, lưu điểm trước và sau",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 9,
+      "name": "Trung tâm cảnh báo sự cố",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 10,
+      "name": "Sao lưu và khôi phục dữ liệu",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 11,
+      "name": "Trung tâm hỗ trợ học sinh",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 12,
+      "name": "Thao tác hàng loạt có kiểm soát",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 13,
+      "name": "Dashboard hoạt động thời gian thực",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 14,
+      "name": "Tìm kiếm toàn hệ thống",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 15,
+      "name": "Lên lịch mở/đóng đề kiểm tra",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 16,
+      "name": "Giám sát sự kiện kỹ thuật phòng thi",
+      "group": 1,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 17,
+      "name": "Duyệt ngân hàng câu hỏi",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 18,
+      "name": "Lịch sử phiên bản đề thi",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 19,
+      "name": "Xác minh và duyệt giáo viên",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 20,
+      "name": "Gửi email tự động",
+      "group": 1,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 21,
+      "name": "Chat hỗ trợ",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 22,
+      "name": "Báo lỗi nội dung, câu hỏi, đáp án",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 23,
+      "name": "Quản lý trợ giảng AI",
+      "group": 2,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 24,
+      "name": "Phân tích chất lượng và độ khó đề",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 25,
+      "name": "Cấu hình hệ thống từ Admin",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 26,
+      "name": "Quản lý phiên bản triển khai website",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 27,
+      "name": "Trung tâm an ninh và truy cập",
+      "group": 2,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 28,
+      "name": "Nhập tài khoản Excel hàng loạt",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 29,
+      "name": "Quản lý năm học và chuyển lớp",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 30,
+      "name": "Phê duyệt hai cấp cho thao tác nhạy cảm",
+      "group": 2,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 31,
+      "name": "Giao nhiệm vụ cho giáo viên",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 32,
+      "name": "Phân tích hiệu quả câu hỏi",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 33,
+      "name": "Chấm tự luận theo thang tiêu chí",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 34,
+      "name": "Phát hiện câu hỏi và đề trùng",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 35,
+      "name": "Tài khoản không hoạt động",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 36,
+      "name": "Kiểm tra tính toàn vẹn dữ liệu",
+      "group": 2,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 37,
+      "name": "Yêu cầu riêng tư và quyền dữ liệu",
+      "group": 2,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 38,
+      "name": "Bật/tắt chức năng bằng cấu hình",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 39,
+      "name": "Nhập đề thi Word/Excel",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 40,
+      "name": "Theo dõi yêu cầu hỗ trợ",
+      "group": 2,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 41,
+      "name": "Chống spam và lạm dụng API",
+      "group": 3,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 42,
+      "name": "Chế độ bảo trì có bảo vệ bài nộp",
+      "group": 3,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 43,
+      "name": "Theo dõi hoạt động hệ thống trực tiếp",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 44,
+      "name": "Hồ sơ học sinh 360 độ",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 45,
+      "name": "AI phân tích học lực",
+      "group": 3,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 46,
+      "name": "AI kiểm tra đáp án",
+      "group": 3,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 47,
+      "name": "AI tạo đề thi",
+      "group": 3,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 48,
+      "name": "Tự động giao bài theo lịch",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 49,
+      "name": "Báo cáo học tập chuyên sâu",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 50,
+      "name": "Cảnh báo xu hướng sa sút",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 51,
+      "name": "Tự động hóa công việc Admin",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 52,
+      "name": "Lưu trữ đề thi theo phiên bản",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 53,
+      "name": "Thống kê mức độ sử dụng tính năng",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 54,
+      "name": "Quản lý tích hợp bên ngoài",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 55,
+      "name": "Quản lý API key an toàn",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 56,
+      "name": "Hoàn tác thao tác nhầm",
+      "group": 3,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 57,
+      "name": "Phân nhóm học sinh",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 58,
+      "name": "Thông báo theo nhóm",
+      "group": 3,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 59,
+      "name": "Kiểm tra bảo mật định kỳ",
+      "group": 3,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 60,
+      "name": "Chẩn đoán tình trạng hệ thống",
+      "group": 3,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 61,
+      "name": "Xác nhận người giám hộ",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 62,
+      "name": "Lưu và quản lý đồng ý của phụ huynh",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 63,
+      "name": "Mã mời học sinh có thời hạn",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 64,
+      "name": "Gộp tài khoản trùng không mất dữ liệu",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 65,
+      "name": "Cảnh báo email đăng ký xung đột",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 66,
+      "name": "Chuyển lớp giữ lịch sử học",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 67,
+      "name": "Thu hồi quyền nhân sự nghỉ việc",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 68,
+      "name": "Cấp quyền tạm thời có hạn",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 69,
+      "name": "Phê duyệt truy cập dữ liệu nhạy cảm",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 70,
+      "name": "Mã học sinh riêng",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 71,
+      "name": "Đăng nhập Passkey",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 72,
+      "name": "Khóa bảo mật Admin WebAuthn",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 73,
+      "name": "Xác thực lại khi thao tác nguy hiểm",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 74,
+      "name": "Danh sách thiết bị tin cậy",
+      "group": 4,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 75,
+      "name": "Luân chuyển khóa bí mật",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 76,
+      "name": "Nhật ký xem thông tin cá nhân",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 77,
+      "name": "Link báo cáo tải về có thời hạn",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 78,
+      "name": "Thu hồi đồng ý xử lý dữ liệu",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 79,
+      "name": "Chính sách lưu giữ và xóa dữ liệu",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 80,
+      "name": "Ẩn danh dữ liệu kiểm thử",
+      "group": 4,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 81,
+      "name": "Bản đồ chương trình lớp 1–5",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 82,
+      "name": "Sơ đồ kiến thức tiên quyết",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 83,
+      "name": "Phân tích đáp án nhiễu",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 84,
+      "name": "Phiên bản tiêu chí chấm điểm",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 85,
+      "name": "Gắn chuẩn đầu ra cho bài học",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 86,
+      "name": "Ma trận độ khó nội dung",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 87,
+      "name": "Kiểm tra học liệu đa phương tiện",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 88,
+      "name": "Quản lý bản quyền học liệu",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 89,
+      "name": "Quy trình duyệt bản dịch",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 90,
+      "name": "Lọc nội dung phù hợp lứa tuổi",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 91,
+      "name": "Điều chỉnh thời gian thi theo nhu cầu",
+      "group": 5,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 92,
+      "name": "Tạm dừng thi khi gặp sự cố",
+      "group": 5,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 93,
+      "name": "Khiếu nại về bài nộp",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 94,
+      "name": "Biên nhận nộp bài",
+      "group": 5,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 95,
+      "name": "Lưu checkpoint bài thi",
+      "group": 5,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 96,
+      "name": "Trộn đề với độ khó tương đương",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 97,
+      "name": "Ma trận câu hỏi theo chương",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 98,
+      "name": "Nhật ký sự cố phòng thi",
+      "group": 5,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 99,
+      "name": "Phúc khảo bài thi",
+      "group": 5,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 100,
+      "name": "Kiểm tra độ nhất quán chấm bài",
+      "group": 5,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 101,
+      "name": "Kế hoạch hỗ trợ học sinh yếu",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 102,
+      "name": "Đo hiệu quả hoạt động phụ đạo",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 103,
+      "name": "Phân bổ tải công việc giáo viên",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 104,
+      "name": "Phân công giáo viên thay thế",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 105,
+      "name": "Quyền giáo viên theo lịch phân công",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 106,
+      "name": "Kế hoạch giảng dạy theo tuần",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 107,
+      "name": "Thư viện giáo án chung",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 108,
+      "name": "Phản biện giáo án",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 109,
+      "name": "Phiếu đánh giá tiết học",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 110,
+      "name": "Điểm danh và học bù",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 111,
+      "name": "Dashboard quyền dữ liệu phụ huynh",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 112,
+      "name": "Bản tin học tập định kỳ",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 113,
+      "name": "Đặt lịch trao đổi giáo viên",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 114,
+      "name": "Giờ nhận tin nhắn",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 115,
+      "name": "Tùy chọn loại thông báo",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 116,
+      "name": "Xác nhận phụ huynh đã xem nhận xét",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 117,
+      "name": "Một phụ huynh quản lý nhiều con",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 118,
+      "name": "Theo dõi thói quen học",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 119,
+      "name": "Ẩn học sinh khỏi bảng xếp hạng công khai",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 120,
+      "name": "Giới hạn thông báo theo ngày",
+      "group": 6,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 121,
+      "name": "AI dựa trên nguồn kiến thức đã duyệt",
+      "group": 7,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 122,
+      "name": "AI giải thích theo từng khối lớp",
+      "group": 7,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 123,
+      "name": "Hàng đợi giáo viên duyệt phản hồi AI",
+      "group": 7,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 124,
+      "name": "Bộ bài kiểm thử năng lực AI",
+      "group": 7,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 125,
+      "name": "Phòng vệ prompt injection",
+      "group": 7,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 126,
+      "name": "Ẩn dữ liệu cá nhân khỏi log AI",
+      "group": 7,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 127,
+      "name": "Giới hạn ngân sách AI theo người dùng",
+      "group": 7,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 128,
+      "name": "Ngăn AI tự sửa điểm",
+      "group": 7,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 129,
+      "name": "AI trích dẫn nguồn lời giải",
+      "group": 7,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 130,
+      "name": "Đánh giá an toàn AI cho trẻ em",
+      "group": 7,
+      "phase": "ai",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 131,
+      "name": "Thống kê tiến bộ qua nhiều năm",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 132,
+      "name": "Phân tích phân bố điểm",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 133,
+      "name": "Báo cáo tùy chỉnh",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 134,
+      "name": "Đánh giá độ tin cậy thống kê",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 135,
+      "name": "So sánh nhóm học tập",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 136,
+      "name": "Xác minh điểm bất thường",
+      "group": 7,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 137,
+      "name": "Cảnh báo dữ liệu hết hạn lưu giữ",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 138,
+      "name": "Báo cáo học sinh ít tương tác",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 139,
+      "name": "Dashboard mục tiêu học tập",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 140,
+      "name": "Dự báo nhu cầu hỗ trợ",
+      "group": 7,
+      "phase": "learning",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 141,
+      "name": "Kiểm tra trước migration",
+      "group": 8,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 142,
+      "name": "Phát hiện lệch schema database",
+      "group": 8,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 143,
+      "name": "Khôi phục database theo thời điểm",
+      "group": 8,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 144,
+      "name": "Idempotency chống nộp bài trùng",
+      "group": 8,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 145,
+      "name": "Dead Letter Queue cho tác vụ thất bại",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 146,
+      "name": "Circuit Breaker cho dịch vụ ngoài",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 147,
+      "name": "Rate Limit phân tán",
+      "group": 8,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 148,
+      "name": "Tải file theo từng phần",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 149,
+      "name": "Database Read Replica",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 150,
+      "name": "Triển khai Blue/Green",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 151,
+      "name": "Quản lý nhiều trường với dữ liệu riêng",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 152,
+      "name": "Tùy chỉnh thương hiệu từng trường",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 153,
+      "name": "Đa ngôn ngữ toàn hệ thống",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 154,
+      "name": "Chế độ mạng yếu",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 155,
+      "name": "Kiểm thử tương thích thiết bị",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 156,
+      "name": "Kiểm toán accessibility WCAG",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 157,
+      "name": "Kiểm tra accessibility học liệu",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 158,
+      "name": "Tích hợp chuẩn dữ liệu giáo dục",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 159,
+      "name": "Trang trạng thái hệ thống công khai",
+      "group": 8,
+      "phase": "scale",
+      "assessment": "not-verified"
+    },
+    {
+      "id": 160,
+      "name": "Diễn tập phục hồi thảm họa",
+      "group": 8,
+      "phase": "foundation",
+      "assessment": "not-verified"
+    }
+  ]
+}

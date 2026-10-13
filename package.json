@@ -24,7 +24,9 @@
     "ai:math-eval": "node scripts/math-eval.js",
     "roadmap:audit": "node scripts/audit-roadmap.js",
     "roadmap:audit:json": "node scripts/audit-roadmap.js --json",
-    "perf:budget": "node scripts/check-performance-budget.js"
+    "perf:budget": "node scripts/check-performance-budget.js",
+    "admin:catalog:check": "node scripts/sync-admin-catalog.js --check",
+    "admin:catalog:sync": "node scripts/sync-admin-catalog.js --write"
   },
   "engines": {
     "node": "22.x"

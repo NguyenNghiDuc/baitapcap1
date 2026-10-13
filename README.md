@@ -61,7 +61,11 @@ Xem chi tiết: [FEATURES.md](FEATURES.md) và [docs/PRODUCTION.md](docs/PRODUCT
 
 **Danh mục mở rộng 1–160:** [roadmap/README.md](roadmap/README.md). Các hạng mục mới được kiểm kê riêng, không coi là hoàn thành cho đến khi có kiểm thử. Chạy `npm run roadmap:audit` để kiểm tra danh mục và bằng chứng mã nguồn.
 
-**Nhật ký Admin mới:** mở menu **Admin → Nhật ký hoạt động**; tính năng xem và lọc nhật ký chỉ dành cho Admin và không hiển thị metadata nhạy cảm.
+**Nhật ký Admin:** chỉ Admin có thể xem và lọc nhật ký; metadata nhạy cảm không được hiển thị.
+
+**Trung tâm quản trị:** mở [#adminCenter](https://baitapcap1.vercel.app/#adminCenter) sau khi đăng nhập Admin. Menu được chia 8 nhóm và chỉ liên kết các trang giao diện đã tồn tại. Danh mục 160 mục chỉ biểu thị tình trạng kiểm kê (không đồng nghĩa hoàn thiện).
+
+Nguồn dữ liệu công khai **không chứa thông tin học sinh**: `assets/admin-feature-catalog.json`, đồng bộ từ `roadmap/features-*.json` bằng `npm run admin:catalog:sync`; CI chạy `npm run admin:catalog:check` để phát hiện lệch dữ liệu.
 
 ## Kiểm tra code
 
