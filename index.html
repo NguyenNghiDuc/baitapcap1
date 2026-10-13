@@ -20,24 +20,118 @@
   <link rel="stylesheet" href="css/mobile-fix.css" />
   <link rel="stylesheet" href="css/profile-dashboard.css" />
   <link rel="stylesheet" href="css/admin-results.css" />
+  <link rel="stylesheet" href="css/sidebar-nav.css" />
 </head>
 <body>
   <header class="topbar">
     <button class="icon-btn mobile-only" id="menuBtn">☰</button>
     <a class="brand" href="#home"><span class="brand-mark">📖</span><span>Bài Tập <b>Cấp 1</b></span></a>
     <nav class="topnav">
-      <a href="#home">Trang chủ</a><a href="#subjects">Môn học</a><a href="/kiem-tra.html">Đề kiểm tra</a><a href="/kiem-tra-nang-cao.html">🌟 Đề kiểm tra nâng cao</a><a href="#materials">Tài liệu</a>
+      <a href="#home">Trang chủ</a><a href="#subjects">Môn học</a><a href="/kiem-tra.html">Bài kiểm tra</a><a href="/kiem-tra-nang-cao.html">🌟 Bài kiểm tra nâng cao</a><a href="#materials">Tài liệu</a>
     </nav>
     <div class="top-actions"><button class="ghost" id="themeBtn">☀️</button><a class="ghost register-link" id="registerBtn" href="/?auth=register">Đăng ký</a><button class="primary" id="authBtn">Đăng nhập</button></div>
   </header>
 
   <aside class="sidebar" id="sidebar">
     <a class="profile-mini profile-link" href="#profile" title="Xem hồ sơ và đổi ảnh đại diện"><div class="avatar" id="sideAvatar">👧🏻</div><div><b id="sideName">Khách</b><small id="sideRole">Học sinh</small></div></a>
-    <div class="side-title">HỌC SINH</div><a href="#featureHub">✨ Tất cả tiện ích</a>
-    <a href="#today">🎯 Hôm nay học gì?</a><a href="#wrongReview">🧠 Ôn câu sai</a><a href="#quickPractice">⏱ Luyện nhanh</a><a href="#studyPath">🛤 Lộ trình cá nhân</a><a href="#topics">📚 Chuyên đề</a><a href="#adaptive">🧩 Luyện thích ứng</a><a href="#targetScore">🎯 Mục tiêu điểm</a><a href="#mathWork">✏️ Toán tự luận</a><a href="#goals">✅ Mục tiêu</a><a href="#schedule">📅 Lịch học</a><a href="#formulas">📐 Sổ tay công thức</a><a href="#languageLab">📖 Reading & Dictation</a><a href="#vocab">🗣 Từ vựng & phát âm</a><a href="#speech">🎙 Luyện nói</a><a href="#notes">📝 Ghi chú</a><a href="#worksheet">🖨 Phiếu bài tập</a><a href="#profileStats">📊 Hồ sơ học tập</a><a href="#missions">🏁 Nhiệm vụ</a><a href="#leaderboard">🏆 Xếp hạng</a><a href="#bookmarks">🔖 Câu đã lưu</a><a href="#prepPlan">🗓 Kế hoạch ôn</a><a href="#writing">✍️ Viết & AI góp ý</a><a href="#handwriting">📷 Ảnh bài làm</a><a href="#sync">☁️ Đồng bộ</a><a href="#accessibility">👁 Trợ năng</a>
-    <div class="side-title">HỌC TẬP</div>
-    <a href="#home">🏠 Trang chủ</a><a href="#subjects">📚 Môn học</a><a href="/kiem-tra.html">📝 Đề kiểm tra</a><a href="#examRooms">🧪 Phòng thi</a><a href="#classes">🏫 Lớp học</a><a href="#assignments">📌 Bài được giao</a><a href="#favorites">❤️ Yêu thích</a><a href="#history">📈 Kết quả học tập</a><a href="#analytics">📊 Phân tích học tập</a><a href="#flashcards">🧠 Flashcard</a><a href="#game">🎮 Mini game</a><a href="#achievements">🏆 Thành tích</a><a href="#shop">🎁 Shop & XP</a><a href="#premium">⭐ Premium</a><a href="#materials">📎 Tài liệu</a><a href="#notifications">🔔 Thông báo</a><a href="#ai">🤖 Trợ giảng AI</a><a href="#parent">👨‍👩‍👧 Phụ huynh</a>
-    <div class="side-title">TÀI KHOẢN</div><a href="#profile">👤 Hồ sơ</a><a href="#accountSecurity">🔐 Bảo mật tài khoản</a><a class="teacher-only" href="#teacher">👩🏻‍🏫 Giáo viên</a><a class="teacher-only" href="#questionBank">🧮 Ngân hàng câu hỏi</a><a class="teacher-only" href="#submissions">📨 Chấm bài</a><a class="admin-only" href="#admin">⚙️ Quản trị</a><a class="admin-only" href="#adminUsers">👥 Quản lý user</a><a class="admin-only" href="#adminResults">📊 Bảng điểm học sinh</a><a class="admin-only" href="#performanceMonitor">🚀 Hiệu năng API</a><a class="admin-only" href="#storageHealth">🐘 PostgreSQL/Redis</a><a href="/privacy.html">🔒 Quyền riêng tư</a><div class="side-title">HỆ THỐNG</div><a href="#settings">⚙️ Cài đặt</a><a href="#updateCenter">⬆️ Cập nhật</a>
+    <div class="sidebar-search">
+      <label for="sidebarSearch">Tìm chức năng</label>
+      <div class="sidebar-search-field"><span aria-hidden="true">⌕</span><input id="sidebarSearch" type="search" placeholder="Ví dụ: toán, mini game, điểm..." autocomplete="off" spellcheck="false" /><kbd aria-hidden="true">/</kbd></div>
+    </div>
+    <nav class="sidebar-navigation" aria-label="Các chức năng">
+      <div class="sidebar-shortcuts"><a href="#home">🏠 Trang chủ</a><a href="#subjects">📚 Môn học</a><a href="#featureHub">✨ Tất cả tiện ích</a></div>
+      <details class="sidebar-nav-group" data-nav-group="student" open>
+        <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">👩‍🎓</span><span>HỌC SINH</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="sidebar-nav-items">
+        <a href="#today">🎯 Hôm nay học gì?</a>
+        <a href="#wrongReview">🧠 Ôn câu sai</a>
+        <a href="#quickPractice">⏱ Luyện nhanh</a>
+        <a href="#studyPath">🛤 Lộ trình cá nhân</a>
+        <a href="#topics">📚 Chuyên đề</a>
+        <a href="#adaptive">🧩 Luyện thích ứng</a>
+        <a href="#targetScore">🎯 Mục tiêu điểm</a>
+        <a href="#mathWork">✏️ Toán tự luận</a>
+        <a href="#goals">✅ Mục tiêu</a>
+        <a href="#schedule">📅 Lịch học</a>
+        <a href="#formulas">📐 Sổ tay công thức</a>
+        <a href="#languageLab">📖 Reading & Dictation</a>
+        <a href="#vocab">🗣 Từ vựng & phát âm</a>
+        <a href="#speech">🎙 Luyện nói</a>
+        <a href="#notes">📝 Ghi chú</a>
+        <a href="#worksheet">🖨 Phiếu bài tập</a>
+        <a href="#profileStats">📊 Hồ sơ học tập</a>
+        <a href="#bookmarks">🔖 Câu đã lưu</a>
+        <a href="#prepPlan">🗓 Kế hoạch ôn</a>
+        <a href="#writing">✍️ Viết & AI góp ý</a>
+        <a href="#handwriting">📷 Ảnh bài làm</a>
+        <a href="#sync">☁️ Đồng bộ</a>
+        <a href="#accessibility">👁 Trợ năng</a>
+        <a href="#favorites">❤️ Yêu thích</a>
+        <a href="#materials">📎 Tài liệu</a>
+        <a href="#ai">🤖 Trợ giảng AI</a>
+        </div>
+      </details>
+      <details class="sidebar-nav-group" data-nav-group="exams" open>
+        <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">📝</span><span>BÀI KIỂM TRA</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="sidebar-nav-items">
+        <a href="/kiem-tra.html">📝 Bài kiểm tra</a>
+        <a href="/kiem-tra-nang-cao.html">🌟 Bài kiểm tra nâng cao</a>
+        <a href="#examRooms">🧪 Phòng thi</a>
+        <a href="#assignments">📌 Bài được giao</a>
+        <a href="#history">📈 Kết quả học tập</a>
+        <a href="#analytics">📊 Phân tích học tập</a>
+        <a class="teacher-only" href="#questionBank">🧮 Ngân hàng câu hỏi</a>
+        <a class="teacher-only" href="#submissions">📨 Chấm bài</a>
+        </div>
+      </details>
+      <details class="sidebar-nav-group" data-nav-group="games">
+        <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">🎮</span><span>MINI GAME</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="sidebar-nav-items">
+        <a href="#game">🎮 Mini game</a>
+        <a href="#flashcards">🧠 Flashcard</a>
+        <a href="#missions">🏁 Nhiệm vụ</a>
+        <a href="#leaderboard">🏆 Xếp hạng</a>
+        <a href="#achievements">🏆 Thành tích</a>
+        <a href="#shop">🎁 Shop & XP</a>
+        <a href="#premium">⭐ Premium</a>
+        </div>
+      </details>
+      <details class="sidebar-nav-group" data-nav-group="classes">
+        <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">🏫</span><span>LỚP HỌC</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="sidebar-nav-items">
+        <a href="#classes">🏫 Lớp học</a>
+        <a class="teacher-only" href="#teacher">👩🏻‍🏫 Giáo viên</a>
+        <a href="#parent">👨‍👩‍👧 Phụ huynh</a>
+        <a href="#notifications">🔔 Thông báo</a>
+        </div>
+      </details>
+      <details class="sidebar-nav-group" data-nav-group="admin" hidden>
+        <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">🛡️</span><span>ADMIN</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="sidebar-nav-items">
+        <a class="admin-only" href="#admin">🛡️ Admin</a>
+        <a class="admin-only" href="#adminUsers">👥 Quản lý user</a>
+        <a class="admin-only" href="#adminResults">📊 Bảng điểm học sinh</a>
+        <a class="admin-only" href="#performanceMonitor">🚀 Hiệu năng API</a>
+        <a class="admin-only" href="#storageHealth">🐘 PostgreSQL/Redis</a>
+        </div>
+      </details>
+      <details class="sidebar-nav-group" data-nav-group="account">
+        <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">👤</span><span>TÀI KHOẢN</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="sidebar-nav-items">
+        <a href="#profile">👤 Hồ sơ</a>
+        <a href="#accountSecurity">🔐 Bảo mật tài khoản</a>
+        <a href="/privacy.html">🔒 Quyền riêng tư</a>
+        </div>
+      </details>
+      <details class="sidebar-nav-group" data-nav-group="system">
+        <summary class="sidebar-nav-toggle"><span class="sidebar-nav-icon" aria-hidden="true">⚙️</span><span>HỆ THỐNG</span><span class="sidebar-nav-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="sidebar-nav-items">
+        <a href="#settings">⚙️ Cài đặt</a>
+        <a href="#updateCenter">⬆️ Cập nhật</a>
+        </div>
+      </details>
+      <p class="sidebar-no-results" id="sidebarNoResults" hidden>Không tìm thấy chức năng phù hợp.</p>
+    </nav>
   </aside>
 
   <main class="content" id="content"></main>
@@ -72,6 +166,8 @@
   <script defer src="js/student/parent-lock.js"></script>
   <script defer src="js/student/registry.js"></script>
   <script defer src="/js/results/account.js"></script>
-  <script defer src="/js/presence.js"></script><script defer src="js/app.js"></script>
+  <script defer src="/js/presence.js"></script>
+  <script defer src="js/sidebar-nav.js"></script>
+  <script defer src="js/app.js"></script>
 </body>
 </html>
