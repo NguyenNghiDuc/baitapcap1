@@ -75,7 +75,7 @@ window.PerfLoader=(()=>{
   const route=el.dataset.route||el.getAttribute("href")?.slice(1);
   if(routeFiles[route])prefetch(route);
  });
- function cleanupRoute(){window.API?.abortAll?.();window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.();try{window.speechSynthesis?.cancel?.()}catch{}try{window._btSpeechRecognition?.abort?.()}catch{}if(window._btBreak){clearTimeout(window._btBreak);window._btBreak=null}}
+ function cleanupRoute(){window.PerformanceMonitor?.stop?.();window.API?.abortAll?.();window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.();try{window.speechSynthesis?.cancel?.()}catch{}try{window._btSpeechRecognition?.abort?.()}catch{}if(window._btBreak){clearTimeout(window._btBreak);window._btBreak=null}}
  window.addEventListener("online",()=>window.OfflineSyncQueue?.flush?.());
  return {ensureRoute,prefetch,cleanupRoute,skeleton,routeFiles}
 })();
