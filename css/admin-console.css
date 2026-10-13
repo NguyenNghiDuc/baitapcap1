@@ -696,3 +696,79 @@
  #content[data-admin-view] :is(.metric,.admin-users-stat,.admin-center-group){transition:none}
  #content[data-admin-view] :is(.metric,.admin-users-stat,.admin-center-group):hover{transform:none}
 }
+
+
+/* ADMIN NAVIGATION REFINEMENT — only the authenticated Admin navigation group.
+   Color system matches the dashboard; no global sidebar/student changes. */
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]){
+ border:1px solid rgba(229,119,36,.34);
+ background:linear-gradient(180deg,rgba(255,153,67,.10),var(--surface) 73%);
+ box-shadow:0 12px 28px rgba(142,67,21,.09);
+ border-radius:16px;
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden])>.sidebar-nav-toggle{
+ background:transparent;
+ border-bottom-color:rgba(222,125,59,.18);
+ color:var(--text);
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .sidebar-nav-toggle:hover{
+ background:rgba(244,135,51,.08);
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .sidebar-nav-icon{
+ background:linear-gradient(135deg,#ffad52,#e86c18 70%,#c34c09);
+ box-shadow:0 6px 14px rgba(200,88,15,.20);
+ color:#fff;
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section{
+ border-bottom-color:rgba(217,116,49,.15);
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section-label{
+ color:var(--muted);letter-spacing:.09em;font-size:10px;
+ margin-top:10px;margin-bottom:6px;
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section a{
+ border:1px solid transparent;
+ border-radius:10px;
+ min-height:38px;
+ transition:background-color .16s,color .16s,border-color .16s,box-shadow .16s;
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section a:hover{
+ background:rgba(245,135,48,.10);
+ color:#c4590e;
+ border-color:rgba(226,116,42,.16);
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section a:is(.is-active,[aria-current="page"]){
+ background:linear-gradient(105deg,rgba(255,165,81,.21),rgba(244,121,34,.08));
+ color:#ae4707;
+ border-color:rgba(223,105,24,.28);
+ font-weight:850;
+ box-shadow:inset 3px 0 #e97820;
+}
+#sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) :is(.sidebar-nav-toggle,.admin-nav-section a):focus-visible{
+ outline:3px solid #ed8d41;
+ outline-offset:2px;
+}
+@media(max-width:900px){
+ #sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section a{
+  min-height:45px;
+  padding:11px 12px;
+ }
+}
+:root[data-theme="dark"] #sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]){
+ border-color:rgba(255,168,98,.28);
+ background:linear-gradient(180deg,rgba(163,78,28,.17),var(--surface) 77%);
+ box-shadow:0 11px 26px rgba(0,0,0,.24);
+}
+:root[data-theme="dark"] #sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section a:hover{
+ color:#ffd0a4;
+ background:rgba(228,126,49,.12);
+}
+:root[data-theme="dark"] #sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section a:is(.is-active,[aria-current="page"]){
+ color:#ffca93;
+ background:linear-gradient(105deg,rgba(223,114,31,.25),rgba(188,81,15,.12));
+ border-color:rgba(245,151,70,.31);
+ box-shadow:inset 3px 0 #ffad63;
+}
+@media(prefers-reduced-motion:reduce){
+ #sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]) .admin-nav-section a{transition:none}
+}
