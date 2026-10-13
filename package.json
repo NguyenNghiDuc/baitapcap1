@@ -23,7 +23,8 @@
     "perf:lighthouse": "node scripts/lighthouse-audit.js",
     "ai:math-eval": "node scripts/math-eval.js",
     "roadmap:audit": "node scripts/audit-roadmap.js",
-    "roadmap:audit:json": "node scripts/audit-roadmap.js --json"
+    "roadmap:audit:json": "node scripts/audit-roadmap.js --json",
+    "perf:budget": "node scripts/check-performance-budget.js"
   },
   "engines": {
     "node": "22.x"
