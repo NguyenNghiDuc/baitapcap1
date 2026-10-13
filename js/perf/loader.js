@@ -62,7 +62,7 @@ window.PerfLoader=(()=>{
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
   const files=routeFiles[route]||[];
-  const css=route==="history"&&!isAdmin?[]:routeStyles[route]||[];
+  const css=isAdmin?(routeStyles[route]||[]):[];
   const cssReady=Promise.all(css.map(style));
   const scriptsReady=(async()=>{
    if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));
