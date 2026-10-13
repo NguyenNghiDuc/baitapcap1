@@ -69,6 +69,22 @@ function seedAdmin(){const db=load();if(!db.users.length&&process.env.SEED_DEMO=
 {id:"demo-admin",name:"Quản trị viên",email:"admin@demo.vn",password:hashPassword(crypto.randomBytes(32).toString("hex")),role:"admin",avatar:"🧑🏻‍💻",emailVerified:true,createdAt:now});save(db)}}
 
 async function api(req,res,p,ip){
+ if(req.method==="GET"&&p==="/api/admin/system-health"){
+  const admin=await requireUser(req,res,["admin"]);if(!admin)return;
+  const bounded=promise=>Promise.race([promise,new Promise(resolve=>setTimeout(()=>resolve({error:"timeout"}),1800))]);
+  const [db,redis]=await Promise.all([
+   bounded(pgStore.health().catch(e=>({error:e.message}))),
+   bounded(sessionStore.health().catch(e=>({error:e.message})))
+  ]);
+  return send(res,200,{
+   scope:"current-server-instance",at:new Date().toISOString(),
+   database:{enabled:!!db.enabled,healthy:!!db.enabled&&!db.error,error:db.error||null},
+   redis:{enabled:!!redis.enabled,healthy:!!redis.enabled&&!redis.error,error:redis.error||null},
+   process:{uptimeSeconds:Math.round(process.uptime()),heapUsedMB:Math.round(process.memoryUsage().heapUsed/1048576)},
+   cache:require("./lib/cache").stats(),
+   alertingConfigured:require("./lib/alerting").enabled()
+  },{"Cache-Control":"private, no-store"});
+ }
  if(req.method==="GET"&&p==="/api/admin/performance"){
   const admin=await requireUser(req,res,["admin"]);if(!admin)return;
   return send(res,200,apiPerformance.summary(),{"Cache-Control":"private, no-store"});
