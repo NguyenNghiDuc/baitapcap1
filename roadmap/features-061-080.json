@@ -1,0 +1,170 @@
+{
+  "range": [
+    61,
+    80
+  ],
+  "title": "Danh tính, người giám hộ, dữ liệu và bảo mật",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 61,
+      "name": "Xác nhận người giám hộ",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 62,
+      "name": "Lưu và quản lý đồng ý của phụ huynh",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 63,
+      "name": "Mã mời học sinh có thời hạn",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 64,
+      "name": "Gộp tài khoản trùng không mất dữ liệu",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 65,
+      "name": "Cảnh báo email đăng ký xung đột",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 66,
+      "name": "Chuyển lớp giữ lịch sử học",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 67,
+      "name": "Thu hồi quyền nhân sự nghỉ việc",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 68,
+      "name": "Cấp quyền tạm thời có hạn",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 69,
+      "name": "Phê duyệt truy cập dữ liệu nhạy cảm",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 70,
+      "name": "Mã học sinh riêng",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 71,
+      "name": "Đăng nhập Passkey",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 72,
+      "name": "Khóa bảo mật Admin WebAuthn",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 73,
+      "name": "Xác thực lại khi thao tác nguy hiểm",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 74,
+      "name": "Danh sách thiết bị tin cậy",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 75,
+      "name": "Luân chuyển khóa bí mật",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 76,
+      "name": "Nhật ký xem thông tin cá nhân",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 77,
+      "name": "Link báo cáo tải về có thời hạn",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 78,
+      "name": "Thu hồi đồng ý xử lý dữ liệu",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 79,
+      "name": "Chính sách lưu giữ và xóa dữ liệu",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 80,
+      "name": "Ẩn danh dữ liệu kiểm thử",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    }
+  ]
+}
