@@ -23,3 +23,6 @@
 :root[data-theme="dark"] .admin-sec-chip.is-limited{color:#ffb0bf}
 @media(max-width:850px){.admin-sec-stats{grid-template-columns:1fr 1fr}.admin-sec-powers{grid-template-columns:1fr}}
 @media(max-width:510px){.admin-sec-stats{grid-template-columns:1fr}.admin-sec-power{flex-wrap:wrap}.admin-sec-heading{flex-wrap:wrap}}
+
+/* Admin sunset feature polish */
+.admin-sec-stats>div{border-radius:18px;box-shadow:0 10px 28px rgba(142,69,21,.075)}.admin-sec-stats>div:hover{border-color:rgba(233,121,40,.4)}@media(max-width:650px){.admin-sec-stats{grid-template-columns:1fr}}
