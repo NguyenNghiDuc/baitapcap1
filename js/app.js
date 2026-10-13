@@ -114,18 +114,35 @@ function bindAdminPresence(){
  }
  adminPresenceRefresh=setInterval(refresh,30000);
 }
+function adminUserFilterControls(){
+ const f=window.PerfLists.state("adminUsers");
+ const option=(value,current)=>value===current?"selected":"";
+ return '<div class="admin-users-filterbar" role="group" aria-label="Bộ lọc tài khoản nâng cao">'+
+ '<div class="admin-users-filter-title"><b>🎯 Bộ lọc nâng cao</b><small>Lọc theo vai trò và tình trạng tài khoản trên toàn hệ thống</small></div>'+
+ '<label for="adminUsersRoleFilter">Vai trò<select id="adminUsersRoleFilter" aria-label="Lọc theo vai trò">'+
+ '<option value="" '+option("",f.role||"")+'>Tất cả vai trò</option>'+
+ '<option value="student" '+option("student",f.role||"")+'>Học sinh</option>'+
+ '<option value="parent" '+option("parent",f.role||"")+'>Phụ huynh</option>'+
+ '<option value="teacher" '+option("teacher",f.role||"")+'>Giáo viên</option>'+
+ '<option value="admin" '+option("admin",f.role||"")+'>Quản trị viên</option></select></label>'+
+ '<label for="adminUsersStatusFilter">Tình trạng<select id="adminUsersStatusFilter" aria-label="Lọc theo trạng thái khóa">'+
+ '<option value="" '+option("",f.accountStatus||"")+'>Tất cả tài khoản</option>'+
+ '<option value="active" '+option("active",f.accountStatus||"")+'>Đang hoạt động</option>'+
+ '<option value="locked" '+option("locked",f.accountStatus||"")+'>Đã khóa</option></select></label>'+
+ '<button type="button" class="outline" id="adminUsersResetFilters">↺ Xóa bộ lọc</button></div>';
+}
 async function adminUsers(){
  if(state.user?.role!=="admin")return loginRequired("Chỉ Admin được quản lý tài khoản.");
- let j;try{j=await window.PerfLists.get("adminUsers","/api/admin/users")}catch(e){return errorBox(e.message)}
+ let j;try{const filters=window.PerfLists.state("adminUsers");j=await window.PerfLists.get("adminUsers","/api/admin/users",{role:filters.role||"",accountStatus:filters.accountStatus||""})}catch(e){return errorBox(e.message)}
  return '<div class="admin-users-page">'+pageHead("TRUNG TÂM QUẢN TRỊ","Tài khoản hệ thống","Quản lý thành viên, phân quyền và theo dõi hoạt động an toàn.")+
  '<section class="admin-users-summary" aria-label="Tổng quan tài khoản">'+
- '<article class="admin-users-stat"><span class="admin-users-stat-icon" aria-hidden="true">👥</span><div><small>Tổng tài khoản</small><strong>'+Number(j.pagination?.total||0).toLocaleString("vi-VN")+'</strong><span>Đã đăng ký trên hệ thống</span></div></article>'+
+ '<article class="admin-users-stat"><span class="admin-users-stat-icon" aria-hidden="true">👥</span><div><small>Tổng tài khoản</small><strong>'+Number(j.allUsersTotal??j.pagination?.total??0).toLocaleString("vi-VN")+'</strong><span>Đã đăng ký trên hệ thống</span></div></article>'+
  '<article class="admin-users-stat admin-users-stat-online"><span class="admin-users-stat-icon" aria-hidden="true">🟢</span><div><small>Đang trực tuyến</small><strong id="adminUsersOnlineStat">'+(j.presenceAvailable?Number(j.onlineTotal||0).toLocaleString("vi-VN"):"—")+'</strong><span>Hoạt động trong 2 phút gần đây</span></div></article>'+
  '<article class="admin-users-stat"><span class="admin-users-stat-icon" aria-hidden="true">📋</span><div><small>Đang hiển thị</small><strong>'+Number(j.users?.length||0).toLocaleString("vi-VN")+'</strong><span>Tài khoản trong trang này</span></div></article>'+
  '</section>'+(j.durable?"":'<div class="panel admin-users-warning" role="alert"><b>⚠️ Chưa có PostgreSQL dùng chung.</b><p>Trên Vercel, cần cấu hình DATABASE_URL trước khi khóa/mở khóa tài khoản. Không nên sử dụng JSON cục bộ để quản lý quyền thật.</p></div>')+`
  <div class="panel admin-presence-summary admin-users-live-banner" id="adminPresenceSummary" role="status" data-available="${j.presenceAvailable?"1":"0"}">${j.presenceAvailable?"🟢 "+Number(j.onlineTotal||0)+" tài khoản đang online (toàn hệ thống)":"⚪ Chưa bật giám sát online: Vercel cần DATABASE_URL"}. Trạng thái online là hoạt động trên website trong khoảng 2 phút gần nhất.</div>
  <section class="panel admin-users-grant"><div class="admin-users-grant-head"><span class="admin-users-grant-icon" aria-hidden="true">🛡️</span><div><h3>Cấp quyền quản trị viên</h3><p class="muted">${j.canGrantAdmin?"Bạn đang dùng tài khoản Admin chính. Có thể cấp quyền cho tài khoản Supabase đã liên kết.":"Chỉ Admin chính đã được cấu hình mới có thể cấp quyền này."} Tài khoản nhận quyền cần đăng ký và đăng nhập website ít nhất một lần.</p></div></div><form id="grantAdminForm" class="admin-users-grant-form"><label for="grantAdminEmail">Email tài khoản<input id="grantAdminEmail" name="email" type="email" autocomplete="email" placeholder="Nhập email tài khoản cần cấp quyền" required></label><button class="primary" type="submit" ${j.canGrantAdmin?"":"disabled title='Chỉ Admin chính được cấp quyền'"}>🛡️ Cấp quyền Admin</button></form></section>
- <section class="admin-users-directory"><div class="admin-users-directory-heading"><div><span class="admin-users-eyebrow">DANH SÁCH THÀNH VIÊN</span><h3>Quản lý người dùng</h3><p>Tìm kiếm, cập nhật vai trò và quản lý trạng thái tài khoản.</p></div><span class="admin-users-count">${Number(j.pagination?.total||0)} tài khoản</span></div>${window.PerfLists.controls("adminUsers",j.pagination,{placeholder:"🔎 Tìm tên, email hoặc vai trò..."})}<div class="panel admin-users-table-card"><div class="table-wrap" tabindex="0" aria-label="Bảng quản lý tài khoản, có thể cuộn ngang"><table><thead><tr><th>Tên</th><th>Email</th><th>Vai trò</th><th>Lớp</th><th>Tài khoản</th><th>Trực tuyến</th><th>Thao tác</th></tr></thead><tbody>${j.users.map(u=>`<tr class="${u.locked?"is-locked":""}"><td><div class="admin-user-identity"><span class="admin-user-avatar" aria-hidden="true">${esc(String(u.name||u.email||"U").trim().charAt(0).toLocaleUpperCase("vi-VN"))}</span><span class="admin-user-name">${esc(u.name||"Chưa có tên")}</span></div></td><td><span class="admin-user-email">${esc(u.email)}</span></td><td><select class="admin-user-role-select" aria-label="Vai trò của ${esc(u.name||u.email)}" data-user-role="${esc(u.id)}" data-current-role="${esc(u.role)}" data-user-email="${esc(u.email)}" data-can-grant-admin="${j.canGrantAdmin?"1":"0"}">${[["student","Học sinh"],["parent","Phụ huynh"],["teacher","Giáo viên"],["admin","Quản trị viên"]].map(([r,t])=>`<option value="${r}" ${r===u.role?"selected":""} ${r==="admin"&&u.role!=="admin"&&!j.canGrantAdmin?"disabled":""}>${t}</option>`).join("")}</select></td><td><span class="admin-user-grade">${u.grade?"Lớp "+Number(u.grade):"—"}</span></td><td><span class="admin-account-state ${u.locked?"locked":"active"}">${u.locked?"🔒 Đã khóa":"✓ Hoạt động"}</span></td><td data-live-user="${esc(u.id)}">${liveBadge(u.presence,j.presenceAvailable)}</td><td><div class="admin-user-actions"><button type="button" class="outline small admin-user-save" data-user-save="${esc(u.id)}">Lưu vai trò</button><button type="button" class="outline small admin-user-lock ${u.locked?"unlock":"lock"}" data-user-lock="${esc(u.id)}" data-user-email="${esc(u.email)}" data-locked="${u.locked?"1":"0"}" ${u.id===state.user.id?"disabled title='Không thể tự khóa tài khoản'":""}>${u.locked?"🔓 Mở khóa":"🔒 Khóa tài khoản"}</button></div></td></tr>`).join("")}</tbody></table></div></div></section></div>`
+ <section class="admin-users-directory"><div class="admin-users-directory-heading"><div><span class="admin-users-eyebrow">DANH SÁCH THÀNH VIÊN</span><h3>Quản lý người dùng</h3><p>Tìm kiếm, cập nhật vai trò và quản lý trạng thái tài khoản.</p></div><span class="admin-users-count">${Number(j.pagination?.total||0)} tài khoản khớp bộ lọc</span></div>${adminUserFilterControls()}${window.PerfLists.controls("adminUsers",j.pagination,{placeholder:"🔎 Tìm tên hoặc email..."})}<div class="panel admin-users-table-card"><div class="table-wrap" tabindex="0" aria-label="Bảng quản lý tài khoản, có thể cuộn ngang"><table><thead><tr><th>Tên</th><th>Email</th><th>Vai trò</th><th>Lớp</th><th>Tài khoản</th><th>Trực tuyến</th><th>Thao tác</th></tr></thead><tbody>${j.users.map(u=>`<tr class="${u.locked?"is-locked":""}"><td><div class="admin-user-identity"><span class="admin-user-avatar" aria-hidden="true">${esc(String(u.name||u.email||"U").trim().charAt(0).toLocaleUpperCase("vi-VN"))}</span><span class="admin-user-name">${esc(u.name||"Chưa có tên")}</span></div></td><td><span class="admin-user-email">${esc(u.email)}</span></td><td><select class="admin-user-role-select" aria-label="Vai trò của ${esc(u.name||u.email)}" data-user-role="${esc(u.id)}" data-current-role="${esc(u.role)}" data-user-email="${esc(u.email)}" data-can-grant-admin="${j.canGrantAdmin?"1":"0"}">${[["student","Học sinh"],["parent","Phụ huynh"],["teacher","Giáo viên"],["admin","Quản trị viên"]].map(([r,t])=>`<option value="${r}" ${r===u.role?"selected":""} ${r==="admin"&&u.role!=="admin"&&!j.canGrantAdmin?"disabled":""}>${t}</option>`).join("")}</select></td><td><span class="admin-user-grade">${u.grade?"Lớp "+Number(u.grade):"—"}</span></td><td><span class="admin-account-state ${u.locked?"locked":"active"}">${u.locked?"🔒 Đã khóa":"✓ Hoạt động"}</span></td><td data-live-user="${esc(u.id)}">${liveBadge(u.presence,j.presenceAvailable)}</td><td><div class="admin-user-actions"><button type="button" class="outline small admin-user-save" data-user-save="${esc(u.id)}">Lưu vai trò</button><button type="button" class="outline small admin-user-lock ${u.locked?"unlock":"lock"}" data-user-lock="${esc(u.id)}" data-user-email="${esc(u.email)}" data-locked="${u.locked?"1":"0"}" ${u.id===state.user.id?"disabled title='Không thể tự khóa tài khoản'":""}>${u.locked?"🔓 Mở khóa":"🔒 Khóa tài khoản"}</button></div></td></tr>`).join("")||'<tr><td colspan="7" class="admin-users-empty">Không có tài khoản phù hợp với bộ lọc hiện tại.</td></tr>'}</tbody></table></div></div></section></div>`
 }
 async function storageHealth(){
  if(state.user?.role!=="admin")return loginRequired("Chỉ Admin.");
@@ -308,6 +325,16 @@ function bind(){
   window.AuthUI.open("register");
  });
  window.PerfLists?.bind?.(state.route,render);
+ if(state.route==="adminUsers"){
+  for(const [selector,key] of [["#adminUsersRoleFilter","role"],["#adminUsersStatusFilter","accountStatus"]]){
+   $(selector)?.addEventListener("change",e=>{
+    const f=window.PerfLists.state("adminUsers");f[key]=e.currentTarget.value;f.page=1;render();
+   });
+  }
+  $("#adminUsersResetFilters")?.addEventListener("click",()=>{
+   const f=window.PerfLists.state("adminUsers");f.role="";f.accountStatus="";f.search="";f.page=1;render();
+  });
+ }
  if(state.route==="performanceMonitor")window.PerformanceMonitor?.bind?.();
  if(state.route==="history"&&state.user?.role!=="admin"&&state.results.length>250){
   const rows=[...state.results].reverse();
