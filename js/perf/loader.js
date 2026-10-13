@@ -34,7 +34,9 @@ window.PerfLoader=(()=>{
   // Feature flags are fetched in the background; do not hold every page on this API.
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
-  for(const src of routeFiles[route]||[])await script(src)
+  const files=routeFiles[route]||[];
+  if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));
+  else for(const src of files)await script(src)
  }
  function prefetch(route){
   const files=routeFiles[route]||[];
