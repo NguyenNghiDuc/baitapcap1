@@ -55,3 +55,5 @@
 .admin-results-track{height:12px;border-radius:999px;overflow:hidden;background:var(--line)}
 .admin-results-track i{display:block;height:100%;background:var(--blue);border-radius:999px;min-width:0}
 @media(max-width:480px){.admin-results-bar{grid-template-columns:73px minmax(45px,1fr) 80px;gap:6px;font-size:10px}}
+
+.admin-review-flag{display:block;width:fit-content;max-width:260px;margin-top:7px;padding:6px 9px;border:1px solid rgba(211,140,42,.4);background:rgba(238,173,60,.12);border-radius:9px;color:var(--text);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
