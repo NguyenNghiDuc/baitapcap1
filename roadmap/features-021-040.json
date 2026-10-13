@@ -1,0 +1,170 @@
+{
+  "range": [
+    21,
+    40
+  ],
+  "title": "Vận hành, an toàn, nội dung và phân quyền",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 21,
+      "name": "Chat hỗ trợ",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 22,
+      "name": "Báo lỗi nội dung, câu hỏi, đáp án",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 23,
+      "name": "Quản lý trợ giảng AI",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 24,
+      "name": "Phân tích chất lượng và độ khó đề",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 25,
+      "name": "Cấu hình hệ thống từ Admin",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 26,
+      "name": "Quản lý phiên bản triển khai website",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 27,
+      "name": "Trung tâm an ninh và truy cập",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 28,
+      "name": "Nhập tài khoản Excel hàng loạt",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 29,
+      "name": "Quản lý năm học và chuyển lớp",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 30,
+      "name": "Phê duyệt hai cấp cho thao tác nhạy cảm",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 31,
+      "name": "Giao nhiệm vụ cho giáo viên",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 32,
+      "name": "Phân tích hiệu quả câu hỏi",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 33,
+      "name": "Chấm tự luận theo thang tiêu chí",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 34,
+      "name": "Phát hiện câu hỏi và đề trùng",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 35,
+      "name": "Tài khoản không hoạt động",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 36,
+      "name": "Kiểm tra tính toàn vẹn dữ liệu",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 37,
+      "name": "Yêu cầu riêng tư và quyền dữ liệu",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 38,
+      "name": "Bật/tắt chức năng bằng cấu hình",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 39,
+      "name": "Nhập đề thi Word/Excel",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 40,
+      "name": "Theo dõi yêu cầu hỗ trợ",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    }
+  ]
+}
