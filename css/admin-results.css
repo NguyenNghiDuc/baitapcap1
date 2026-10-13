@@ -63,3 +63,6 @@
 .admin-review-decision button{cursor:pointer;font-weight:750}
 .admin-review-decision button:disabled{opacity:.55;cursor:wait}
 .admin-review-done{display:block;margin-top:7px;color:var(--muted);font-size:11px;line-height:1.5}
+
+/* Admin sunset feature polish */
+#content:has(#adminResultsFilter){--ar-accent:#df691c}#adminResultsFilter button[type=submit]{background:linear-gradient(135deg,#ff9437,#e76b14)!important;box-shadow:0 7px 18px rgba(218,99,23,.2)}#adminResultsFilter :is(input,select):focus{border-color:#ed8938;box-shadow:0 0 0 3px rgba(244,142,57,.14)}#content:has(#adminResultsFilter) .table-wrap td:nth-child(5)>b{background:rgba(239,130,40,.12);color:var(--ar-accent)}.admin-results-track i{background:linear-gradient(90deg,#ffb759,#df6815)}@media(max-width:650px){#adminResultsFilter{grid-template-columns:1fr!important}#adminResultsFilter>*{grid-column:1/-1}}
