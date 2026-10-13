@@ -46,12 +46,19 @@ async function handler(req,res,p,ctx){
    if(!found){send(res,404,{error:"Không tìm thấy bài kiểm tra"},HEADERS);return true}
    const signals=reviewSignals(found);
    if(!signals.length){send(res,409,{error:"Bài không còn dấu hiệu bất thường để xem xét."},HEADERS);return true}
-   const out=await execute(ctx,(db,audit)=>{
+   const out=await execute(ctx,async(db,audit)=>{
+    // Recheck the authoritative result while holding the app_state transaction lock.
+    const latest=await findResult(ctx,resultId);
+    if(!latest)return {status:404,data:{error:"Bài kiểm tra không còn tồn tại."}};
+    const currentSignals=reviewSignals(latest);
+    if(!currentSignals.length)return {status:409,data:{error:"Dấu hiệu bất thường đã thay đổi. Tải lại dữ liệu."}};
+    if(JSON.stringify({score:latest.score,correct:latest.correct,total:latest.total,durationSec:latest.durationSec})!==JSON.stringify({score:found.score,correct:found.correct,total:found.total,durationSec:found.durationSec}))
+     return {status:409,data:{error:"Dữ liệu bài thi đã thay đổi. Vui lòng tải lại."}};
     db.resultReviewDecisions=Array.isArray(db.resultReviewDecisions)?db.resultReviewDecisions:[];
     if(db.resultReviewDecisions.some(x=>String(x.resultId)===resultId))
      return {status:409,data:{error:"Bài này đã có quyết định. Tải lại để xem."}};
     const record={resultId,status,reason,reviewerId:String(admin.id),reviewedAt:new Date().toISOString(),
-     scoreAtReview:found.score??null,flagReasons:signals};
+     scoreAtReview:latest.score??null,flagReasons:currentSignals};
     db.resultReviewDecisions.unshift(record);
     const entry=audit(db,admin,"exam_result_review_decided",{resultId,status});
     return {status:201,data:{review:publicRecord(record)},changed:true,audit:entry};
