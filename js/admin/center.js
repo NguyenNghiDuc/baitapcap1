@@ -8,7 +8,7 @@ window.AdminCenter=(()=>{
   {id:"ai",icon:"🤖",title:"AI học tập",description:"Trải nghiệm trợ giảng, chưa phải bảng cấu hình AI",links:[["ai","Trợ giảng AI"]]},
   {id:"reports",icon:"📊",title:"Báo cáo & thống kê",description:"Điểm học sinh và phân tích kết quả",links:[["adminResults","Bảng điểm"],["analytics","Phân tích"]]},
   {id:"security",icon:"🛡️",title:"Bảo mật",description:"Nhật ký Admin và bảo mật tài khoản đang đăng nhập",links:[["adminAudit","Nhật ký"],["accountSecurity","Bảo mật của tôi"]]},
-  {id:"system",icon:"⚙️",title:"Hệ thống",description:"Theo dõi API và cơ sở dữ liệu",links:[["performanceMonitor","Hiệu năng API"],["storageHealth","PostgreSQL/Redis"]]}
+  {id:"system",icon:"⚙️",title:"Hệ thống",description:"Theo dõi API và cơ sở dữ liệu",links:[["adminAlerts","Cảnh báo hệ thống"],["performanceMonitor","Hiệu năng API"],["storageHealth","PostgreSQL/Redis"]]}
  ];
  const state={search:"",group:"all",status:"all",page:1},LIMIT=12;
  let cached=null;
