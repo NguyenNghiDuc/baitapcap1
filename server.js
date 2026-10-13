@@ -278,15 +278,13 @@ async function api(req,res,p,ip){
   const u=await requireUser(req,res,["admin"]);if(!u)return;
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
   if(!d||typeof d!=="object"||Array.isArray(d))return send(res,400,{error:"Dữ liệu không hợp lệ"});
-  const db=load(),x=db.users.find(v=>v.id===userPatch.id);
-  if(!x)return send(res,404,{error:"Không tìm thấy tài khoản"});
+  const db=load();let x;
+  // The table shows PostgreSQL users; editing must find users there too.
   if(process.env.DATABASE_URL){
-   try{
-    const access=await pgStore.getUserAccess(x.id);
-    if(!access)return send(res,503,{error:"Tài khoản chưa tồn tại trong PostgreSQL"});
-    x.role=access.role;x.locked=!!access.locked;
-   }catch(e){safeMonitorError("admin_target_access_failed",{message:e.message});return send(res,503,{error:"Không kiểm tra được quyền của tài khoản đích"})}
-  }
+   try{x=await pgStore.findAdminUserById(userPatch.id)}
+   catch(e){safeMonitorError("admin_target_access_failed",{message:e.message});return send(res,503,{error:"Không đọc được tài khoản trong PostgreSQL."})}
+  }else x=db.users.find(v=>String(v.id)===String(userPatch.id))||null;
+  if(!x)return send(res,404,{error:"Tài khoản không còn tồn tại. Hãy tải lại danh sách."});
   const ownerUid=String(process.env.ADMIN_SUPABASE_UID||"").trim();
   const isOwner=!!ownerUid&&u.authUserId===ownerUid;
   if(x.authUserId&&x.authUserId===ownerUid)return send(res,403,{error:"Tài khoản Admin chính được bảo vệ, không thể chỉnh sửa hoặc khóa"});
@@ -313,8 +311,15 @@ async function api(req,res,p,ip){
    else{x.lockedAt=null;x.lockedBy=null;x.lockReason=null;}
    audit(db,u,d.locked?"account_locked":"account_unlocked",{target:x.id,reason:d.locked?x.lockReason:undefined});
   }
+  // Keep the legacy profile snapshot in sync only after the canonical PG write succeeds.
+  if(process.env.DATABASE_URL){
+   const cached=db.users.find(v=>String(v.id)===String(x.id));
+   if(cached)Object.assign(cached,{role:x.role,locked:!!x.locked,authUserId:x.authUserId,email:x.email});
+   else db.users.push({...x,password:"",children:[],createdAt:new Date().toISOString()});
+  }
   audit(db,u,"user_updated",{target:x.id,role:x.role,locked:!!x.locked});
-  await save(db);
+  save(db);
+  if(process.env.DATABASE_URL)await storage.flush();
   return send(res,200,{user:{...safeUser(x),locked:!!x.locked},locked:!!x.locked});
  }
  if(req.method==="GET"&&p==="/api/storage/health"){const u=await requireUser(req,res,["admin"]);if(!u)return;const [pg,redis]=await Promise.all([pgStore.health().catch(e=>({enabled:!!process.env.DATABASE_URL,error:e.message})),sessionStore.health().catch(e=>({enabled:!!process.env.REDIS_URL,error:e.message}))]);return send(res,200,{postgres:pg,redis,storage:storage.status()})}
