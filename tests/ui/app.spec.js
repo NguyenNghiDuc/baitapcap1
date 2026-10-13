@@ -1,12 +1,12 @@
 const {test,expect}=require("@playwright/test");
 test("home renders without white screen",async({page})=>{await page.goto("/");await expect(page.getByText("Bài Tập",{exact:false}).first()).toBeVisible();await expect(page.locator("#content")).not.toBeEmpty()});
 test("polished auth modal has login and register flows",async({page})=>{await page.goto("/");await page.locator("#authBtn").click();await expect(page.locator(".auth-modal")).toBeVisible();await expect(page.getByRole("button",{name:"Đăng nhập",exact:true}).first()).toBeVisible();await page.getByRole("button",{name:"Đăng ký",exact:true}).click();await expect(page.locator("#sbRegisterForm")).toBeVisible();await expect(page.locator("#regPassword")).toBeVisible()});
-test("demo admin can login through fallback auth",async({page})=>{await page.goto("/");await page.locator("#authBtn").click();await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");await page.locator('#sbLoginForm input[name="password"]').fill("27032006");await page.locator("#sbLoginForm .auth-primary").click();await expect(page.locator("#sideRole")).toContainText("Quản trị")});
-test("Admin opens all students grades from Results screen",async({page})=>{
+test("demo admin can login through fallback auth",async({page})=>{test.skip(!process.env.E2E_ADMIN_PASSWORD,"Requires disposable E2E admin fixture");await page.goto("/");await page.locator("#authBtn").click();await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");await page.locator('#sbLoginForm input[name="password"]').fill(process.env.E2E_ADMIN_PASSWORD||"");await page.locator("#sbLoginForm .auth-primary").click();await expect(page.locator("#sideRole")).toContainText("Quản trị")});
+test("Admin opens all students grades from Results screen",async({page})=>{test.skip(!process.env.E2E_ADMIN_PASSWORD,"Requires disposable E2E admin fixture");
  await page.goto("/");
  await page.locator("#authBtn").click();
  await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");
- await page.locator('#sbLoginForm input[name="password"]').fill("27032006");
+ await page.locator('#sbLoginForm input[name="password"]').fill(process.env.E2E_ADMIN_PASSWORD||"");
  await page.locator("#sbLoginForm .auth-primary").click();
  await expect(page.locator("#sideRole")).toContainText("Quản trị");
  await page.evaluate(()=>location.hash="#history");
@@ -65,4 +65,21 @@ test("exercise fallback still works if primary renderer is unavailable",async({p
  await expect(page.locator("[data-fallback-answer]")).toHaveCount(4);
  await page.locator("[data-fallback-answer]").first().click();
  await expect(page.locator("[data-fallback-answer].selected")).toHaveCount(1);
+});
+
+test("admin performance metrics require authentication",async({request})=>{
+ const r=await request.get("/api/admin/performance");
+ expect(r.status()).toBe(401);
+});
+test("signed-in admin sees a read-only performance diagnostics dashboard",async({page})=>{
+ test.skip(!process.env.E2E_ADMIN_PASSWORD,"Requires disposable E2E admin fixture");
+ await page.goto("/");
+ await page.locator("#authBtn").click();
+ await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");
+ await page.locator('#sbLoginForm input[name="password"]').fill(process.env.E2E_ADMIN_PASSWORD);
+ await page.locator("#sbLoginForm .auth-primary").click();
+ await expect(page.locator("#sideRole")).toContainText("Quản trị");
+ await page.goto("/#performanceMonitor");
+ await expect(page.getByRole("heading",{name:/Hiệu năng API/})).toBeVisible();
+ await expect(page.getByRole("heading",{name:/Kiểm tra máy chủ/})).toBeVisible();
 });
