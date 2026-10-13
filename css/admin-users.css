@@ -241,3 +241,5 @@
  .admin-users-page .admin-users-table-card tbody tr,.admin-users-page .admin-user-actions button,.admin-users-page .admin-users-grant-form button{transition:none}
  .admin-users-page .admin-user-actions button:not(:disabled):hover,.admin-users-page .admin-users-grant-form button:hover{transform:none}
 }
+/* Admin sunset feature polish */
+.admin-users-page{--au-blue:#e16b1c;--au-indigo:#f0a048;--au-shadow:0 10px 28px rgba(142,69,21,.075)}.admin-users-page .admin-users-stat-icon,.admin-users-page .admin-users-grant-icon{background:rgba(238,119,33,.12)}.admin-users-page .admin-users-grant{background:linear-gradient(115deg,rgba(248,150,56,.09),transparent 70%),var(--surface)}.admin-users-page .admin-users-grant-form input:focus{border-color:#ec8c40;box-shadow:0 0 0 3px rgba(240,130,48,.14)}@media(max-width:650px){.admin-users-grant-form{grid-template-columns:1fr}}
