@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],D=window.APP_DATA||{subjects:[],lessons:[],questions:[],tests:[],materials:[]};
 const state={user:null,route:location.hash.slice(1)||"home",theme:localStorage.getItem("bt_theme")||"light",results:JSON.parse(localStorage.getItem("bt_results")||"[]"),favorites:JSON.parse(localStorage.getItem("bt_favs")||"[]"),quiz:null,lastWrong:[],historyPage:1};
 let renderSequence=0;
-window.AppAuthBridge={setUser(u){state.user=u;window.LivePresence?.setIdentity?.(u);render()},updateProfile(data){if(!state.user)return;state.user={...state.user,name:data.name||state.user.name,grade:Number(data.grade)||state.user.grade};shell()},toast,render};
+window.AppAuthBridge={setUser(u){state.user=u;window.OfflineSyncQueue?.setOwner?.(u);window.LivePresence?.setIdentity?.(u);render()},updateProfile(data){if(!state.user)return;state.user={...state.user,name:data.name||state.user.name,grade:Number(data.grade)||state.user.grade};shell()},toast,render};
 document.documentElement.dataset.theme=state.theme;
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
@@ -364,7 +364,7 @@ function bind(){
 }
 $("#menuBtn")?.addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 $("#themeBtn")?.addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";document.documentElement.dataset.theme=state.theme;localStorage.setItem("bt_theme",state.theme)});
-$("#authBtn")?.addEventListener("click",async()=>{if(state.user){await window.AuthUI?.logout();state.user=null;nav("home")}else openAuth()});
+$("#authBtn")?.addEventListener("click",async()=>{if(state.user){await window.AuthUI?.logout();state.user=null;window.OfflineSyncQueue?.setOwner?.(null);nav("home")}else openAuth()});
 window.addEventListener("hashchange",()=>{if(window.ExamLock?.isActive?.()&&!state.quiz)window.ExamLock.exit();if(window.ExamLock?.isActive?.()){window.ExamLock.restoreRoute();return}const next=location.hash.slice(1)||"home";if(!(next==="practice"&&state.quiz?.questions?.length))window.PerfLoader?.cleanupRoute?.();state.route=next;render();window.PerfLoader?.prefetch?.(state.route==="home"?"tests":"home")});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 const qp=new URLSearchParams(location.search);if(qp.get("auth_token")){API.setToken(qp.get("auth_token"));history.replaceState(null,"",location.pathname+location.hash)}const savedQuiz=localStorage.getItem("bt_quiz");if(savedQuiz){try{state.quiz=JSON.parse(savedQuiz)}catch{}}window.AuthUI?.setBridge(window.AppAuthBridge);
@@ -375,5 +375,5 @@ if(qp.get("auth")==="register"||qp.get("auth")==="login"){
  history.replaceState(null,"",location.pathname+(location.hash||""));
  Promise.resolve().then(()=>window.AuthUI?.open(authMode)).catch(e=>{console.error("Cannot open registration",e);const m=document.querySelector("#toast");if(m)m.textContent="Không mở được biểu mẫu đăng ký. Vui lòng tải lại trang."});
 }
-(async()=>{try{await window.SupabaseApp?.init(u=>{state.user=u;shell()})}catch{}if(!state.user)await restore();shell();if(state.user)render()})();
+(async()=>{try{await window.SupabaseApp?.init(u=>{state.user=u;window.OfflineSyncQueue?.setOwner?.(u);shell()})}catch{}if(!state.user)await restore();window.OfflineSyncQueue?.setOwner?.(state.user);shell();if(state.user)render()})();
 })();
