@@ -57,3 +57,9 @@
 @media(max-width:480px){.admin-results-bar{grid-template-columns:73px minmax(45px,1fr) 80px;gap:6px;font-size:10px}}
 
 .admin-review-flag{display:block;width:fit-content;max-width:260px;margin-top:7px;padding:6px 9px;border:1px solid rgba(211,140,42,.4);background:rgba(238,173,60,.12);border-radius:9px;color:var(--text);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+
+.admin-review-decision{display:grid;gap:6px;margin-top:8px;max-width:280px}
+.admin-review-decision :is(input,select,button){width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--surface);color:var(--text);font-size:11px}
+.admin-review-decision button{cursor:pointer;font-weight:750}
+.admin-review-decision button:disabled{opacity:.55;cursor:wait}
+.admin-review-done{display:block;margin-top:7px;color:var(--muted);font-size:11px;line-height:1.5}
