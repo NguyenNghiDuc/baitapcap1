@@ -20,13 +20,15 @@ async function handler(req,res,p,ctx){
  if(req.method==="GET"&&p==="/api/admin/result-reviews"){
   try{
    const q=new URL(req.url,"http://localhost").searchParams;
-   const ids=q.getAll("resultId").filter(x=>x.length>0&&x.length<=128).slice(0,50);
-   const db=await readLatest(ctx);
-   const all=(db.resultReviewDecisions||[]);
+   const requestedIds=q.getAll("resultId");
+   const ids=requestedIds.map(x=>x.trim());
    const page=Number(q.get("page")||1),limit=20,status=q.get("status")||"all";
-   if(!Number.isSafeInteger(page)||page<1||page>10000||!["all","reviewed","dismissed"].includes(status)){
+   if(!Number.isSafeInteger(page)||page<1||page>10000||!["all","reviewed","dismissed"].includes(status)||
+      ids.length>50||ids.some(x=>!x||x.length>128)){
     send(res,400,{error:"Bộ lọc lịch sử không hợp lệ"},HEADERS);return true;
    }
+   const db=await readLatest(ctx);
+   const all=Array.isArray(db.resultReviewDecisions)?db.resultReviewDecisions:[];
    const records=all.filter(x=>(!ids.length||ids.includes(String(x.resultId)))&&(status==="all"||x.status===status))
     .sort((a,b)=>String(b.reviewedAt||"").localeCompare(String(a.reviewedAt||"")));
    const pages=Math.ceil(records.length/limit);
