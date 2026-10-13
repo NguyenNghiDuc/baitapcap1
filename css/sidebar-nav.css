@@ -1,0 +1,44 @@
+/* Sidebar navigation: searchable, collapsible and responsive. */
+@media (min-width:901px){
+ .sidebar{width:264px;padding-inline:12px}
+ .content{margin-left:264px}
+}
+.sidebar{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.sidebar .profile-mini{margin:0 0 7px;padding:11px 9px 14px;border:1px solid var(--line);border-radius:16px;background:var(--surface2);min-width:0}
+.sidebar .profile-mini:hover{background:var(--surface2)}
+.sidebar .profile-mini>div:last-child{min-width:0}
+.sidebar .profile-mini b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-search{position:sticky;top:-18px;z-index:3;padding:13px 3px 12px;background:var(--surface);box-shadow:0 6px 10px -9px rgba(20,50,90,.25)}
+.sidebar-search>label{display:block;margin:0 0 7px 7px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.025em}
+.sidebar-search-field{display:flex;align-items:center;gap:8px;min-height:43px;padding:0 11px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;transition:border-color .2s,box-shadow .2s}
+.sidebar-search-field:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,120,223,.14)}
+.sidebar-search-field span{font-size:24px;line-height:1;color:var(--muted)}
+.sidebar-search-field input{border:0;background:transparent;outline:0;min-width:0;flex:1;width:100%;color:var(--text);font-size:12px}
+.sidebar-search-field input::placeholder{color:var(--muted);opacity:.84}
+.sidebar-search-field kbd{font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:5px;min-width:19px;text-align:center}
+.sidebar-navigation{display:flex;flex-direction:column;gap:8px;margin-top:4px;padding:2px 0 18px}
+.sidebar-shortcuts{display:grid;gap:3px;padding:6px 3px 11px;border-bottom:1px solid var(--line)}
+.sidebar .sidebar-shortcuts a,.sidebar .sidebar-nav-items a{font-size:12.3px;font-weight:600;line-height:1.45;padding:10px 12px;margin:0;border:1px solid transparent;min-width:0;border-radius:11px;overflow-wrap:anywhere}
+.sidebar .sidebar-shortcuts a:hover,.sidebar .sidebar-nav-items a:hover{background:var(--surface2);color:var(--blue)}
+.sidebar .sidebar-shortcuts a.is-active,.sidebar .sidebar-nav-items a.is-active{background:rgba(20,120,223,.10);border-color:rgba(20,120,223,.15);color:var(--blue);font-weight:800}
+.sidebar-nav-group{min-width:0;border:1px solid var(--line);border-radius:13px;background:var(--surface);overflow:hidden}
+.sidebar-nav-group[hidden],.sidebar [hidden]{display:none!important}
+.sidebar-nav-toggle{display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 12px;list-style:none;cursor:pointer;user-select:none;font-size:11px;letter-spacing:.065em;font-weight:800;color:var(--text);background:var(--surface)}
+.sidebar-nav-toggle::-webkit-details-marker{display:none}
+.sidebar-nav-toggle::marker{content:""}
+.sidebar-nav-toggle:hover{background:var(--surface2)}
+.sidebar-nav-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
+.sidebar-nav-icon{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;background:var(--surface2);border-radius:9px;font-size:17px;letter-spacing:0}
+.sidebar-nav-chevron{margin-left:auto;font-size:21px;line-height:1;transform:rotate(0);transition:transform .18s;color:var(--muted);font-weight:600;letter-spacing:0}
+.sidebar-nav-group[open] .sidebar-nav-chevron{transform:rotate(180deg)}
+.sidebar-nav-group[open] .sidebar-nav-toggle{border-bottom:1px solid var(--line);background:var(--surface2)}
+.sidebar-nav-items{padding:6px;display:flex;flex-direction:column;gap:2px}
+.sidebar-nav-group:not([open]) .sidebar-nav-items{display:none}
+.sidebar-no-results{color:var(--muted);background:var(--surface2);border:1px dashed var(--line);border-radius:12px;text-align:center;font-size:12px;line-height:1.6;padding:18px 12px}
+:root[data-theme="dark"] .sidebar .is-active{background:rgba(65,152,255,.17);color:#89c5ff}
+@media(max-width:900px){
+ .sidebar-search{top:-18px}
+ .sidebar-nav-toggle{min-height:50px}
+ .sidebar .sidebar-shortcuts a,.sidebar .sidebar-nav-items a{min-height:43px;font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){.sidebar-nav-chevron,.sidebar-search-field{transition:none}}
