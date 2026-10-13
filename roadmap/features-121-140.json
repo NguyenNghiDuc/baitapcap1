@@ -1,0 +1,170 @@
+{
+  "range": [
+    121,
+    140
+  ],
+  "title": "AI giáo dục và phân tích thống kê",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 121,
+      "name": "AI dựa trên nguồn kiến thức đã duyệt",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 122,
+      "name": "AI giải thích theo từng khối lớp",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 123,
+      "name": "Hàng đợi giáo viên duyệt phản hồi AI",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 124,
+      "name": "Bộ bài kiểm thử năng lực AI",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 125,
+      "name": "Phòng vệ prompt injection",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 126,
+      "name": "Ẩn dữ liệu cá nhân khỏi log AI",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 127,
+      "name": "Giới hạn ngân sách AI theo người dùng",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 128,
+      "name": "Ngăn AI tự sửa điểm",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 129,
+      "name": "AI trích dẫn nguồn lời giải",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 130,
+      "name": "Đánh giá an toàn AI cho trẻ em",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 131,
+      "name": "Thống kê tiến bộ qua nhiều năm",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 132,
+      "name": "Phân tích phân bố điểm",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 133,
+      "name": "Báo cáo tùy chỉnh",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 134,
+      "name": "Đánh giá độ tin cậy thống kê",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 135,
+      "name": "So sánh nhóm học tập",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 136,
+      "name": "Xác minh điểm bất thường",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 137,
+      "name": "Cảnh báo dữ liệu hết hạn lưu giữ",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 138,
+      "name": "Báo cáo học sinh ít tương tác",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 139,
+      "name": "Dashboard mục tiêu học tập",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 140,
+      "name": "Dự báo nhu cầu hỗ trợ",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    }
+  ]
+}
