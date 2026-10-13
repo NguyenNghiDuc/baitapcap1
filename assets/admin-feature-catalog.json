@@ -101,7 +101,8 @@
       "name": "Xuất báo cáo Excel/PDF",
       "group": 1,
       "phase": "learning",
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Đã hỗ trợ xuất bảng điểm đề kiểm tra dạng CSV UTF-8 theo bộ lọc, mở bằng Excel; giới hạn 2.000 dòng và chống CSV formula injection. Chưa có PDF/Excel định dạng .xlsx hay xuất bài giáo viên giao."
     },
     {
       "id": 6,
@@ -129,7 +130,8 @@
       "name": "Trung tâm cảnh báo sự cố",
       "group": 1,
       "phase": "foundation",
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Đã có Trung tâm cảnh báo Admin đọc kiểm tra PostgreSQL, Redis, lỗi 5xx và P95 API trên một instance, kèm UI và unit/UI tests. Chưa có lịch sử bền vững, giám sát đa instance hay thông báo tự động."
     },
     {
       "id": 10,

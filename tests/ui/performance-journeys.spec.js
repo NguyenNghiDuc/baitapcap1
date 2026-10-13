@@ -18,7 +18,7 @@ test("guest first paint avoids Admin-only CSS and stays interactive",async({page
  expect(failures).toEqual([]);
 });
 test("unauthenticated private pages show clear guidance without extra private assets",async({page})=>{
- for(const route of ["adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth","profile"]){
+ for(const route of ["adminAlerts","adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth","profile"]){
   await page.goto("/#"+route);
   await expect(page.locator("#content")).toContainText(/Đăng nhập|quản trị viên/i);
   await expect(page.locator("#content .perf-skeleton")).toHaveCount(0);

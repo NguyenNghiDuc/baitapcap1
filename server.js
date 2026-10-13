@@ -4,6 +4,8 @@ const loginDevices=require("./lib/login-devices");
 const apiPerformance=require("./lib/api-performance");
 const handleAdminResults=require("./routes/admin-results");
 const handleAdminAudit=require("./routes/admin-audit");
+const handleAdminAlerts=require("./routes/admin-alerts");
+const handleAdminExport=require("./routes/admin-results-export");
 const handlePresence=require("./routes/presence");
 const presence=require("./lib/presence");
 const TOKEN_TTL=7*864e5,RESET_TTL=30*60e3,MAX_BODY=2e6;
@@ -111,6 +113,8 @@ async function api(req,res,p,ip){
  if(req.method==="POST"&&(p.startsWith("/api/storage/")||p==="/api/student/handwriting")&&!rate(ip,"upload",20,60e3))return send(res,429,{error:"Bạn tải file quá nhanh"});
  if(await handleAI(req,res,p,{send,parseBody,requireUser,monitor}))return;
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
+ if(await handleAdminExport(req,res,p,{send,requireUser,load,pg:pgStore}))return;
+ if(await handleAdminAlerts(req,res,p,{send,requireUser,pg:pgStore,sessionStore,apiPerformance}))return;
  if(await handleAdminResults(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handleAdminAudit(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handlePresence(req,res,p,{send,parseBody,requireUser,monitor}))return;

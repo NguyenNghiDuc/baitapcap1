@@ -19,7 +19,9 @@
       "routes/analytics.js"
     ],
     "5": [
-      "server.js"
+      "server.js",
+      "routes/admin-results-export.js",
+      "js/admin/results.js"
     ],
     "6": [
       "lib/login-devices.js"
@@ -31,7 +33,10 @@
       "routes/admin-results.js"
     ],
     "9": [
-      "lib/alerting.js"
+      "lib/alerting.js",
+      "routes/admin-alerts.js",
+      "js/admin/alerts.js",
+      "css/admin-alerts.css"
     ],
     "10": [
       "scripts/db-backup.js",

@@ -10,9 +10,9 @@ test("Admin Center catalog exactly matches the eight 20-feature roadmap files",(
  assert.equal(data.features.length,160);
  assert.deepEqual(data.features.map(x=>x.id),Array.from({length:160},(_,i)=>i+1));
  assert.ok(data.features.every(f=>typeof f.name==="string"&&f.name.length>5));
- assert.equal(data.features.filter(x=>x.assessment==="partial").length,1);
+ assert.equal(data.features.filter(x=>x.assessment==="partial").length,3);
  assert.equal(data.features.filter(x=>x.assessment==="verified").length,0);
- assert.equal(data.features.filter(x=>x.assessment==="not-verified").length,159);
+ assert.equal(data.features.filter(x=>x.assessment==="not-verified").length,157);
  for(const item of data.features){
   assert.equal("email" in item,false);
   assert.equal("tests" in item,false);

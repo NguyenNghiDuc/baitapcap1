@@ -63,6 +63,10 @@ Xem chi tiết: [FEATURES.md](FEATURES.md) và [docs/PRODUCTION.md](docs/PRODUCT
 
 **Nhật ký Admin:** chỉ Admin có thể xem và lọc nhật ký; metadata nhạy cảm không được hiển thị.
 
+**Trung tâm cảnh báo:** vào **Admin → Hệ thống → Trung tâm cảnh báo** để kiểm tra lỗi API, PostgreSQL/Redis từ một instance. Đây là ảnh chụp tại thời điểm truy vấn, chưa phải cảnh báo lưu trữ lâu dài.
+
+**Xuất bảng điểm:** vào **Admin → Bảng điểm học sinh**, lọc các bài kiểm tra, bấm **Xuất CSV mở bằng Excel**; chỉ dành cho Admin và giới hạn tối đa 2.000 bản ghi để tránh lộ dữ liệu hoặc tải quá nặng.
+
 **Trung tâm quản trị:** mở [#adminCenter](https://baitapcap1.vercel.app/#adminCenter) sau khi đăng nhập Admin. Menu được chia 8 nhóm và chỉ liên kết các trang giao diện đã tồn tại. Danh mục 160 mục chỉ biểu thị tình trạng kiểm kê (không đồng nghĩa hoàn thiện).
 
 Nguồn dữ liệu công khai **không chứa thông tin học sinh**: `assets/admin-feature-catalog.json`, đồng bộ từ `roadmap/features-*.json` bằng `npm run admin:catalog:sync`; CI chạy `npm run admin:catalog:check` để phát hiện lệch dữ liệu.

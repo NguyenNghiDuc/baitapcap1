@@ -30,6 +30,7 @@ window.AdminResults=(()=>{
    '<div class="panel"><b>Phân biệt nguồn điểm:</b> Điểm đề kiểm tra do học sinh tự gửi từ trình duyệt, <strong>chưa được giáo viên xác minh</strong>. Điểm bài được giao hiển thị khi giáo viên đã chấm.</div>'+
    form()+'<div class="panel"><h3>'+escape(state.kind==="exam"?"Bài kiểm tra đã nộp":"Bài giáo viên giao")+' • '+total+' lượt</h3>'+
    (state.kind==="exam"&&j.source==="local"?'<p class="muted">Dữ liệu đang lưu cục bộ ở server. Cần cấu hình PostgreSQL để đồng bộ nhiều máy chủ.</p>':"")+
+   (state.kind==="exam"?'<div class="admin-results-export"><button type="button" class="outline" id="adminResultsExportCsv">📥 Xuất CSV mở bằng Excel</button><small>Tối đa 2.000 kết quả theo bộ lọc đang chọn. Dữ liệu có tên và email, chỉ lưu trữ ở nơi an toàn.</small></div>':"")+
    '<div class="table-wrap"><table>'+header+'<tbody>'+ (body||'<tr><td colspan="7">Chưa có kết quả được đồng bộ trên máy chủ theo bộ lọc này. Những bài chỉ lưu trên điện thoại sẽ không hiển thị.</td></tr>')+'</tbody></table></div>'+
    '<div class="exam-pagination"><button id="adminScoresPrev" type="button" class="outline" '+(state.page<=1?"disabled":"")+'>← Trước</button>'+
    '<span>Trang '+state.page+'/'+pages+'</span><button id="adminScoresNext" type="button" class="outline" '+(j.pagination?.hasMore?"":"disabled")+'>Tiếp →</button></div></div>';
@@ -45,6 +46,28 @@ window.AdminResults=(()=>{
   });
   document.querySelector("#adminScoresPrev")?.addEventListener("click",()=>{state.page=Math.max(1,state.page-1);render()});
   document.querySelector("#adminScoresNext")?.addEventListener("click",()=>{state.page++;render()});
+  document.querySelector("#adminResultsExportCsv")?.addEventListener("click",async e=>{
+   const btn=e.currentTarget;btn.disabled=true;
+   const params=new URLSearchParams();
+   if(state.search)params.set("search",state.search);
+   if(state.grade)params.set("grade",state.grade);
+   if(state.subject)params.set("subject",state.subject);
+   try{
+    const response=await fetch("/api/admin/results/export?"+params.toString(),{
+     headers:API.token?{Authorization:"Bearer "+API.token}:{},credentials:"same-origin",cache:"no-store"
+    });
+    if(!response.ok){
+     const problem=await response.json().catch(()=>({}));
+     throw new Error(problem.error||"Không tải được báo cáo.");
+    }
+    const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");
+    link.href=url;link.download="bang-diem-"+new Date().toISOString().slice(0,10)+".csv";
+    document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast("Đã xuất bảng điểm CSV");
+   }catch(err){toast(err.message||"Không thể xuất bảng điểm")}
+   finally{btn.disabled=false}
+  });
  }
  return {render,bind};
 })();
