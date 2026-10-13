@@ -17,7 +17,7 @@ function avatarKey(u){return "bt_avatar_"+String(u?.id||u?.email||"guest").repla
 window.ProfileAvatar=()=>avatarUrl(state.user);
 function avatarUrl(u){if(typeof u?.avatarUrl==="string"&&u.avatarUrl.startsWith("https://"))return u.avatarUrl;try{const v=localStorage.getItem(avatarKey(u));return v&&/^data:image\/(png|jpeg|webp);base64,/.test(v)?v:null}catch{return null}}
 function avatarHtml(u,large=false){const src=avatarUrl(u);return src?'<img src="'+src+'" alt="Ảnh đại diện" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(u?.avatar||"👧🏻")}
-function shell(){const u=state.user;$("#sideName").textContent=u?.name||"Khách";$("#sideRole").textContent=u?.pendingProfile?(u.syncError?"Không đồng bộ được quyền":"Đang xác thực quyền…"):u?({student:"Học sinh",parent:"Phụ huynh",teacher:"Giáo viên",admin:"Quản trị viên"}[u.role]||"Đang xác thực quyền…"):"Khách";$("#sideAvatar").innerHTML=avatarHtml(u);$("#authBtn").textContent=u?"Đăng xuất":"Đăng nhập";const rb=$("#registerBtn");if(rb)rb.hidden=!!u;$$(".admin-only").forEach(x=>x.style.display=u?.role==="admin"?"flex":"none");$(".teacher-only").forEach(x=>x.style.display=["teacher","admin"].includes(u?.role)?"flex":"none");window.SidebarNav?.refresh?.(u)}
+function shell(){const u=state.user;$("#sideName").textContent=u?.name||"Khách";$("#sideRole").textContent=u?.pendingProfile?(u.syncError?"Không đồng bộ được quyền":"Đang xác thực quyền…"):u?({student:"Học sinh",parent:"Phụ huynh",teacher:"Giáo viên",admin:"Quản trị viên"}[u.role]||"Đang xác thực quyền…"):"Khách";const retry=$("#retryRoleSync");if(retry)retry.hidden=!u?.syncError;$("#sideAvatar").innerHTML=avatarHtml(u);$("#authBtn").textContent=u?"Đăng xuất":"Đăng nhập";const rb=$("#registerBtn");if(rb)rb.hidden=!!u;$$(".admin-only").forEach(x=>x.style.display=u?.role==="admin"?"flex":"none");$(".teacher-only").forEach(x=>x.style.display=["teacher","admin"].includes(u?.role)?"flex":"none");window.SidebarNav?.refresh?.(u)}
 function pageHead(k,t,p=""){return `<section class="page-head"><span class="eyebrow">${k}</span><h1>${t}</h1><p>${p}</p></section>`}
 function hero(){return `<section class="hero"><div class="hero-copy"><span class="pill">✨ HỌC VUI MỖI NGÀY</span><h1>Bài Tập <em>Cấp 1</em></h1><h2>Học vui – Luyện giỏi – Tiến bộ mỗi ngày</h2><p>Học theo lớp, làm bài, xem tiến bộ, tham gia lớp của giáo viên và nhận gợi ý học tập cá nhân.</p><div class="hero-search"><input id="globalSearch" placeholder="Tìm bài học, môn học, tài liệu..."><button id="globalSearchBtn">Tìm kiếm</button></div><div class="quick-grades">${[1,2,3,4,5].map(g=>`<button data-grade="${g}">Lớp ${g}</button>`).join("")}</div></div><div class="hero-art"><div class="bubble">⭐ Học mỗi ngày</div><div class="big-kid">👧🏻📚</div><div class="bubble second">🏆 Tiến bộ</div></div></section>`}
 function lessonRow(l){const s=subj(l.subject),fav=state.favorites.includes(l.id);return `<div class="lesson-row"><div class="lesson-ico">${s.icon}</div><div class="grow"><b>${esc(l.title)}</b><small>${s.name} • Lớp ${l.grade} • ${l.topic||""} • ${l.level||""}</small></div><button class="heart" data-fav="${l.id}">${fav?"❤️":"🤍"}</button><button class="outline small" data-start="${l.subject}" data-grade="${l.grade}" data-lesson="${l.lessonId||""}">Luyện tập</button></div>`}
@@ -363,6 +363,18 @@ function bind(){
  window.StudentAccessibility?.apply?.();
  shell()
 }
+$("#retryRoleSync")?.addEventListener("click",async e=>{
+ const button=e.currentTarget;button.disabled=true;
+ try{
+  const sess=await window.SupabaseApp?.session?.();
+  if(!sess)throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+  const u=await window.SupabaseApp.sync(sess);
+  if(!u)throw new Error("Chưa nhận được hồ sơ tài khoản.");
+  window.AppAuthBridge.setUser(u);
+  toast("Đã đồng bộ quyền tài khoản");
+ }catch(err){toast(err.message||"Không đồng bộ được tài khoản")}
+ finally{button.disabled=false}
+});
 $("#menuBtn")?.addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 $("#themeBtn")?.addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";document.documentElement.dataset.theme=state.theme;localStorage.setItem("bt_theme",state.theme)});
 $("#authBtn")?.addEventListener("click",async()=>{if(state.user){await window.AuthUI?.logout();state.user=null;window.OfflineSyncQueue?.setOwner?.(null);nav("home")}else openAuth()});
