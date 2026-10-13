@@ -53,7 +53,8 @@ test("admin category is available after verified admin login",async({page})=>{
  await page.locator("#sbLoginForm .auth-primary").click();
  await expect(page.locator("#sideRole")).toContainText("Quản trị");
  await expect(page.locator('[data-nav-group="admin"]')).toBeVisible();
- await expect(page.locator('[data-nav-group="admin"] a[href="#adminResults"]')).not.toBeHidden();
+ await page.locator('[data-nav-group="admin"] > summary').click();
+ await expect(page.locator('[data-nav-group="admin"] a[href="#adminResults"]')).toBeVisible();
 });
 
 
