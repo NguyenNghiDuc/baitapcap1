@@ -20,5 +20,5 @@ jobs:
           node-version: 22
       - name: Verify deployed app (read-only)
         env:
-          POST_DEPLOY_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.url || github.event.deployment_status.environment_url }}
+          POST_DEPLOY_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.url || 'https://baitapcap1.vercel.app' }}
         run: node scripts/post-deploy-smoke.js
