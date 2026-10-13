@@ -6,7 +6,10 @@
       "routes/supabase-auth.js"
     ],
     "2": [
-      "lib/audit.js"
+      "lib/audit.js",
+      "routes/admin-audit.js",
+      "js/admin/audit-log.js",
+      "css/admin-audit.css"
     ],
     "3": [
       "js/exams/catalog.js",
