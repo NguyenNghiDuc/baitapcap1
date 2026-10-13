@@ -41,3 +41,6 @@
 #content[data-admin-view="adminResults"] .admin-results-export{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin:14px 0}
 #content[data-admin-view="adminResults"] .admin-results-export button{min-height:42px}
 #content[data-admin-view="adminResults"] .admin-results-export small{color:var(--muted);font-size:11px;line-height:1.6;max-width:560px}
+
+/* Sample-size guidance: informational, not a grading decision. */
+.admin-results-sample-warning{padding:12px 14px;margin:12px 0;border:1px solid rgba(210,142,27,.40);border-radius:12px;background:rgba(251,191,64,.10);color:var(--text);font-size:12px;line-height:1.65}
