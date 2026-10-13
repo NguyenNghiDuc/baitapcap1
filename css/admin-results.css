@@ -44,3 +44,14 @@
 
 /* Sample-size guidance: informational, not a grading decision. */
 .admin-results-sample-warning{padding:12px 14px;margin:12px 0;border:1px solid rgba(210,142,27,.40);border-radius:12px;background:rgba(251,191,64,.10);color:var(--text);font-size:12px;line-height:1.65}
+
+/* Distribution of filtered submissions, not unique students. */
+.admin-results-distribution{border:1px solid var(--line);background:var(--surface2);border-radius:14px;padding:16px;margin:14px 0}
+.admin-results-distribution h3{margin:0 0 7px;font-size:16px}
+.admin-results-distribution p{margin:0 0 14px}
+.admin-results-bars{display:grid;gap:11px}
+.admin-results-bar{display:grid;grid-template-columns:90px minmax(70px,1fr) 100px;gap:10px;align-items:center;font-size:12px}
+.admin-results-bar strong{text-align:right;font-variant-numeric:tabular-nums}
+.admin-results-track{height:12px;border-radius:999px;overflow:hidden;background:var(--line)}
+.admin-results-track i{display:block;height:100%;background:var(--blue);border-radius:999px;min-width:0}
+@media(max-width:480px){.admin-results-bar{grid-template-columns:73px minmax(45px,1fr) 80px;gap:6px;font-size:10px}}
