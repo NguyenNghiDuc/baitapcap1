@@ -18,3 +18,11 @@ img[loading="lazy"]{content-visibility:auto}
 .perf-skeleton-list .perf-skeleton-table{height:270px}
 @media(max-width:600px){.perf-skeleton{min-height:210px}.perf-skeleton-list .perf-skeleton-table{height:220px}}
 @media(prefers-reduced-motion:reduce){.perf-skeleton>span{animation:none}}
+
+
+#historyVirtualScroll{min-width:0;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.virtual-viewport{height:min(65vh,590px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;background:var(--surface)}
+.virtual-history-row{display:grid;grid-template-columns:minmax(160px,2fr) minmax(95px,1fr) 60px 110px;gap:12px;align-items:center;min-height:75px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:12px}
+.virtual-history-row strong,.virtual-history-row small{display:block;overflow-wrap:anywhere}
+.virtual-history-row small{color:var(--muted);font-size:11px}
+@media(max-width:600px){.virtual-history-row{grid-template-columns:minmax(130px,1fr) 55px;gap:7px}.virtual-history-row>span:nth-child(2),.virtual-history-row>small:last-child{display:none}}
