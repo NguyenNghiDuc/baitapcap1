@@ -3,6 +3,7 @@ const PORT=Number(process.env.PORT||3000),ROOT=__dirname,STATIC_ROOT=process.env
 const loginDevices=require("./lib/login-devices");
 const apiPerformance=require("./lib/api-performance");
 const handleAdminResults=require("./routes/admin-results");
+const handleAdminResultReviews=require("./routes/admin-result-reviews");
 const handleAdminAudit=require("./routes/admin-audit");
 const handleAdminSecurity=require("./routes/admin-security");
 const handleAdminBackup=require("./routes/admin-backup");
@@ -122,6 +123,7 @@ async function api(req,res,p,ip){
  if(await handleAdminExport(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handleAdminAlerts(req,res,p,{send,requireUser,pg:pgStore,sessionStore,apiPerformance}))return;
  if(await handleAdminResults(req,res,p,{send,requireUser,load,pg:pgStore}))return;
+ if(await handleAdminResultReviews(req,res,p,{send,parseBody,requireUser,load,save,storage,pg:pgStore,audit}))return;
  if(await handleAdminAudit(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handleAdminSecurity(req,res,p,{send,requireUser,load,storage}))return;
  if(await handleAdminBackup(req,res,p,{send,requireUser,pg:pgStore,storage}))return;
