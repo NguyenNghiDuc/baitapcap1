@@ -491,3 +491,42 @@
  #content[data-admin-view] .metric:hover,
  #content[data-admin-view] .admin-users-stat:hover{transform:none}
 }
+
+/* Dark mode: preserve contrast and avoid bright white flashes on admin panels. */
+:root[data-theme="dark"] #content[data-admin-view]{
+ --ac-accent:#83b9ff;
+ --ac-accent-strong:#a8d0ff;
+ --ac-glow:rgba(116,169,255,.20);
+ --ac-shadow:0 13px 32px rgba(0,0,0,.17),0 3px 12px rgba(0,0,0,.08);
+ --ac-strong-shadow:0 19px 43px rgba(0,0,0,.29);
+}
+:root[data-theme="dark"] #content[data-admin-view] .page-head{
+ background:linear-gradient(117deg,#14254c,#1a3f86 50%,#275aa9);
+ border-color:rgba(148,192,255,.20);
+ box-shadow:0 18px 40px rgba(0,0,0,.26);
+}
+:root[data-theme="dark"] #content[data-admin-view] .panel,
+:root[data-theme="dark"] #content[data-admin-view] .metric{
+ border-color:var(--line);
+}
+:root[data-theme="dark"] #content[data-admin-view] .table-wrap tbody tr:hover{
+ background:rgba(104,161,243,.09);
+}
+:root[data-theme="dark"] #content[data-admin-view] .outline:not(:disabled):hover{
+ color:#b4d7ff;
+ background:rgba(103,149,227,.13);
+}
+:root[data-theme="dark"] #content[data-admin-view="admin"] #setup2fa{
+ color:#d9d4ff;
+}
+:root[data-theme="dark"] #content[data-admin-view="adminUsers"] .admin-users-grant{
+ background:linear-gradient(110deg,rgba(66,120,220,.12),transparent 67%),var(--surface);
+}
+:root[data-theme="dark"] #content[data-admin-view="adminUsers"] .admin-user-role-select{
+ color:var(--text);
+}
+:root[data-theme="dark"] #sidebar .sidebar-nav-group[data-nav-group="admin"]:not([hidden]){
+ background:linear-gradient(180deg,rgba(73,116,226,.13),var(--surface) 70%);
+ border-color:rgba(115,156,244,.32);
+ box-shadow:0 9px 23px rgba(0,0,0,.15);
+}
