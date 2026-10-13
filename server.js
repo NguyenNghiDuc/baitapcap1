@@ -112,7 +112,7 @@ async function api(req,res,p,ip){
  if(await handleExamDrafts(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleAdminResults(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handlePresence(req,res,p,{send,parseBody,requireUser,monitor}))return;
- if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,supabase,monitor,pg:pgStore}))return;
+ if(await handleSupabaseAuth(req,res,p,{send,parseBody,load,save,flush:storage.flush,supabase,monitor,pg:pgStore}))return;
  if(await handleAccount(req,res,p,{send,requireUser,load,save,supabase,monitor,audit:auditStore,pg:pgStore}))return;
  if(await require("./routes/profile-overview")(req,res,p,{send,parseBody,requireUser,load,save}))return;
  if(await handleCaptcha(req,res,p,{send,parseBody}))return;
