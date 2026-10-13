@@ -1,0 +1,24 @@
+name: Post-deployment smoke
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL triển khai cần kiểm tra'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment_status.environment_url != '') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify deployed app (read-only)
+        env:
+          POST_DEPLOY_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.url || github.event.deployment_status.environment_url }}
+        run: node scripts/post-deploy-smoke.js
