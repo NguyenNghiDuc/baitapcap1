@@ -20,7 +20,11 @@
       "phase": "foundation",
       "risk": "high",
       "needsExternalReview": false,
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "tests": [
+        "tests/admin-audit.test.js"
+      ],
+      "note": "Đã có trang xem/tìm kiếm/phân trang nhật ký dành riêng cho Admin và API chỉ đọc, ẩn metadata nhạy cảm. Chưa xác minh ghi đủ mọi thao tác hay khả năng kiểm toán nhiều instance trên production."
     },
     {
       "id": 3,
