@@ -55,17 +55,20 @@ window.PerfLoader=(()=>{
   })();
   stylesLoaded.set(src,p);return p;
  }
- async function ensureRoute(route){
+ async function ensureRoute(route,{isAdmin=false}={}){
   // Exam modules are preloaded in index.html. Do not block exams on config or asset-hash requests.
   if(route==="tests"&&window.TermExamBank&&window.TermExamCatalog&&window.ExamRunner&&window.ExamInteraction)return;
   // Feature flags are fetched in the background; do not hold every page on this API.
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
   const files=routeFiles[route]||[];
-  const css=route==="history"&&!document.querySelector("#sideRole")?.textContent?.includes("Quản trị")?[]:routeStyles[route]||[];
-  if(css.length)await Promise.all(css.map(style));
-  if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));
-  else for(const src of files)await script(src)
+  const css=route==="history"&&!isAdmin?[]:routeStyles[route]||[];
+  const cssReady=Promise.all(css.map(style));
+  const scriptsReady=(async()=>{
+   if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));
+   else for(const src of files)await script(src);
+  })();
+  await Promise.all([cssReady,scriptsReady])
  }
  function prefetch(route){
   const files=routeFiles[route]||[];
