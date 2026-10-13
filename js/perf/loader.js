@@ -1,5 +1,18 @@
 window.PerfLoader=(()=>{
- const loaded=new Map(),prefetched=new Set();let hashPromise=null,prefetchTimer=null;
+ const loaded=new Map(),stylesLoaded=new Map(),prefetched=new Set();let hashPromise=null,prefetchTimer=null;
+ // Styles for private/secondary screens are not render-blocking for the home page.
+ const routeStyles={
+  admin:["/css/admin-console.css"],
+  adminUsers:["/css/admin-users.css","/css/admin-console.css"],
+  adminResults:["/css/admin-results.css","/css/admin-console.css"],
+  history:["/css/admin-results.css","/css/admin-console.css"], // applied only if role is Admin; see ensureRoute
+  adminAudit:["/css/admin-console.css","/css/admin-audit.css"],
+  performanceMonitor:["/css/admin-console.css"],
+  storageHealth:["/css/admin-console.css"],
+  questionBank:["/css/admin-console.css"],
+  examRooms:["/css/admin-console.css"],
+  submissions:["/css/admin-console.css"]
+ };
  const routeFiles={
   tests:["/js/exams/interaction.js","/js/exams/term-exams.js","/js/exams/runner.js","/js/exams/catalog.js"],
   profile:["/js/student/profile-page.js","/js/supabase/storage.js"],
@@ -30,6 +43,18 @@ window.PerfLoader=(()=>{
   const resolved=await versioned(src);const p=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=resolved;s.async=true;s.dataset.lazySrc=src;s.onload=()=>resolve();s.onerror=()=>{loaded.delete(src);reject(new Error("Không tải được "+src))};document.head.appendChild(s)});
   loaded.set(src,p);return p
  }
+ async function style(src){
+  if(stylesLoaded.has(src))return stylesLoaded.get(src);
+  const p=(async()=>{
+   const resolved=await versioned(src);
+   return new Promise((resolve,reject)=>{
+    const link=document.createElement("link");link.rel="stylesheet";link.href=resolved;link.dataset.lazyStyleSrc=src;
+    link.onload=()=>resolve();link.onerror=()=>{link.remove();stylesLoaded.delete(src);reject(new Error("Không tải được "+src))};
+    document.head.appendChild(link);
+   });
+  })();
+  stylesLoaded.set(src,p);return p;
+ }
  async function ensureRoute(route){
   // Exam modules are preloaded in index.html. Do not block exams on config or asset-hash requests.
   if(route==="tests"&&window.TermExamBank&&window.TermExamCatalog&&window.ExamRunner&&window.ExamInteraction)return;
@@ -37,6 +62,8 @@ window.PerfLoader=(()=>{
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
   const files=routeFiles[route]||[];
+  const css=route==="history"&&!document.querySelector("#sideRole")?.textContent?.includes("Quản trị")?[]:routeStyles[route]||[];
+  if(css.length)await Promise.all(css.map(style));
   if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));
   else for(const src of files)await script(src)
  }
@@ -78,5 +105,5 @@ window.PerfLoader=(()=>{
  });
  function cleanupRoute(){window.PerformanceMonitor?.stop?.();window.API?.abortAll?.();window.SupabaseRealtime?.unsubscribeAll?.().catch?.(()=>{});window.StudentExamProctor?.stop?.();try{window.speechSynthesis?.cancel?.()}catch{}try{window._btSpeechRecognition?.abort?.()}catch{}if(window._btBreak){clearTimeout(window._btBreak);window._btBreak=null}}
  window.addEventListener("online",()=>window.OfflineSyncQueue?.flush?.());
- return {ensureRoute,prefetch,cleanupRoute,skeleton,routeFiles}
+ return {ensureRoute,prefetch,cleanupRoute,skeleton,routeFiles,routeStyles}
 })();
