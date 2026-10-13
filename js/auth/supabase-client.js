@@ -46,7 +46,8 @@ window.SupabaseApp=(()=>{
   if(syncing?.token===sess.access_token)return syncing.promise;
   const request=(async()=>{
    API.setToken(sess.access_token);
-   const j=await API.post("/api/auth/sync",{accessToken:sess.access_token},{timeout:15000,retries:0});
+   // Account synchronization is idempotent and may retry once on a transient 502/503/504 cold-start failure.
+   const j=await API.post("/api/auth/sync",{accessToken:sess.access_token},{timeout:15000,retries:1});
    if(!j?.user)throw new Error("Máy chủ chưa trả hồ sơ tài khoản.");
    if(j.user.avatarPath&&client){
     try{
@@ -87,7 +88,7 @@ window.SupabaseApp=(()=>{
      console.warn("Profile sync pending",message);
      if(authId===sess.user?.id&&lastError!==message){
       lastError=message;
-      onUser?.({id:sess.user?.id,email:sess.user?.email||"",name:String(sess.user?.user_metadata?.name||sess.user?.email?.split("@")[0]||"Người dùng"),role:"pending",pendingProfile:true,syncError:true});
+      onUser?.({id:sess.user?.id,email:sess.user?.email||"",name:String(sess.user?.user_metadata?.name||sess.user?.email?.split("@")[0]||"Người dùng"),role:"pending",pendingProfile:true,syncError:true,syncErrorMessage:message.slice(0,180)});
      }
      return null;
     }
