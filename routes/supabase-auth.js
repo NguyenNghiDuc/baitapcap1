@@ -1,7 +1,7 @@
 const crypto=require("crypto");
 const loginDevices=require("../lib/login-devices");
 module.exports=async function handleSupabaseAuth(req,res,p,ctx){
- const {send,parseBody,load,save,supabase,monitor,pg}=ctx;
+ const {send,parseBody,load,save,flush,supabase,monitor,pg}=ctx;
  if(req.method==="GET"&&p==="/api/public-config"){
   return send(res,200,{supabase:{url:process.env.SUPABASE_URL||"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY||"",enabled:supabase.enabled()},captcha:{provider:process.env.CAPTCHA_PROVIDER||"",siteKey:process.env.TURNSTILE_SITE_KEY||""},appUrl:process.env.APP_PUBLIC_URL||process.env.PUBLIC_BASE_URL||"",features:{disabled:String(process.env.DISABLED_FEATURES||"").split(",").map(x=>x.trim()).filter(Boolean)}}),true;
  }
@@ -43,7 +43,8 @@ module.exports=async function handleSupabaseAuth(req,res,p,ctx){
    try{await pg.upsertUser(u)}
    catch(e){monitor.warn("profile_upsert_failed",{message:e.message,userId:u.id});return send(res,503,{error:"Không thể đồng bộ quyền tài khoản vào PostgreSQL"}),true}
   }
-  if(modified||deviceModified)await save(db);
+  if(modified){save(db);if(flush)await flush()}
+  else if(deviceModified)save(db);
   monitor.info("supabase_auth_sync",{userId:u.id,role:u.role});
   return send(res,200,{user:{id:u.id,email:u.email,name:u.name,role:u.role,grade:u.grade,avatar:u.avatar,avatarPath:u.avatarPath||null,emailVerified:!!u.emailVerified}}),true;
  }
