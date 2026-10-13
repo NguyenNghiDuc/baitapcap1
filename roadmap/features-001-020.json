@@ -86,7 +86,11 @@
       "phase": "foundation",
       "risk": "high",
       "needsExternalReview": false,
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Có quy trình giáo viên tạo yêu cầu sửa điểm đã chấm và Admin duyệt/từ chối, lưu điểm gốc–đề nghị, lý do, thời gian, audit và chặn PATCH sửa trực tiếp. Chưa có giao dịch nguyên tử đa instance hoặc cơ chế kháng nghị độc lập từ học sinh.",
+      "tests": [
+        "tests/grade-reviews.test.js"
+      ]
     },
     {
       "id": 9,

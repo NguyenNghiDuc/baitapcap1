@@ -34,7 +34,10 @@
       "server.js"
     ],
     "8": [
-      "routes/admin-results.js"
+      "routes/admin-results.js",
+      "routes/grade-reviews.js",
+      "js/teacher/grade-reviews.js",
+      "css/grade-reviews.css"
     ],
     "9": [
       "lib/alerting.js",

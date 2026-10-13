@@ -23,7 +23,7 @@ function pageHead(k,t,p=""){return `<section class="page-head"><span class="eyeb
 function hero(){return `<section class="hero"><div class="hero-copy"><span class="pill">✨ HỌC VUI MỖI NGÀY</span><h1>Bài Tập <em>Cấp 1</em></h1><h2>Học vui – Luyện giỏi – Tiến bộ mỗi ngày</h2><p>Học theo lớp, làm bài, xem tiến bộ, tham gia lớp của giáo viên và nhận gợi ý học tập cá nhân.</p><div class="hero-search"><input id="globalSearch" placeholder="Tìm bài học, môn học, tài liệu..."><button id="globalSearchBtn">Tìm kiếm</button></div><div class="quick-grades">${[1,2,3,4,5].map(g=>`<button data-grade="${g}">Lớp ${g}</button>`).join("")}</div></div><div class="hero-art"><div class="bubble">⭐ Học mỗi ngày</div><div class="big-kid">👧🏻📚</div><div class="bubble second">🏆 Tiến bộ</div></div></section>`}
 function lessonRow(l){const s=subj(l.subject),fav=state.favorites.includes(l.id);return `<div class="lesson-row"><div class="lesson-ico">${s.icon}</div><div class="grow"><b>${esc(l.title)}</b><small>${s.name} • Lớp ${l.grade} • ${l.topic||""} • ${l.level||""}</small></div><button class="heart" data-fav="${l.id}">${fav?"❤️":"🤍"}</button><button class="outline small" data-start="${l.subject}" data-grade="${l.grade}" data-lesson="${l.lessonId||""}">Luyện tập</button></div>`}
 function mathFocus(){const a=D.lessons.filter(l=>l.subject==="math"&&[4,5].includes(l.grade)&&l.lessonId);return `<section class="section"><div class="section-head"><div><span class="eyebrow">TRỌNG TÂM LỚP 4–5</span><h2>🧮 Toán 30 câu mỗi bài</h2></div><button class="link-btn" data-route="examRooms">Phòng thi →</button></div><div class="cards-3">${a.map(l=>`<article class="test-card"><div class="test-top"><span class="subject-icon mini pink">➗</span><span class="badge">Lớp ${l.grade}</span></div><h3>${esc(l.title)}</h3><p>${esc(l.desc||l.topic||"")}</p><div class="test-meta"><span>❓ 30 câu</span><span>💡 Có giải thích</span></div><button class="primary full" data-start="math" data-grade="${l.grade}" data-lesson="${l.lessonId}">Làm 30 câu</button></article>`).join("")}</div></section>`}
-function home(){const avg=state.results.length?Math.round(state.results.reduce((a,b)=>a+b.score,0)/state.results.length):0;return hero()+mathFocus()+`<section class="metrics">${metric("📝",state.results.length,"Bài đã làm")}${metric("🎯",avg+"%","Điểm trung bình")}${metric("❤️",state.favorites.length,"Bài đã lưu")}${metric("🔥","3","Ngày liên tiếp")}</section><section class="section"><div class="section-head"><div><span class="eyebrow">KHÁM PHÁ</span><h2>Môn học nổi bật</h2></div></div><div class="subject-grid">${D.subjects.map(s=>`<article class="subject-card ${s.color}"><div class="subject-icon">${s.icon}</div><h3>${s.name}</h3><p>${s.desc||""}</p><button class="primary small" data-subject="${s.id}">Xem bài tập →</button></article>`).join("")}</div></section><section class="section split"><div><div class="section-head"><h2>⭐ Bài tập mới</h2></div><div class="list-card">${D.lessons.slice(0,6).map(lessonRow).join("")}</div></div><div class="panel"><h3>⚡ Truy cập nhanh</h3><div class="admin-actions"><button class="outline" data-route="classes">🏫 Lớp học</button><button class="outline" data-route="assignments">📌 Bài được giao</button><button class="outline" data-route="analytics">📊 Phân tích</button><button class="outline" data-route="notifications">🔔 Thông báo</button><button class="outline" data-route="liveClassroom">📡 Live Classroom</button><button class="outline" data-route="submissions">📨 Chấm bài</button></div></div></section>`}
+function home(){const avg=state.results.length?Math.round(state.results.reduce((a,b)=>a+b.score,0)/state.results.length):0;return hero()+mathFocus()+`<section class="metrics">${metric("📝",state.results.length,"Bài đã làm")}${metric("🎯",avg+"%","Điểm trung bình")}${metric("❤️",state.favorites.length,"Bài đã lưu")}${metric("🔥","3","Ngày liên tiếp")}</section><section class="section"><div class="section-head"><div><span class="eyebrow">KHÁM PHÁ</span><h2>Môn học nổi bật</h2></div></div><div class="subject-grid">${D.subjects.map(s=>`<article class="subject-card ${s.color}"><div class="subject-icon">${s.icon}</div><h3>${s.name}</h3><p>${s.desc||""}</p><button class="primary small" data-subject="${s.id}">Xem bài tập →</button></article>`).join("")}</div></section><section class="section split"><div><div class="section-head"><h2>⭐ Bài tập mới</h2></div><div class="list-card">${D.lessons.slice(0,6).map(lessonRow).join("")}</div></div><div class="panel"><h3>⚡ Truy cập nhanh</h3><div class="admin-actions"><button class="outline" data-route="classes">🏫 Lớp học</button><button class="outline" data-route="assignments">📌 Bài được giao</button><button class="outline" data-route="analytics">📊 Phân tích</button><button class="outline" data-route="notifications">🔔 Thông báo</button><button class="outline" data-route="liveClassroom">📡 Live Classroom</button><button class="outline" data-route="submissions">📨 Chấm bài</button><button class="outline" data-route="gradeReviews">📝 Đề nghị sửa điểm</button></div></div></section>`}
 function subjects(){return pageHead("THƯ VIỆN","Môn học & bài tập","Tìm không dấu, lọc theo lớp/môn/mức độ.")+`<section class="filterbar"><input id="lessonSearch" placeholder="🔎 Tìm bài..."><select id="gradeFilter"><option value="">Tất cả lớp</option>${[1,2,3,4,5].map(g=>`<option>${g}</option>`).join("")}</select><select id="levelFilter"><option value="">Mọi mức độ</option><option>Dễ</option><option>Trung bình</option><option>Khó</option></select></section><section class="subject-grid compact">${D.subjects.map(s=>`<button class="subject-filter ${s.color}" data-filter-subject="${s.id}"><span>${s.icon}</span><b>${s.name}</b></button>`).join("")}</section><div id="lessonResults" class="list-card">${D.lessons.map(lessonRow).join("")}</div>`}
 function tests(){return window.TermExamBank?.render?.()||pageHead("KIỂM TRA","Đang tải ngân hàng đề","Hãy thử lại sau vài giây.")}
 
@@ -144,7 +144,28 @@ function shop(){return pageHead("GAMIFICATION","Shop & phần thưởng","Khung 
 
 function flashcards(){const cards=D.lessons.slice(0,8);return pageHead("FLASHCARD","Ôn nhanh kiến thức","Bấm vào thẻ để lật mặt sau, dùng giọng đọc của trình duyệt nếu cần.")+`<div class="cards-3">${cards.map((l,i)=>`<button class="test-card flashcard" data-flash="${i}" data-front="${esc(l.title)}" data-back="${esc(subj(l.subject).name+" • "+(l.topic||"Kiến thức trọng tâm"))}"><div class="subject-icon">${subj(l.subject).icon}</div><h3>${esc(l.title)}</h3><p>Chạm để lật</p></button>`).join("")}</div><div class="panel"><button class="outline" id="readFlash">🔊 Đọc thẻ đầu tiên</button></div>`}
 function game(){return pageHead("MINI GAME","⚡ Toán nhanh","Trả lời liên tục để tăng combo và XP.")+`<div class="result-card"><div class="score-ring"><b id="gameScore">0</b><span>XP</span></div><div class="question-card"><h2 id="gameQ">Bấm Bắt đầu</h2><div class="options" id="gameOptions"></div></div><div class="quiz-actions"><button class="primary" id="startGame">Bắt đầu game</button></div></div>`}
-async function submissions(){if(!state.user||!["teacher","admin"].includes(state.user.role))return loginRequired("Chỉ giáo viên/Admin được xem bài nộp.");let j;try{j=await window.PerfLists.get("submissions","/api/submissions")}catch(e){return errorBox(e.message)}return pageHead("CHẤM BÀI","Bài học sinh đã nộp","Chỉnh điểm và nhận xét trực tiếp.")+`${window.PerfLists.controls("submissions",j.pagination,{placeholder:"Tìm học sinh hoặc bài..."})}<div class="list-card">${j.submissions.map(x=>`<div class="lesson-row"><div class="lesson-ico">📨</div><div class="grow"><b>${esc(x.student?.name||"Học sinh")} — ${esc(x.assignment?.title||"Bài tập")}</b><small>Điểm: ${x.score}% • ${new Date(x.submittedAt).toLocaleString("vi-VN")}</small></div><button class="outline small" data-grade-submission="${x.id}" data-current-score="${x.score}">Chấm</button></div>`).join("")||'<div class="empty">Chưa có bài nộp.</div>'}</div>`}
+async function submissions(){
+ if(!state.user||!["teacher","admin"].includes(state.user.role))return loginRequired("Chỉ giáo viên/Admin được xem bài nộp.");
+ let j;try{j=await window.PerfLists.get("submissions","/api/submissions")}catch(e){return errorBox(e.message)}
+ return pageHead("CHẤM BÀI","Bài học sinh đã nộp","Chấm lần đầu trực tiếp. Sửa điểm đã chấm phải được Admin duyệt.")+
+ '<div class="panel"><button type="button" class="outline" data-route="gradeReviews">📝 Xem yêu cầu sửa điểm</button></div>'+
+ window.PerfLists.controls("submissions",j.pagination,{placeholder:"Tìm học sinh hoặc bài..."})+
+ '<div class="list-card">'+(j.submissions||[]).map(x=>{
+  const graded=x.score!==null&&x.score!==undefined&&x.score!=="";
+  return '<div class="lesson-row"><div class="lesson-ico">📨</div><div class="grow">'+
+   '<b>'+esc(x.student?.name||"Học sinh")+' — '+esc(x.assignment?.title||"Bài tập")+'</b>'+
+   '<small>Điểm: '+(graded?Number(x.score)+"%":"Chưa chấm")+' • '+esc(x.submittedAt?new Date(x.submittedAt).toLocaleString("vi-VN"):"—")+'</small>'+
+   '<button type="button" class="outline small" data-grade-toggle="'+esc(x.id)+'" aria-expanded="false">'+
+   (graded?"Đề nghị sửa điểm":"Chấm lần đầu")+'</button>'+
+   '<form class="grade-submission-form" data-grade-form="'+esc(x.id)+'" data-graded="'+(graded?"1":"0")+'" hidden>'+
+   '<label>Điểm mới (0–100)<input type="number" name="score" min="0" max="100" step="0.5" value="'+(graded?Number(x.score):"")+'" required></label>'+
+   (graded?'<label>Lý do sửa điểm (ít nhất 10 ký tự)<input name="reason" minlength="10" maxlength="500" required placeholder="Ví dụ: chấm nhầm câu số 3"></label>':
+   '<label>Nhận xét<input name="feedback" maxlength="500" placeholder="Nhận xét cho học sinh"></label>')+
+   '<button class="primary" type="submit">'+(graded?"Gửi yêu cầu duyệt":"Lưu điểm lần đầu")+'</button>'+
+   '</form></div></div>';
+ }).join("")+'</div>';
+}
+
 async function premium(){return window.DemoWallet?.render?.()||errorBox("Không tải được Ví demo")}
 
 function today(){return window.StudentDashboard?.render(state.user)||errorBox("StudentDashboard chưa tải")}
@@ -177,7 +198,7 @@ function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMa
 function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync,targetScore,topics,mathWork};$("#content").innerHTML=(map[state.route]||home)();bind()}
 async function render(){
  const sequence=++renderSequence,route=state.route;
- const adminViews=["adminIntegrity","adminBackup","adminSecurity","adminAlerts","adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth","questionBank","submissions","examRooms"];
+ const adminViews=["gradeReviews","adminIntegrity","adminBackup","adminSecurity","adminAlerts","adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth","questionBank","submissions","examRooms"];
  const adminView=state.user?.role==="admin"?(route==="history"?"adminResults":adminViews.includes(route)?route:""):"";
  const container=$("#content");
  if(adminView)container.dataset.adminView=adminView;
@@ -188,7 +209,7 @@ async function render(){
   shell();
   // Do not fetch private-page scripts/styles before a verified role can use them.
   // Server APIs still perform their own authoritative authorization checks.
-  const staffOnly=new Set(["classInsights"]);
+  const staffOnly=new Set(["classInsights","gradeReviews"]);
   if(staffOnly.has(route)&&!["teacher","admin"].includes(state.user?.role)){
    $("#content").innerHTML=loginRequired("Chỉ giáo viên/Admin được xem thống kê lớp học.");bind();return;
   }
@@ -217,7 +238,7 @@ async function render(){
    $("#content").innerHTML=content;bind();
    window.StudentRegistry.bind(route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
   }
-  const asyncMap={classes,assignments,classInsights:async()=>window.ClassInsights?.render(state.user)||errorBox("Thống kê lớp học chưa tải"),notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminCenter:async()=>window.AdminCenter?.render(state.user)||errorBox("Trung tâm Admin chưa tải"),adminAlerts:async()=>window.AdminAlerts?.render(state.user)||errorBox("Cảnh báo Admin chưa tải"),adminSecurity:async()=>window.AdminSecurity?.render(state.user)||errorBox("Bảo mật Admin chưa tải"),adminBackup:async()=>window.AdminBackup?.render(state.user)||errorBox("Sao lưu Admin chưa tải"),adminIntegrity:async()=>window.AdminIntegrity?.render(state.user)||errorBox("Kiểm tra dữ liệu chưa tải"),adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),adminAudit:async()=>window.AdminAudit?.render(state.user)||errorBox("Nhật ký Admin chưa tải"),performanceMonitor:async()=>window.PerformanceMonitor?.render(state.user)||errorBox("Giám sát API chưa tải"),history:async()=>{if(state.user?.role==="admin"){await window.PerfLoader.ensureRoute("adminResults");return window.AdminResults.render(state.user)}return history()},storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
+  const asyncMap={classes,assignments,classInsights:async()=>window.ClassInsights?.render(state.user)||errorBox("Thống kê lớp học chưa tải"),gradeReviews:async()=>window.GradeReviews?.render(state.user)||errorBox("Duyệt sửa điểm chưa tải"),notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminCenter:async()=>window.AdminCenter?.render(state.user)||errorBox("Trung tâm Admin chưa tải"),adminAlerts:async()=>window.AdminAlerts?.render(state.user)||errorBox("Cảnh báo Admin chưa tải"),adminSecurity:async()=>window.AdminSecurity?.render(state.user)||errorBox("Bảo mật Admin chưa tải"),adminBackup:async()=>window.AdminBackup?.render(state.user)||errorBox("Sao lưu Admin chưa tải"),adminIntegrity:async()=>window.AdminIntegrity?.render(state.user)||errorBox("Kiểm tra dữ liệu chưa tải"),adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),adminAudit:async()=>window.AdminAudit?.render(state.user)||errorBox("Nhật ký Admin chưa tải"),performanceMonitor:async()=>window.PerformanceMonitor?.render(state.user)||errorBox("Giám sát API chưa tải"),history:async()=>{if(state.user?.role==="admin"){await window.PerfLoader.ensureRoute("adminResults");return window.AdminResults.render(state.user)}return history()},storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
   if(asyncMap[route]){
    const content=await asyncMap[route]();
    if(sequence!==renderSequence||route!==state.route)return;
@@ -305,6 +326,23 @@ function bind(){
  if(state.route==="adminBackup")window.AdminBackup?.bind(render);
  if(state.route==="adminIntegrity")window.AdminIntegrity?.bind(render);
  if(state.route==="classInsights")window.ClassInsights?.bind(render);
+ if(state.route==="gradeReviews")window.GradeReviews?.bind(toast,render);
+ if(state.route==="submissions"){
+  $("[data-grade-toggle]").forEach(btn=>btn.addEventListener("click",()=>{
+   const form=$("[data-grade-form]").find(f=>f.dataset.gradeForm===btn.dataset.gradeToggle);
+   if(!form)return;form.hidden=!form.hidden;btn.setAttribute("aria-expanded",String(!form.hidden));
+  }));
+  $("[data-grade-form]").forEach(form=>form.addEventListener("submit",async e=>{
+   e.preventDefault();const submit=form.querySelector('button[type="submit"]');
+   const d=Object.fromEntries(new FormData(form)),graded=form.dataset.graded==="1";
+   submit.disabled=true;
+   try{
+    if(graded)await API.post("/api/grade-reviews",{submissionId:form.dataset.gradeForm,newScore:Number(d.score),reason:d.reason});
+    else await API.patch("/api/submissions/"+encodeURIComponent(form.dataset.gradeForm)+"/grade",{score:Number(d.score),feedback:d.feedback||""});
+    toast(graded?"Đã gửi yêu cầu, chờ Admin duyệt.":"Đã lưu điểm lần đầu.");await render();
+   }catch(error){toast(error.message||"Không lưu được điểm");submit.disabled=false}
+  }));
+ }
  $$("[data-route]").forEach(x=>x.onclick=()=>nav(x.dataset.route));$$("[data-subject]").forEach(x=>x.onclick=()=>{state.subjectFilter=x.dataset.subject;nav("subjects")});$$("[data-fav]").forEach(x=>x.onclick=()=>{const id=Number(x.dataset.fav);state.favorites=state.favorites.includes(id)?state.favorites.filter(a=>a!==id):[...state.favorites,id];saveLocal();render()});$$("[data-start]").forEach(x=>x.onclick=()=>startQuiz(x.dataset.start,Number(x.dataset.grade),null,x.dataset.lesson||""));$("#openLogin")?.addEventListener("click",openAuth);
  if(state.route==="tests")window.TermExamBank?.bind?.(startCustom);
  $("#globalSearchBtn")?.addEventListener("click",()=>{const q=$("#globalSearch").value;nav("subjects");setTimeout(()=>{$("#lessonSearch").value=q;filterLessons()},20)});$$(".quick-grades [data-grade]").forEach(x=>x.onclick=()=>{nav("subjects");setTimeout(()=>{$("#gradeFilter").value=x.dataset.grade;filterLessons()},20)});
