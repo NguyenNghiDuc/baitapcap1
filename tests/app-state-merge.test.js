@@ -86,3 +86,23 @@ test("malformed snapshots fail closed and never silently produce an empty databa
  assert.throws(()=>mergeAppState({}, {}, []),/PostgreSQL/);
  assert.throws(()=>validateLegacy(null,fixture()),/không hợp lệ/);
 });
+
+test("stale snapshots preserve authoritative Admin result-review decisions",()=>{
+ const base=fixture(),local=copy(base),remote=copy(base);
+ local.users[1].name="Updated student";
+ remote.resultReviewDecisions=[{resultId:"res1",status:"reviewed",reason:"Manually checked",reviewerId:"admin1"}];
+ const merged=mergeAppState(base,local,remote);
+ assert.equal(merged.users[1].name,"Updated student");
+ assert.equal(merged.resultReviewDecisions.length,1);
+ assert.equal(merged.resultReviewDecisions[0].status,"reviewed");
+ assert.equal(merged.resultReviewDecisions[0].reviewerId,"admin1");
+});
+test("legacy snapshots cannot forge, alter or remove Admin result-review decisions",()=>{
+ const base=fixture();base.resultReviewDecisions=[{resultId:"res1",status:"reviewed"}];
+ for(const changed of [[],[{resultId:"res1",status:"dismissed"}],[
+  {resultId:"res1",status:"reviewed"},{resultId:"res2",status:"reviewed"}]]){
+  const local=copy(base);local.resultReviewDecisions=changed;
+  assert.throws(()=>validateLegacy(base,local),/lịch sử xem xét/);
+  assert.throws(()=>mergeAppState(base,local,copy(base)),/lịch sử xem xét/);
+ }
+});
