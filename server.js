@@ -237,21 +237,40 @@ async function api(req,res,p,ip){
   catch(e){monitor.warn("admin_presence_failed",{message:e.message});live={available:false,users:[],onlineTotal:null}}
   const mapped=new Map(live.users.map(x=>[x.id,x]));
   const users=pg.items.map(x=>({...x,presence:mapped.get(String(x.id))||null}));
-  return send(res,200,{users,pagination:pg.pagination,durable:storage.status().mode==="supabase",presenceAvailable:live.available,onlineTotal:live.onlineTotal});
+  const ownerUid=String(process.env.ADMIN_SUPABASE_UID||"").trim();
+  const canGrantAdmin=!!ownerUid&&u.authUserId===ownerUid;
+  return send(res,200,{users,pagination:pg.pagination,durable:storage.status().mode==="supabase",presenceAvailable:live.available,onlineTotal:live.onlineTotal,canGrantAdmin});
  }
  if(req.method==="POST"&&p==="/api/admin/grant-admin"){
   const current=await requireUser(req,res,["admin"]);if(!current)return;
   const ownerUid=String(process.env.ADMIN_SUPABASE_UID||"").trim();
-  if(!ownerUid||current.authUserId!==ownerUid)return send(res,403,{error:"Chỉ Admin chính được cấp quyền Admin."});
+  if(!ownerUid||current.authUserId!==ownerUid)return send(res,403,{error:"Chỉ Admin chính (ADMIN_SUPABASE_UID) được cấp quyền Admin."});
+  if(process.env.VERCEL==="1"&&!process.env.DATABASE_URL)return send(res,503,{error:"Cần DATABASE_URL để cấp quyền Admin có hiệu lực trên tất cả máy chủ."});
   let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}
   const email=String(d.email||"").trim().toLowerCase();
-  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return send(res,400,{error:"Email không hợp lệ"});
-  const db=load(),target=db.users.find(x=>String(x.email||"").toLowerCase()===email&&x.authUserId);
-  if(!target)return send(res,404,{error:"Chưa tìm thấy tài khoản Supabase này. Người dùng cần đăng ký và đăng nhập website ít nhất một lần."});
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return send(res,400,{error:"Email không hợp lệ"});
+  const db=load();let target;
+  if(process.env.DATABASE_URL){
+   try{target=await pgStore.findAdminUserByEmail(email)}
+   catch(e){safeMonitorError("admin_grant_lookup_failed",{message:e.message});return send(res,503,{error:"Không truy vấn được tài khoản từ PostgreSQL."})}
+  }else target=db.users.find(x=>String(x.email||"").toLowerCase()===email)||null;
+  if(!target)return send(res,404,{error:"Không tìm thấy email trong danh sách tài khoản. Hãy cho người dùng đăng ký trước."});
+  if(!target.authUserId)return send(res,409,{error:"Tài khoản chưa liên kết Supabase Auth. Người dùng cần đăng nhập bằng Supabase ít nhất một lần."});
   if(target.locked)return send(res,409,{error:"Tài khoản đang bị khóa"});
-  target.role="admin";audit(db,current,"admin_granted",{target:target.id});save(db);
-  await pgStore.upsertUser(target).catch(()=>{});
-  return send(res,200,{user:safeUser(target),message:"Đã cấp quyền Admin. Người dùng cần đăng nhập lại."});
+  if(process.env.DATABASE_URL){
+   try{
+    const updated=await pgStore.setUserAccess(target.id,{role:"admin",locked:!!target.locked});
+    if(!updated)return send(res,409,{error:"Tài khoản chưa tồn tại trong PostgreSQL. Vui lòng đồng bộ tài khoản."});
+   }catch(e){safeMonitorError("admin_grant_update_failed",{message:e.message});return send(res,503,{error:"Không thể cấp quyền Admin trong PostgreSQL."})}
+  }
+  const local=db.users.find(x=>String(x.id)===String(target.id));
+  const x=local||{...target,password:"",children:[],createdAt:new Date().toISOString()};
+  x.role="admin";x.authUserId=target.authUserId;x.email=target.email;x.locked=!!target.locked;
+  if(!local)db.users.push(x);
+  audit(db,current,"admin_granted",{target:target.id});
+  save(db);
+  if(process.env.DATABASE_URL)await storage.flush();
+  return send(res,200,{user:safeUser(x),message:"Đã cấp quyền Admin. Người dùng cần đăng nhập lại hoặc đồng bộ quyền."});
  }
  if(req.method==="POST"&&p==="/api/admin/users"){const u=await requireUser(req,res,["admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})};const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),name=String(d.name||"Người dùng").trim();if(!/^\S+@\S+\.\S+$/.test(email)||password.length<8)return send(res,400,{error:"Email hợp lệ và mật khẩu tối thiểu 8 ký tự"});const role=["student","parent","teacher"].includes(d.role)?d.role:"student";const db=load();if(db.users.some(x=>x.email===email))return send(res,409,{error:"Email đã tồn tại"});const x={id:id(),name:name.slice(0,80),email,password:hashPassword(password),role,grade:role==="student"?Number(d.grade)||1:null,avatar:role==="teacher"?"👩🏻‍🏫":role==="parent"?"👩🏻":role==="admin"?"🧑🏻‍💻":"👧🏻",emailVerified:true,createdAt:new Date().toISOString()};db.users.push(x);audit(db,u,"user_created",{target:x.id,role:x.role});save(db);return send(res,201,{user:safeUser(x),message:"Tạo tài khoản thành công"})}
  const userPatch=routeMatch(p,"/api/admin/users/:id");
