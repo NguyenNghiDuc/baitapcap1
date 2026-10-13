@@ -187,7 +187,7 @@ async function render(){
   if(window.ExamLock?.isActive?.()&&!document.querySelector(".locked-exam-shell"))window.ExamLock.exit();
   shell();
   $("#content").innerHTML=window.PerfLoader?.skeleton?.(route)||'<div class="perf-skeleton" role="status">Đang tải dữ liệu…</div>';
-  await window.PerfLoader?.ensureRoute(route);
+  await window.PerfLoader?.ensureRoute(route,{isAdmin:state.user?.role==="admin"});
   if(sequence!==renderSequence||route!==state.route)return;
   if(route==="practice"){
    if(state.quiz?.questions?.length)quiz();
