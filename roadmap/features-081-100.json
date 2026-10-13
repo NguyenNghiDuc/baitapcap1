@@ -1,0 +1,170 @@
+{
+  "range": [
+    81,
+    100
+  ],
+  "title": "Chương trình học, ngân hàng đề và chấm điểm",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 81,
+      "name": "Bản đồ chương trình lớp 1–5",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 82,
+      "name": "Sơ đồ kiến thức tiên quyết",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 83,
+      "name": "Phân tích đáp án nhiễu",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 84,
+      "name": "Phiên bản tiêu chí chấm điểm",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 85,
+      "name": "Gắn chuẩn đầu ra cho bài học",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 86,
+      "name": "Ma trận độ khó nội dung",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 87,
+      "name": "Kiểm tra học liệu đa phương tiện",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 88,
+      "name": "Quản lý bản quyền học liệu",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 89,
+      "name": "Quy trình duyệt bản dịch",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 90,
+      "name": "Lọc nội dung phù hợp lứa tuổi",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 91,
+      "name": "Điều chỉnh thời gian thi theo nhu cầu",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 92,
+      "name": "Tạm dừng thi khi gặp sự cố",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 93,
+      "name": "Khiếu nại về bài nộp",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 94,
+      "name": "Biên nhận nộp bài",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 95,
+      "name": "Lưu checkpoint bài thi",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 96,
+      "name": "Trộn đề với độ khó tương đương",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 97,
+      "name": "Ma trận câu hỏi theo chương",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 98,
+      "name": "Nhật ký sự cố phòng thi",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 99,
+      "name": "Phúc khảo bài thi",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 100,
+      "name": "Kiểm tra độ nhất quán chấm bài",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    }
+  ]
+}
