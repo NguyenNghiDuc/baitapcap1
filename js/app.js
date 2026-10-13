@@ -262,6 +262,7 @@ function bind(){
   window.AuthUI.open("register");
  });
  window.PerfLists?.bind?.(state.route,render);
+ if(state.route==="performanceMonitor")window.PerformanceMonitor?.bind?.();
  if(state.route==="history"&&state.user?.role!=="admin"&&state.results.length>250){
   const rows=[...state.results].reverse();
   window.VirtualList?.mount?.($("#historyVirtualScroll"),{items:rows,rowHeight:75,renderRow:r=>
