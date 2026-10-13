@@ -55,3 +55,20 @@ test("admin category is available after verified admin login",async({page})=>{
  await expect(page.locator('[data-nav-group="admin"]')).toBeVisible();
  await expect(page.locator('[data-nav-group="admin"] a[href="#adminResults"]')).not.toBeHidden();
 });
+
+
+test("profile shell never crashes when role changes from pending to verified Admin",async({page})=>{
+ const jsErrors=[];
+ page.on("pageerror",err=>jsErrors.push(err.message));
+ await openMenu(page,"/#home");
+ await page.evaluate(()=>{
+  window.AppAuthBridge.setUser({id:"auth-unit-1",name:"Testing Admin",email:"tester@example.test",role:"pending",pendingProfile:true});
+ });
+ await expect(page.locator("#sideRole")).toContainText("Đang xác thực quyền");
+ await page.evaluate(()=>{
+  window.AppAuthBridge.setUser({id:"auth-unit-1",name:"Testing Admin",email:"tester@example.test",role:"admin"});
+ });
+ await expect(page.locator("#sideRole")).toContainText("Quản trị viên");
+ await expect(page.locator('[data-nav-group="admin"]')).toBeVisible();
+ expect(jsErrors.filter(msg=>/forEach is not a function/.test(msg))).toEqual([]);
+});
