@@ -23,3 +23,6 @@
 :root[data-theme="dark"] .admin-backup-check .needs-attention{color:#ffbf84}
 @media(max-width:780px){.admin-backup-cards{grid-template-columns:1fr 1fr}.admin-backup-checks{grid-template-columns:1fr}}
 @media(max-width:520px){.admin-backup-cards{grid-template-columns:1fr}.admin-backup-check{flex-wrap:wrap}.admin-backup-heading{flex-wrap:wrap}}
+
+/* Admin sunset feature polish */
+.admin-backup-cards>div{border-radius:18px;box-shadow:0 10px 28px rgba(142,69,21,.075)}.admin-backup-cards>div:hover{border-color:rgba(233,121,40,.4)}@media(max-width:650px){.admin-backup-cards{grid-template-columns:1fr}}
