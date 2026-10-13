@@ -52,7 +52,7 @@ window.AdminCenter=(()=>{
    '<form id="adminCenterFilters" class="admin-center-filters"><label>Tìm chức năng<input type="search" name="search" maxlength="100" placeholder="VD: phân quyền, tạo đề, AI..." value="'+esc(state.search)+'"></label>'+
    '<label>Nhóm đề xuất<select name="group">'+options([["all","Tất cả nhóm"],...data.groups.map(g=>[String(g.id),g.name])],state.group)+'</select></label>'+
    '<label>Tiến độ<select name="status">'+options([["all","Tất cả trạng thái"],...Object.entries(labels)],state.status)+'</select></label>'+
-   '<button class="primary" type="submit">Lọc</button></form>'+
+   '<div class="admin-center-filter-actions"><button class="primary" type="submit">Lọc</button><button class="outline" id="adminCenterClear" type="button">Xóa lọc</button></div></form>'+
    '<div class="admin-center-feature-list" aria-live="polite">'+rows+'</div>'+
    '<div class="admin-center-pager"><button class="outline" id="adminCenterPrev" type="button" '+(state.page<=1?'disabled':'')+'>← Trước</button><span>'+filtered.length+' kết quả • Trang '+state.page+'/'+pages+'</span><button class="outline" id="adminCenterNext" type="button" '+(state.page>=pages?'disabled':'')+'>Tiếp →</button></div>'+
    '<p class="admin-center-disclaimer">Danh mục này là kế hoạch và tình trạng rà soát mã nguồn, không phải 160 chức năng đã vận hành. Các thao tác cấp quyền hoặc chỉnh điểm tiếp tục được kiểm tra ở API.</p></section></div>';
@@ -66,6 +66,7 @@ window.AdminCenter=(()=>{
    state.group=String(d.get("group")||"all");state.status=String(d.get("status")||"all");state.page=1;rerender()
   });
   form?.querySelectorAll("select").forEach(select=>select.addEventListener("change",()=>form.requestSubmit()));
+  document.querySelector("#adminCenterClear")?.addEventListener("click",()=>{state.search="";state.group="all";state.status="all";state.page=1;rerender()});
   document.querySelector("#adminCenterPrev")?.addEventListener("click",()=>{state.page=Math.max(1,state.page-1);rerender()});
   document.querySelector("#adminCenterNext")?.addEventListener("click",()=>{state.page++;rerender()});
  }
