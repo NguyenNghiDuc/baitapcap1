@@ -1,0 +1,170 @@
+{
+  "range": [
+    41,
+    60
+  ],
+  "title": "AI, báo cáo, giám sát và khắc phục sự cố",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 41,
+      "name": "Chống spam và lạm dụng API",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 42,
+      "name": "Chế độ bảo trì có bảo vệ bài nộp",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 43,
+      "name": "Theo dõi hoạt động hệ thống trực tiếp",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 44,
+      "name": "Hồ sơ học sinh 360 độ",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 45,
+      "name": "AI phân tích học lực",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 46,
+      "name": "AI kiểm tra đáp án",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 47,
+      "name": "AI tạo đề thi",
+      "phase": "ai",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 48,
+      "name": "Tự động giao bài theo lịch",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 49,
+      "name": "Báo cáo học tập chuyên sâu",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 50,
+      "name": "Cảnh báo xu hướng sa sút",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 51,
+      "name": "Tự động hóa công việc Admin",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 52,
+      "name": "Lưu trữ đề thi theo phiên bản",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 53,
+      "name": "Thống kê mức độ sử dụng tính năng",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 54,
+      "name": "Quản lý tích hợp bên ngoài",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 55,
+      "name": "Quản lý API key an toàn",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": true,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 56,
+      "name": "Hoàn tác thao tác nhầm",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 57,
+      "name": "Phân nhóm học sinh",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 58,
+      "name": "Thông báo theo nhóm",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 59,
+      "name": "Kiểm tra bảo mật định kỳ",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 60,
+      "name": "Chẩn đoán tình trạng hệ thống",
+      "phase": "foundation",
+      "risk": "high",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    }
+  ]
+}
