@@ -1,6 +1,10 @@
 const {test,expect}=require("@playwright/test");
+async function openMenu(page,url="/"){
+ await page.goto(url);
+ if(await page.locator("#menuBtn").isVisible())await page.locator("#menuBtn").click();
+}
 test("sidebar groups learning, exams, games and admin in distinct menus",async({page})=>{
- await page.goto("/");
+ await openMenu(page);
  const sidebar=page.locator("#sidebar");
  for(const group of ["student","exams","games","classes","admin","account","system"])
   await expect(sidebar.locator('[data-nav-group="'+group+'"]')).toHaveCount(1);
@@ -10,7 +14,7 @@ test("sidebar groups learning, exams, games and admin in distinct menus",async({
  await expect(sidebar.locator('[data-nav-group="student"] a[href="#today"]')).toHaveCount(1);
 });
 test("search matches categories without Vietnamese accents or spaces",async({page})=>{
- await page.goto("/");
+ await openMenu(page);
  const search=page.locator("#sidebarSearch");
  await search.fill("minigame");
  await expect(page.locator('[data-nav-group="games"]')).toBeVisible();
@@ -25,7 +29,7 @@ test("search matches categories without Vietnamese accents or spaces",async({pag
  await expect(page.locator("#sidebarNoResults")).toBeHidden();
 });
 test("active page expands its menu and protected links stay hidden from visitors",async({page})=>{
- await page.goto("/#history");
+ await openMenu(page,"/#history");
  const exams=page.locator('[data-nav-group="exams"]');
  await expect(exams).toHaveAttribute("open","");
  await expect(exams.locator('a[href="#history"]')).toHaveAttribute("aria-current","page");
@@ -33,7 +37,7 @@ test("active page expands its menu and protected links stay hidden from visitors
  await expect(page.locator('[data-nav-group="admin"]')).toBeHidden();
 });
 test("menu search keyboard shortcut focuses input",async({page})=>{
- await page.goto("/");
+ await openMenu(page);
  await page.keyboard.press("/");
  await expect(page.locator("#sidebarSearch")).toBeFocused();
  await page.locator("#sidebarSearch").fill("toan");
@@ -42,7 +46,7 @@ test("menu search keyboard shortcut focuses input",async({page})=>{
 });
 test("admin category is available after verified admin login",async({page})=>{
  test.skip(!process.env.E2E_ADMIN_PASSWORD,"Requires disposable E2E admin fixture");
- await page.goto("/");
+ await openMenu(page);
  await page.locator("#authBtn").click();
  await page.locator('#sbLoginForm input[name="email"]').fill("admin@demo.vn");
  await page.locator('#sbLoginForm input[name="password"]').fill(process.env.E2E_ADMIN_PASSWORD);
