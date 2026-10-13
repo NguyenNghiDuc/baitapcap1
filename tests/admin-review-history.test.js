@@ -34,3 +34,10 @@ test("History UI exposes status filter and pager",()=>{
  assert.match(js,/adminHistoryStatus/);assert.match(js,/adminHistoryNext/);
  assert.match(js,/historyHtml/);
 });
+
+test("Invalid result IDs do not silently expand a scoped review query",async()=>{
+ assert.equal((await call("/api/admin/result-reviews?resultId=")).code,400);
+ const many=new URLSearchParams();for(let i=0;i<51;i++)many.append("resultId","r"+i);
+ assert.equal((await call("/api/admin/result-reviews?"+many.toString())).code,400);
+ assert.equal((await call("/api/admin/result-reviews?resultId="+("x".repeat(129)))).code,400);
+});
