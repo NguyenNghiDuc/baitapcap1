@@ -1,12 +1,19 @@
 "use strict";
 const {test,expect}=require("@playwright/test");
 async function adminSession(page,route){
- await page.goto("/");
- await expect(page.locator("#content .hero h1")).toBeVisible();
- await page.evaluate(r=>{
+ // Fake API fixture only: do not race real Supabase startup with a second hashchange,
+ // especially on slower Mobile WebKit.
+ await page.route("**/api/public-config",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({supabase:{enabled:false}})
+ }));
+ await page.goto("/#"+route);
+ await expect(page.locator("#content")).toContainText("Chỉ quản trị viên",{timeout:12000});
+ await page.evaluate(async()=>{
+  await window.SupabaseApp?.ready();
+  await Promise.resolve();
   window.AppAuthBridge.setUser({id:"admin-test-ui",name:"Admin test",role:"admin",email:"admin@example.test"});
-  location.hash=r;
- },route);
+ });
+ await expect(page.locator("#sideRole")).toContainText("Quản trị viên",{timeout:12000});
 }
 test("alert center renders severity cards from authenticated API response",async({page})=>{
  const errors=[];page.on("pageerror",e=>errors.push(e.message));
