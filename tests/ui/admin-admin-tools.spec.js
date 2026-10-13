@@ -1,5 +1,7 @@
 "use strict";
 const {test,expect}=require("@playwright/test");
+// API interception must not be bypassed by a previously registered Service Worker.
+test.use({serviceWorkers:"block"});
 async function expectAdminView(page,selector){
  try{await expect(page.locator(selector)).toBeVisible({timeout:12000})}
  catch(err){
