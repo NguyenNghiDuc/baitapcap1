@@ -35,7 +35,7 @@ window.GradeReviews=(()=>{
     '<div class="grade-review-pages"><button type="button" class="outline" id="gradeReviewsPrev" '+(state.page<=1?"disabled":"")+'>← Trước</button>'+
     '<span>Trang '+state.page+'/'+pages+' · '+Number(j.pagination?.total||0)+' yêu cầu</span>'+
     '<button type="button" class="outline" id="gradeReviewsNext" '+(state.page>=pages?"disabled":"")+'>Sau →</button></div>'+
-    '<p class="muted">Yêu cầu và quyết định được ghi nhật ký. Hệ thống chưa hỗ trợ phê duyệt đa máy chủ theo giao dịch nguyên tử.</p>'+
+    '<p class="muted">Yêu cầu và quyết định được ghi nhật ký. Chấm và duyệt điểm dùng giao dịch khóa hàng PostgreSQL khi được cấu hình. Các chức năng cũ lưu app_state theo snapshot vẫn có nguy cơ ghi đè khi chạy nhiều máy chủ.</p>'+
     '</section></div>';
   }catch(e){return '<section class="panel" role="alert"><h3>Không tải được yêu cầu sửa điểm</h3><p>'+escape(e?.message||"Có lỗi")+'</p><button id="gradeReviewsRetry" class="outline">Thử lại</button></section>'}
  }

@@ -94,8 +94,10 @@ test("teachers only see own requests; Admin pagination and history remain bounde
 test("server blocks direct regrading after an initial score; teacher UI binds the form",()=>{
  const fs=require("node:fs"),path=require("node:path"),root=path.join(__dirname,"..");
  const server=fs.readFileSync(path.join(root,"server.js"),"utf8");
+ const first=fs.readFileSync(path.join(root,"routes/grade-first.js"),"utf8");
  const app=fs.readFileSync(path.join(root,"js/app.js"),"utf8");
- assert.ok(server.includes("Bài đã chấm điểm. Muốn sửa điểm phải gửi yêu cầu"));
+ assert.ok(first.includes("Bài đã chấm điểm. Muốn sửa điểm phải gửi yêu cầu"));
+ assert.ok(server.includes("handleFirstGrade(req,res,p,"));
  assert.ok(server.includes("handleGradeReviews(req,res,p,"));
  assert.ok(app.includes('data-grade-form="'));
  assert.ok(app.includes('API.post("/api/grade-reviews"'));

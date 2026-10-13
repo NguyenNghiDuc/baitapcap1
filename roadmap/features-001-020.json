@@ -87,9 +87,10 @@
       "risk": "high",
       "needsExternalReview": false,
       "assessment": "partial",
-      "note": "Có quy trình giáo viên tạo yêu cầu sửa điểm đã chấm và Admin duyệt/từ chối, lưu điểm gốc–đề nghị, lý do, thời gian, audit và chặn PATCH sửa trực tiếp. Chưa có giao dịch nguyên tử đa instance hoặc cơ chế kháng nghị độc lập từ học sinh.",
+      "note": "Đã có yêu cầu sửa điểm với lý do, Admin duyệt/từ chối, lịch sử điểm và audit. Chấm lần đầu, tạo yêu cầu và duyệt dùng khóa hàng PostgreSQL trong một transaction, có kiểm thử hai yêu cầu đồng thời/rollback. Chưa an toàn toàn hệ thống vì các endpoint legacy khác vẫn ghi toàn bộ app_state từ cache và có thể ghi đè; cần tiếp tục chuyển các luồng này sang transaction.",
       "tests": [
-        "tests/grade-reviews.test.js"
+        "tests/grade-reviews.test.js",
+        "tests/grade-atomic.test.js"
       ]
     },
     {
