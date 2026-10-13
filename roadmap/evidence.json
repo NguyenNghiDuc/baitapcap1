@@ -3,7 +3,9 @@
   "features": {
     "1": [
       "server.js",
-      "routes/supabase-auth.js"
+      "routes/supabase-auth.js",
+      "routes/admin-security.js",
+      "js/admin/security-center.js"
     ],
     "2": [
       "lib/audit.js",
@@ -24,7 +26,9 @@
       "js/admin/results.js"
     ],
     "6": [
-      "lib/login-devices.js"
+      "lib/login-devices.js",
+      "routes/admin-security.js",
+      "js/admin/security-center.js"
     ],
     "7": [
       "server.js"

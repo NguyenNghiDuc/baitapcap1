@@ -177,7 +177,7 @@ function mathWork(){return window.StudentMathWork?.render()||errorBox("StudentMa
 function renderSync(){const map={home,subjects,tests,materials,favorites,history,ai,profile,achievements,shop,flashcards,game,today,goals,formulas,vocab,accessibility,notes,wrongReview,quickPractice,studyPath,languageLab,adaptive,speech,schedule,worksheet,profileStats,missions,bookmarks,prepPlan,writing,handwriting,sync,targetScore,topics,mathWork};$("#content").innerHTML=(map[state.route]||home)();bind()}
 async function render(){
  const sequence=++renderSequence,route=state.route;
- const adminViews=["adminAlerts","adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth","questionBank","submissions","examRooms"];
+ const adminViews=["adminSecurity","adminAlerts","adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth","questionBank","submissions","examRooms"];
  const adminView=state.user?.role==="admin"?(route==="history"?"adminResults":adminViews.includes(route)?route:""):"";
  const container=$("#content");
  if(adminView)container.dataset.adminView=adminView;
@@ -188,7 +188,7 @@ async function render(){
   shell();
   // Do not fetch private-page scripts/styles before a verified role can use them.
   // Server APIs still perform their own authoritative authorization checks.
-  const adminOnly=new Set(["adminAlerts","adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth"]);
+  const adminOnly=new Set(["adminSecurity","adminAlerts","adminCenter","admin","adminUsers","adminResults","adminAudit","performanceMonitor","storageHealth"]);
   if(adminOnly.has(route)&&state.user?.role!=="admin"){
    $("#content").innerHTML=loginRequired("Chỉ quản trị viên được truy cập.");bind();return;
   }
@@ -213,7 +213,7 @@ async function render(){
    $("#content").innerHTML=content;bind();
    window.StudentRegistry.bind(route,{toast,nav,startCustom,render,user:state.user});window.StudentI18n?.apply?.();shell();return
   }
-  const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminCenter:async()=>window.AdminCenter?.render(state.user)||errorBox("Trung tâm Admin chưa tải"),adminAlerts:async()=>window.AdminAlerts?.render(state.user)||errorBox("Cảnh báo Admin chưa tải"),adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),adminAudit:async()=>window.AdminAudit?.render(state.user)||errorBox("Nhật ký Admin chưa tải"),performanceMonitor:async()=>window.PerformanceMonitor?.render(state.user)||errorBox("Giám sát API chưa tải"),history:async()=>{if(state.user?.role==="admin"){await window.PerfLoader.ensureRoute("adminResults");return window.AdminResults.render(state.user)}return history()},storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
+  const asyncMap={classes,assignments,notifications,analytics,parent,teacher,admin,submissions,premium,profile,questionBank,examRooms,adminUsers,adminCenter:async()=>window.AdminCenter?.render(state.user)||errorBox("Trung tâm Admin chưa tải"),adminAlerts:async()=>window.AdminAlerts?.render(state.user)||errorBox("Cảnh báo Admin chưa tải"),adminSecurity:async()=>window.AdminSecurity?.render(state.user)||errorBox("Bảo mật Admin chưa tải"),adminResults:async()=>window.AdminResults?.render(state.user)||errorBox("Bảng điểm Admin chưa tải"),adminAudit:async()=>window.AdminAudit?.render(state.user)||errorBox("Nhật ký Admin chưa tải"),performanceMonitor:async()=>window.PerformanceMonitor?.render(state.user)||errorBox("Giám sát API chưa tải"),history:async()=>{if(state.user?.role==="admin"){await window.PerfLoader.ensureRoute("adminResults");return window.AdminResults.render(state.user)}return history()},storageHealth,leaderboard:async()=>window.StudentLeaderboard?.render()||errorBox("StudentLeaderboard chưa tải")};
   if(asyncMap[route]){
    const content=await asyncMap[route]();
    if(sequence!==renderSequence||route!==state.route)return;
@@ -297,6 +297,7 @@ function bind(){
  if(state.route==="adminAudit")window.AdminAudit?.bind(toast,render);
  if(state.route==="adminCenter")window.AdminCenter?.bind(render);
  if(state.route==="adminAlerts")window.AdminAlerts?.bind(render);
+ if(state.route==="adminSecurity")window.AdminSecurity?.bind(render);
  $$("[data-route]").forEach(x=>x.onclick=()=>nav(x.dataset.route));$$("[data-subject]").forEach(x=>x.onclick=()=>{state.subjectFilter=x.dataset.subject;nav("subjects")});$$("[data-fav]").forEach(x=>x.onclick=()=>{const id=Number(x.dataset.fav);state.favorites=state.favorites.includes(id)?state.favorites.filter(a=>a!==id):[...state.favorites,id];saveLocal();render()});$$("[data-start]").forEach(x=>x.onclick=()=>startQuiz(x.dataset.start,Number(x.dataset.grade),null,x.dataset.lesson||""));$("#openLogin")?.addEventListener("click",openAuth);
  if(state.route==="tests")window.TermExamBank?.bind?.(startCustom);
  $("#globalSearchBtn")?.addEventListener("click",()=>{const q=$("#globalSearch").value;nav("subjects");setTimeout(()=>{$("#lessonSearch").value=q;filterLessons()},20)});$$(".quick-grades [data-grade]").forEach(x=>x.onclick=()=>{nav("subjects");setTimeout(()=>{$("#gradeFilter").value=x.dataset.grade;filterLessons()},20)});

@@ -63,6 +63,8 @@ Xem chi tiết: [FEATURES.md](FEATURES.md) và [docs/PRODUCTION.md](docs/PRODUCT
 
 **Nhật ký Admin:** chỉ Admin có thể xem và lọc nhật ký; metadata nhạy cảm không được hiển thị.
 
+**Trung tâm bảo mật Admin:** `/#adminSecurity` hiển thị quyền Admin chính/phụ (xác minh qua `ADMIN_SUPABASE_UID`) và lịch sử **thiết bị của chính tài khoản đang đăng nhập**, không trả thông tin thiết bị của học sinh. Đây là lịch sử ghi nhận, không phải danh sách phiên đang hoạt động; chưa hỗ trợ thu hồi phiên từ xa.
+
 **Trung tâm cảnh báo:** vào **Admin → Hệ thống → Trung tâm cảnh báo** để kiểm tra lỗi API, PostgreSQL/Redis từ một instance. Đây là ảnh chụp tại thời điểm truy vấn, chưa phải cảnh báo lưu trữ lâu dài.
 
 **Xuất bảng điểm:** vào **Admin → Bảng điểm học sinh**, lọc các bài kiểm tra, bấm **Xuất CSV mở bằng Excel**; chỉ dành cho Admin và giới hạn tối đa 2.000 bản ghi để tránh lộ dữ liệu hoặc tải quá nặng.

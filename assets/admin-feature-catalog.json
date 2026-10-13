@@ -72,7 +72,8 @@
       "name": "Phân quyền Admin chính/phụ và quyền chi tiết",
       "group": 1,
       "phase": "foundation",
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Backend đã phân biệt Admin chính bằng Supabase Auth UID, ngăn cấp quyền/sửa Admin khác khi không phải chủ sở hữu; thêm bảng chỉ đọc kiểm tra quyền. Chưa có mô hình quyền theo từng chức năng và phê duyệt hai cấp."
     },
     {
       "id": 2,
@@ -109,7 +110,8 @@
       "name": "Quản lý thiết bị và phiên đăng nhập",
       "group": 1,
       "phase": "foundation",
-      "assessment": "not-verified"
+      "assessment": "partial",
+      "note": "Có lịch sử tối đa 25 thiết bị ghi nhận khi đăng nhập, IP/trình duyệt/thời gian chỉ xem bởi chủ tài khoản (hoặc chính Admin trong Trung tâm bảo mật). Đây không phải phiên đang hoạt động; chưa có thu hồi phiên đăng nhập từ xa."
     },
     {
       "id": 7,

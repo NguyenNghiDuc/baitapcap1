@@ -4,6 +4,7 @@ window.PerfLoader=(()=>{
  const routeStyles={
   adminCenter:["/css/admin-console.css","/css/admin-center.css"],
   adminAlerts:["/css/admin-console.css","/css/admin-alerts.css"],
+  adminSecurity:["/css/admin-console.css","/css/admin-security.css"],
   admin:["/css/admin-console.css"],
   adminUsers:["/css/admin-users.css","/css/admin-console.css"],
   adminResults:["/css/admin-results.css","/css/admin-console.css"],
@@ -18,6 +19,7 @@ window.PerfLoader=(()=>{
  const routeFiles={
   adminCenter:["/js/admin/center.js"],
   adminAlerts:["/js/admin/alerts.js"],
+  adminSecurity:["/js/admin/security-center.js"],
   tests:["/js/exams/interaction.js","/js/exams/term-exams.js","/js/exams/runner.js","/js/exams/catalog.js"],
   profile:["/js/student/profile-page.js","/js/supabase/storage.js"],
   adminResults:["/js/admin/results.js"],

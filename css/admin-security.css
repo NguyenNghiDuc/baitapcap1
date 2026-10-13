@@ -1,0 +1,25 @@
+/* Admin security overview – route-only CSS. */
+#content[data-admin-view="adminSecurity"] .admin-security-page{display:grid;gap:17px;padding-bottom:24px;min-width:0}
+#content[data-admin-view="adminSecurity"] .page-head{margin:0}
+.admin-sec-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.admin-sec-stats>div{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:19px;box-shadow:0 9px 25px rgba(20,67,132,.05)}
+.admin-sec-stats span{font-size:11px;color:var(--muted);font-weight:700}
+.admin-sec-stats strong{font-size:20px;font-weight:850;color:var(--text);overflow-wrap:anywhere}
+#content[data-admin-view="adminSecurity"] .admin-sec-panel{margin:0}
+.admin-sec-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.admin-sec-heading h2{font:800 20px/1.3 "Baloo 2",sans-serif;color:var(--text);margin:0}
+.admin-sec-powers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:16px}
+.admin-sec-power{display:flex;align-items:center;justify-content:space-between;min-width:0;gap:9px;padding:12px 13px;background:var(--surface2);border:1px solid var(--line);border-radius:11px}
+.admin-sec-power>span:first-child{font-size:12px;color:var(--text);font-weight:650;line-height:1.5}
+.admin-sec-chip{display:inline-flex;align-items:center;border-radius:999px;padding:6px 9px;background:var(--surface2);color:var(--muted);font-size:10px;line-height:1.35;white-space:nowrap;font-weight:800}
+.admin-sec-chip.is-allowed{color:#168d72;background:rgba(32,190,148,.12)}
+.admin-sec-chip.is-limited{color:#9c5268;background:rgba(221,91,126,.10)}
+#content[data-admin-view="adminSecurity"] .table-wrap{margin-top:16px}
+#content[data-admin-view="adminSecurity"] table{min-width:570px}
+#content[data-admin-view="adminSecurity"] table td small{display:block;color:var(--muted);margin-top:5px}
+#content[data-admin-view="adminSecurity"] table td code{font-size:11px;overflow-wrap:anywhere}
+.admin-sec-note{font-size:11px;line-height:1.75;color:var(--muted);margin:14px 0 0}
+:root[data-theme="dark"] .admin-sec-chip.is-allowed{color:#6ce9c9}
+:root[data-theme="dark"] .admin-sec-chip.is-limited{color:#ffb0bf}
+@media(max-width:850px){.admin-sec-stats{grid-template-columns:1fr 1fr}.admin-sec-powers{grid-template-columns:1fr}}
+@media(max-width:510px){.admin-sec-stats{grid-template-columns:1fr}.admin-sec-power{flex-wrap:wrap}.admin-sec-heading{flex-wrap:wrap}}
