@@ -20,17 +20,19 @@ function parseBody(req){return new Promise((resolve,reject)=>{let d="";req.on("d
 function token(req){return (req.headers.authorization||"").replace(/^Bearer\s+/i,"")}
 async function auth(req){
  const t=token(req);if(!t)return null;
+ // Supabase access tokens are JWTs. Do not wait for Redis to verify them.
+ // Opaque fallback sessions still use the session store.
+ if(supabase.enabled()&&t.split(".").length===3){
+  const su=await supabase.getUserFromToken(t);
+  if(!su)return null;
+  const u=load().users.find(x=>x.authUserId===su.id);
+  if(u)u.emailVerified=!!su.email_confirmed_at;
+  return u||null;
+ }
  const ss=await sessionStore.get(t);
  if(ss&&ss.exp>=Date.now())return load().users.find(x=>x.id===ss.uid)||null;
  if(ss&&ss.exp<Date.now())await sessionStore.del(t);
- if(supabase.enabled()){
-  const su=await supabase.getUserFromToken(t);
-  if(su){
-   const db=load();let u=db.users.find(x=>x.authUserId===su.id);
-   if(u){u.emailVerified=!!su.email_confirmed_at;return u}
-  }
- }
- return null
+ return null;
 }
 async function requireUser(req,res,roles){
  const u=await auth(req);
