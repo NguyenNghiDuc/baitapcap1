@@ -1,0 +1,170 @@
+{
+  "range": [
+    101,
+    120
+  ],
+  "title": "Giáo viên, lớp học và phụ huynh",
+  "statusPolicy": "not-verified means NOT completed; check implementation and tests before changing this status",
+  "features": [
+    {
+      "id": 101,
+      "name": "Kế hoạch hỗ trợ học sinh yếu",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 102,
+      "name": "Đo hiệu quả hoạt động phụ đạo",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 103,
+      "name": "Phân bổ tải công việc giáo viên",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 104,
+      "name": "Phân công giáo viên thay thế",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 105,
+      "name": "Quyền giáo viên theo lịch phân công",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 106,
+      "name": "Kế hoạch giảng dạy theo tuần",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 107,
+      "name": "Thư viện giáo án chung",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 108,
+      "name": "Phản biện giáo án",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 109,
+      "name": "Phiếu đánh giá tiết học",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 110,
+      "name": "Điểm danh và học bù",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 111,
+      "name": "Dashboard quyền dữ liệu phụ huynh",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 112,
+      "name": "Bản tin học tập định kỳ",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 113,
+      "name": "Đặt lịch trao đổi giáo viên",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 114,
+      "name": "Giờ nhận tin nhắn",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 115,
+      "name": "Tùy chọn loại thông báo",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 116,
+      "name": "Xác nhận phụ huynh đã xem nhận xét",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 117,
+      "name": "Một phụ huynh quản lý nhiều con",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 118,
+      "name": "Theo dõi thói quen học",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 119,
+      "name": "Ẩn học sinh khỏi bảng xếp hạng công khai",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    },
+    {
+      "id": 120,
+      "name": "Giới hạn thông báo theo ngày",
+      "phase": "learning",
+      "risk": "medium",
+      "needsExternalReview": false,
+      "assessment": "not-verified"
+    }
+  ]
+}
