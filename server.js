@@ -4,6 +4,7 @@ const loginDevices=require("./lib/login-devices");
 const apiPerformance=require("./lib/api-performance");
 const handleAdminResults=require("./routes/admin-results");
 const {parseUserFilters,applyUserFilters}=require("./lib/admin-user-filters");
+const {readAdminUserPage,loadAdminUserPage}=require("./lib/admin-user-directory");
 const handleAdminResultReviews=require("./routes/admin-result-reviews");
 const handleAdminAudit=require("./routes/admin-audit");
 const handleAdminSecurity=require("./routes/admin-security");
@@ -244,16 +245,25 @@ async function api(req,res,p,ip){
  if(req.method==="POST"&&p==="/api/push/send"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;if(!process.env.VAPID_PUBLIC_KEY||!process.env.VAPID_PRIVATE_KEY)return send(res,503,{error:"Web Push chưa cấu hình"});let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const webpush=require("web-push");webpush.setVapidDetails(process.env.VAPID_SUBJECT||"mailto:admin@example.com",process.env.VAPID_PUBLIC_KEY,process.env.VAPID_PRIVATE_KEY);const db=load(),targets=db.pushSubscriptions.filter(x=>!d.userId||x.userId===d.userId),payload=JSON.stringify({title:String(d.title||"Bài Tập Cấp 1"),body:String(d.body||"Bạn có thông báo mới"),url:d.url||"/#notifications"});const settled=await Promise.allSettled(targets.map(x=>webpush.sendNotification(x.subscription,payload)));return send(res,200,{sent:settled.filter(x=>x.status==="fulfilled").length,failed:settled.filter(x=>x.status==="rejected").length})}
  if(req.method==="GET"&&p==="/api/admin/users"){
   const u=await requireUser(req,res,["admin"]);if(!u)return;
-  let filters;try{filters=parseUserFilters(url.parse(req.url,true).query||{})}catch{return send(res,400,{error:"Bộ lọc tài khoản không hợp lệ"})}
-  let list;
+  const query=url.parse(req.url,true).query||{};
+  let filters,paging;
+  try{filters=parseUserFilters(query);paging=readAdminUserPage(query)}
+  catch{return send(res,400,{error:"Bộ lọc tài khoản hoặc phân trang không hợp lệ"})}
+  let pg,allUsersTotal;
   if(process.env.DATABASE_URL){
-   try{list=(await pgStore.query("SELECT id,name,email,role,grade,locked FROM users ORDER BY created_at DESC")).rows.map(x=>({...x,locked:!!x.locked}))}
-   catch(e){safeMonitorError("admin_list_db_failed",{message:e.message});return send(res,503,{error:"Không đọc được danh sách tài khoản từ PostgreSQL"})}
+   try{
+    const result=await loadAdminUserPage(pgStore,filters,paging);
+    pg={items:result.items,pagination:result.pagination};
+    allUsersTotal=result.allUsersTotal;
+   }catch(e){
+    safeMonitorError("admin_list_db_failed",{message:e.message});
+    return send(res,503,{error:"Không đọc được danh sách tài khoản từ PostgreSQL"});
+   }
   }else{
-   const db=load();list=db.users.map(x=>({...safeUser(x),locked:!!x.locked}));
+   const db=load(),list=db.users.map(x=>({...safeUser(x),locked:!!x.locked}));
+   allUsersTotal=list.length;
+   pg=pageList(applyUserFilters(list,filters),req,{searchFn:x=>(x.name||"")+" "+(x.email||"")+" "+(x.role||"")});
   }
-  const allUsersTotal=list.length;
-  const pg=pageList(applyUserFilters(list,filters),req,{searchFn:x=>(x.name||"")+" "+(x.email||"")+" "+(x.role||"")});
   let live;
   try{live=await presence.overview(pg.items.map(x=>x.id))}
   catch(e){monitor.warn("admin_presence_failed",{message:e.message});live={available:false,users:[],onlineTotal:null}}
