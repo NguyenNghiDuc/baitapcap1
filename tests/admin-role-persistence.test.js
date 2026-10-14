@@ -3,8 +3,10 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
 const root=path.join(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p),"utf8");
 test("Admin list, editing and grant all query authoritative PostgreSQL accounts",()=>{
- const server=read("server.js"),pg=read("lib/postgres.js");
- assert.ok(server.includes('SELECT id,name,email,role,grade,locked FROM users ORDER BY created_at DESC'));
+ const server=read("server.js"),pg=read("lib/postgres.js"),directory=read("lib/admin-user-directory.js");
+ assert.ok(server.includes("loadAdminUserPage(pgStore,filters,paging)"),"Admin list must use authoritative PostgreSQL with server-side pagination");
+ assert.ok(directory.includes("FROM users u"),"Directory queries must read PostgreSQL users");
+ assert.ok(directory.includes("LIMIT $4 OFFSET $5"),"Directory queries must select only requested user page");
  assert.ok(server.includes("pgStore.findAdminUserById(userPatch.id)"),"edit must look up PG ID, not just app_state");
  assert.ok(server.includes("pgStore.findAdminUserByEmail(email)"),"grant must look up PostgreSQL email");
  assert.ok(pg.includes("async function findAdminUserById(id)"));
