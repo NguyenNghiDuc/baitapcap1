@@ -356,11 +356,11 @@ function bind(){
   $("#adminUsersResetFilters")?.addEventListener("click",()=>{
    const f=window.PerfLists.state("adminUsers");f.role="";f.accountStatus="";f.search="";f.page=1;render();
   });
-  $("[data-users-summary-role]").forEach(button=>button.addEventListener("click",()=>{
+  $$("[data-users-summary-role]").forEach(button=>button.addEventListener("click",()=>{
    const f=window.PerfLists.state("adminUsers"),role=button.dataset.usersSummaryRole;
    f.role=f.role===role?"":role;f.page=1;render();
   }));
-  $("[data-users-summary-status]").forEach(button=>button.addEventListener("click",()=>{
+  $$("[data-users-summary-status]").forEach(button=>button.addEventListener("click",()=>{
    const f=window.PerfLists.state("adminUsers"),status=button.dataset.usersSummaryStatus;
    f.accountStatus=f.accountStatus===status?"":status;f.page=1;render();
   }));
