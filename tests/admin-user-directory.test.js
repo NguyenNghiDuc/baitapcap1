@@ -1,6 +1,6 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
-const {readAdminUserPage,buildAdminUserQueries,loadAdminUserPage,aggregateSummary,summarizeUsers}=require("../lib/admin-user-directory");
+const {readAdminUserPage,buildAdminUserQueries,loadAdminUserPage,aggregateSummary,summarizeUsers,growthWindow,normalizeGrowth,summarizeGrowth}=require("../lib/admin-user-directory");
 test("Admin account paging validates query values before querying PostgreSQL",()=>{
  assert.deepEqual(readAdminUserPage({page:"2",limit:"25",search:"  minh anh  "}),
   {page:2,limit:25,search:"minh anh"});
@@ -27,6 +27,7 @@ test("Postgres directory returns only requested page and separate full/filtered 
  const calls=[];
  const fakePg={query:async(sql,params)=>{
   calls.push({sql,params});
+  if(sql.includes("TO_CHAR(created_at"))return {rows:[{month:growthWindow().months[5],total:2}]};
   if(sql.includes("GROUP BY role,locked"))return {rows:[
    {role:"teacher",locked:true,total:30},{role:"student",locked:false,total:1700},
    {role:"parent",locked:false,total:70}
@@ -37,10 +38,12 @@ test("Postgres directory returns only requested page and separate full/filtered 
  }};
  const p=await loadAdminUserPage(fakePg,{role:"teacher",accountStatus:"locked"},
   {page:3,limit:20,search:"co"});
- assert.equal(calls.length,3);
+ assert.equal(calls.length,4);
  assert.deepEqual(p.items.map(x=>x.id),["u41","u42"]);
  assert.equal(p.items[0].locked,true);
  assert.equal(p.allUsersTotal,1800);
+ assert.deepEqual(p.accountGrowth,normalizeGrowth([{month:growthWindow().months[5],total:2}]));
+ assert.equal(calls.find(x=>x.sql.includes("TO_CHAR(created_at")).params.length,2);
  assert.deepEqual(p.accountSummary,{roles:{student:1700,parent:70,teacher:30,admin:0},
   unlocked:1770,locked:30,total:1800});
  assert.deepEqual(p.pagination,{page:3,limit:20,total:51,pages:3,hasMore:false});
@@ -81,4 +84,37 @@ test("Admin account summary UI includes 6 shortcut cards and accessible pressed 
   assert.ok(app.includes(name),name);
  assert.ok(css.includes(".admin-users-role-grid"));
  assert.ok(css.includes("@media(max-width:590px)"));
+});
+
+test("Six-month window crosses year boundaries and zero-fills missing months",()=>{
+ const now=new Date("2026-01-15T10:00:00.000Z");
+ const window=growthWindow(now);
+ assert.deepEqual(window.months,["2025-08","2025-09","2025-10","2025-11","2025-12","2026-01"]);
+ assert.equal(window.from,"2025-08-01T00:00:00.000Z");
+ assert.equal(window.to,"2026-02-01T00:00:00.000Z");
+ const values=normalizeGrowth([{month:"2025-09",total:2},{month:"2025-09",total:3},
+  {month:"2026-01",total:4},{month:"2026-02",total:999}],now);
+ assert.deepEqual(values.map(x=>x.total),[0,5,0,0,0,4]);
+});
+test("JSON fallback counts only dated registrations in the same six-month UTC range",()=>{
+ const now=new Date("2026-01-15T10:00:00.000Z");
+ const users=[
+  {createdAt:"2025-08-31T23:59:59.000Z"},
+  {created_at:"2025-09-01T00:00:00.000Z"},
+  {createdAt:"2025-09-30T23:00:00.000Z"},
+  {createdAt:"2026-01-14T20:00:00.000Z"},
+  {createdAt:"2025-07-31T20:00:00.000Z"},
+  {createdAt:"invalid"},{createdAt:null}
+ ];
+ assert.deepEqual(summarizeGrowth(users,now).map(x=>x.total),[1,2,0,0,0,1]);
+});
+test("Admin signup chart has six semantic bars with responsive and reduced-motion CSS",()=>{
+ const fs=require("node:fs"),path=require("node:path");
+ const app=fs.readFileSync(path.join(__dirname,"../js/app.js"),"utf8");
+ const css=fs.readFileSync(path.join(__dirname,"../css/admin-users.css"),"utf8");
+ assert.ok(app.includes("adminUserGrowth(j.accountGrowth)"));
+ assert.ok(app.includes('class="admin-users-growth-month" role="listitem"'));
+ assert.ok(app.includes('aria-label="Tháng '));
+ for(const marker of [".admin-users-growth-bars","@media(max-width:590px)","prefers-reduced-motion"])
+  assert.ok(css.includes(marker),marker);
 });
