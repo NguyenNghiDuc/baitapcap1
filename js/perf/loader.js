@@ -10,7 +10,7 @@ window.PerfLoader=(()=>{
   adminBackup:["/css/admin-console.css","/css/admin-backup.css"],
   adminIntegrity:["/css/admin-console.css","/css/admin-integrity.css"],
   admin:["/css/admin-console.css"],
-  adminUsers:["/css/admin-console.css","/css/admin-users.css"],
+  adminUsers:["/css/admin-console.css","/css/admin-users.css","/css/admin-users-overview.css"],
   adminResults:["/css/admin-results.css","/css/admin-console.css"],
   history:["/css/admin-results.css","/css/admin-console.css"], // applied only if role is Admin; see ensureRoute
   adminAudit:["/css/admin-console.css","/css/admin-audit.css"],

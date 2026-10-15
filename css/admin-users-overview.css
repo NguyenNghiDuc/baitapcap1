@@ -1,0 +1,177 @@
+/* Admin account overview — standalone lazy-loaded stylesheet.
+   Loaded after admin-console.css and admin-users.css to avoid stale cascade collisions.
+   Role cards and chart remain scoped to the Admin users page only. */
+#content .admin-users-page .admin-users-role-section {
+  display:grid;gap:20px;padding:22px 24px 25px;
+  border:1px solid rgba(234,142,71,.26);border-radius:23px;
+  background:linear-gradient(132deg,rgba(255,247,236,.97),rgba(255,255,255,.97) 70%);
+  box-shadow:0 14px 36px rgba(126,71,28,.07);min-width:0;
+}
+#content .admin-users-page .admin-users-role-heading h3{
+  font-family:"Baloo 2",sans-serif;font-size:clamp(20px,2vw,26px);
+  line-height:1.25;font-weight:800;letter-spacing:-.025em;color:var(--text);
+}
+#content .admin-users-page .admin-users-role-heading p{font-size:12px;line-height:1.7;color:var(--muted)}
+#content .admin-users-page .admin-users-role-grid {
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:14px;width:100%;min-width:0;
+}
+#content .admin-users-page button.admin-users-role-card {
+  appearance:none;-webkit-appearance:none;display:flex!important;align-items:center!important;
+  position:relative;gap:14px;text-align:left;
+  padding:17px 16px!important;min-width:0;width:100%;min-height:112px;
+  border:1px solid rgba(236,165,112,.38)!important;border-radius:18px!important;
+  background:linear-gradient(120deg,#fff,#fff5ea)!important;
+  color:#73401d!important;box-shadow:0 7px 20px rgba(148,87,40,.085);
+  font:inherit;cursor:pointer;overflow:hidden;
+  transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+#content .admin-users-page button.admin-users-role-card::before{
+  content:"";position:absolute;inset:0 auto 0 0;width:4px;
+  background:linear-gradient(#ffb767,#dc6217);
+}
+#content .admin-users-page button.admin-users-role-card:hover{
+  border-color:#eb9b60!important;box-shadow:0 14px 30px rgba(155,83,35,.16);
+  transform:translateY(-2px);
+}
+#content .admin-users-page button.admin-users-role-card.is-selected{
+  background:linear-gradient(120deg,#fff0df,#ffead0)!important;
+  border-color:#e87527!important;
+  box-shadow:0 0 0 2px rgba(230,104,18,.13),0 9px 25px rgba(140,75,33,.11);
+}
+#content .admin-users-page button.admin-users-role-card:focus-visible{
+  outline:3px solid #f7a361!important;outline-offset:3px;
+}
+#content .admin-users-page .admin-users-role-icon{
+  display:grid!important;place-items:center!important;
+  flex:0 0 52px;width:52px;height:52px;border-radius:16px;
+  background:#ffefdf;border:1px solid #f8e0c8;font-size:25px;
+}
+#content .admin-users-page .admin-users-role-card:nth-child(2) .admin-users-role-icon{background:#e9f3ff;border-color:#d8eaff}
+#content .admin-users-page .admin-users-role-card:nth-child(3) .admin-users-role-icon{background:#f2ebff;border-color:#e8dcff}
+#content .admin-users-page .admin-users-role-card:nth-child(5) .admin-users-role-icon{background:#e6f8ef;border-color:#d6f1e3}
+#content .admin-users-page .admin-users-role-card:nth-child(6) .admin-users-role-icon{background:#fff0ed;border-color:#ffe0d9}
+#content .admin-users-page .admin-users-role-copy{
+  display:flex!important;flex:1;flex-direction:column!important;gap:5px;min-width:0;
+}
+#content .admin-users-page .admin-users-role-copy strong{
+  font-family:"Baloo 2",sans-serif;font-size:clamp(25px,2.6vw,34px);
+  font-weight:800;line-height:1.1;letter-spacing:-.03em;color:#b75211!important;
+  font-variant-numeric:tabular-nums;
+}
+#content .admin-users-page .admin-users-role-copy small{
+  font-size:12px;color:#7b5740!important;font-weight:750;line-height:1.45;
+}
+#content .admin-users-page .admin-users-role-arrow{
+  align-self:flex-start;margin-left:auto;color:#d78038;font-size:19px;
+}
+/* Six equal month columns. Never use a vertical text-only fallback when CSS is loaded. */
+#content .admin-users-page .admin-users-growth {
+  display:grid!important;gap:20px;
+  padding:26px 28px 24px!important;margin:0!important;
+  background:linear-gradient(135deg,#fff,#fffaf5)!important;
+  border:1px solid rgba(232,159,106,.29)!important;border-radius:23px!important;
+  box-shadow:0 14px 34px rgba(148,83,37,.09);min-width:0;
+}
+#content .admin-users-page .admin-users-growth-head{
+  display:flex!important;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;
+}
+#content .admin-users-page .admin-users-growth-head h3{
+  margin:0 0 7px;font-family:"Baloo 2",sans-serif;
+  font-size:clamp(20px,2vw,26px);line-height:1.25;font-weight:800;
+  color:#694020;
+}
+#content .admin-users-page .admin-users-growth-head p{
+  font-size:12px;color:#876d58;line-height:1.6;
+}
+#content .admin-users-page .admin-users-growth-total{
+  display:inline-flex!important;align-items:baseline;gap:7px;
+  border-radius:14px;padding:11px 14px;border:1px solid #f3d5bb;
+  color:#7c461c;background:#fff0dc;font-size:12px;font-weight:700;
+}
+#content .admin-users-page .admin-users-growth-total b{
+  color:#c15c0e;font-size:26px;line-height:1;font-weight:850;
+}
+#content .admin-users-page .admin-users-growth-bars{
+  display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  align-items:end!important;gap:clamp(6px,1.25vw,16px);
+  min-width:0;min-height:262px;
+  padding:20px 17px 15px;border:1px solid rgba(229,145,76,.18);
+  border-radius:18px;
+  background:repeating-linear-gradient(to top,rgba(217,151,92,.13) 0 1px,transparent 1px 45px),
+    linear-gradient(180deg,#fffaf3,#fff0dc);
+}
+#content .admin-users-page .admin-users-growth-month{
+  display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:end;
+  min-width:0;gap:9px;
+}
+#content .admin-users-page .admin-users-growth-month strong{
+  font-size:14px;line-height:1.3;font-weight:800;color:#714626;
+  font-variant-numeric:tabular-nums;
+}
+#content .admin-users-page .admin-users-growth-track{
+  display:flex!important;align-items:flex-end!important;justify-content:center!important;
+  height:176px;width:min(100%,80px);
+  background:linear-gradient(180deg,rgba(255,204,157,.12),rgba(255,156,72,.15));
+  border-radius:12px 12px 8px 8px;overflow:hidden;
+}
+#content .admin-users-page .admin-users-growth-bar{
+  display:block!important;width:100%!important;
+  border-radius:12px 12px 7px 7px;
+  background:linear-gradient(180deg,#ffbf72,#f38a31 52%,#df6117)!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.36);
+}
+#content .admin-users-page .admin-users-growth-month small{
+  font-size:12px;font-weight:800;color:#7c624b;
+}
+#content .admin-users-page .admin-users-growth-note{font-size:11px;line-height:1.7;color:var(--muted)}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-role-section{
+  background:linear-gradient(130deg,#312720,#29231f)!important;border-color:#624d3d;
+}
+:root[data-theme="dark"] #content .admin-users-page button.admin-users-role-card{
+  color:#ffe3c8!important;background:linear-gradient(130deg,#3c2c21,#342922)!important;
+  border-color:#684c36!important;
+}
+:root[data-theme="dark"] #content .admin-users-page button.admin-users-role-card.is-selected{
+  background:linear-gradient(120deg,#54331f,#483020)!important;border-color:#e79f60!important;
+}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-role-copy strong{color:#ffbd82!important}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-role-copy small{color:#e1bea3!important}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-growth{
+  background:linear-gradient(135deg,#322820,#29231e)!important;border-color:#66503d!important;
+}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-growth-bars{
+  background:repeating-linear-gradient(to top,rgba(255,186,111,.1) 0 1px,transparent 1px 45px),
+    linear-gradient(180deg,#33281f,#433020);border-color:#6b523a;
+}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-growth-head :is(h3,p),
+:root[data-theme="dark"] #content .admin-users-page .admin-users-growth-month :is(strong,small){color:#ffe4ce}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-growth-total{
+  color:#ffce9e;background:#503520;border-color:#795338;
+}
+:root[data-theme="dark"] #content .admin-users-page .admin-users-growth-total b{color:#ffbf7c}
+@media(max-width:1080px){
+  #content .admin-users-page .admin-users-role-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:640px){
+  #content .admin-users-page .admin-users-role-section{padding:18px 14px;gap:14px}
+  #content .admin-users-page .admin-users-role-grid{gap:9px}
+  #content .admin-users-page button.admin-users-role-card{min-height:96px;padding:13px 10px!important;gap:9px}
+  #content .admin-users-page .admin-users-role-icon{width:40px;height:40px;flex-basis:40px;font-size:19px;border-radius:12px}
+  #content .admin-users-page .admin-users-role-copy strong{font-size:25px}
+  #content .admin-users-page .admin-users-role-copy small{font-size:10px}
+  #content .admin-users-page .admin-users-role-arrow{display:none}
+  #content .admin-users-page .admin-users-growth{padding:18px 12px!important}
+  #content .admin-users-page .admin-users-growth-bars{padding:13px 7px;min-height:210px;gap:5px}
+  #content .admin-users-page .admin-users-growth-track{height:137px}
+  #content .admin-users-page .admin-users-growth-month strong{font-size:11px}
+  #content .admin-users-page .admin-users-growth-month small{font-size:10px}
+}
+@media(max-width:350px){
+  #content .admin-users-page .admin-users-role-grid{grid-template-columns:1fr!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #content .admin-users-page button.admin-users-role-card{transition:none}
+  #content .admin-users-page button.admin-users-role-card:hover{transform:none}
+}

@@ -46,3 +46,23 @@ test("Account cards and growth chart are visibly styled in the Admin route",()=>
  assert.ok(sw.includes('u.pathname==="/asset-hashes.json"'));
  assert.ok(sw.includes('networkFirst(req,{fallback:null,timeout:2200})'));
 });
+
+test("Fresh Admin account overview module is loaded LAST and never cached in initial guest HTML",()=>{
+ const styles=read("css/admin-users-overview.css"),loader=read("js/perf/loader.js");
+ const html=read("index.html"),vercel=JSON.parse(read("vercel.json"));
+ assert.ok(loader.includes('adminUsers:["/css/admin-console.css","/css/admin-users.css","/css/admin-users-overview.css"]'));
+ assert.equal(html.includes('admin-users-overview.css'),false);
+ for(const marker of [
+  "#content .admin-users-page .admin-users-role-grid",
+  "#content .admin-users-page button.admin-users-role-card",
+  "#content .admin-users-page .admin-users-growth-bars",
+  "#content .admin-users-page .admin-users-growth-track",
+  "grid-template-columns:repeat(6,minmax(0,1fr))!important",
+  ':root[data-theme="dark"]',
+  "@media(max-width:640px)"
+ ])assert.ok(styles.includes(marker),marker);
+ assert.ok(vercel.headers.some(x=>x.source==="/asset-hashes.json"&&
+  x.headers.some(h=>h.key==="Cache-Control"&&h.value.includes("no-store"))));
+ const staticServer=read("lib/static-server.js");
+ assert.ok(staticServer.includes('base==="asset-hashes.json"'));
+});

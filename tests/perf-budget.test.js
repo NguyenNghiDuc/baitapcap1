@@ -13,7 +13,7 @@ test("Admin-only CSS is absent from guest critical styles but lazy-loaded per ro
  const root=path.join(__dirname,".."),h=fs.readFileSync(path.join(root,"index.html"),"utf8");
  const loader=fs.readFileSync(path.join(root,"js/perf/loader.js"),"utf8");
  const initial=scan(h).stylePaths;
- for(const name of ["admin-users","admin-results","admin-console","admin-audit"]){
+ for(const name of ["admin-users","admin-users-overview","admin-results","admin-console","admin-audit"]){
   assert.equal(initial.includes("css/"+name+".css"),false);
   assert.ok(loader.includes('"/css/'+name+'.css"'),"No lazy CSS for "+name);
  }

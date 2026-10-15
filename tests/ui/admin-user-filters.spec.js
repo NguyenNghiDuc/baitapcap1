@@ -41,6 +41,14 @@ test("Admin users filter role and locked accounts and reset without losing manag
  await expect(page.locator('[data-user-save]')).toHaveCount(4);
  await expect(page.locator(".admin-users-role-card")).toHaveCount(6);
  await expect(page.locator(".admin-users-growth-month")).toHaveCount(6);
+ await expect(page.locator('link[data-lazy-style-src="/css/admin-users-overview.css"]')).toHaveCount(1);
+ const href=await page.locator('link[data-lazy-style-src="/css/admin-users-overview.css"]').getAttribute("href");
+ expect(href).toContain("/css/admin-users-overview.css");
+ await expect.poll(async()=>page.evaluate(()=>{
+  const link=document.querySelector('link[data-lazy-style-src="/css/admin-users-overview.css"]');
+  return link?.sheet?.cssRules?.length||0;
+ })).toBeGreaterThan(8);
+
  const visual=await page.evaluate(()=>{
   const roleGrid=document.querySelector(".admin-users-role-grid");
   const card=document.querySelector(".admin-users-role-card");
