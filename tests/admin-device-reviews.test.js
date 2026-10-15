@@ -134,7 +134,7 @@ test("Journal page limits, unsupported intervals and parameter injection are rej
   {period:null},{userId:["u1","u2"]},{userId:"x".repeat(129)}
  ])assert.throws(()=>parseHistoryFilters(query),/Invalid device review filters/);
  assert.deepEqual(parseHistoryFilters({}),{
-  page:1,status:"all",userId:"",period:"all",type:"all"
+  page:1,status:"all",userId:"",period:"all",type:"all",search:""
  });
 });
 test("Admin journal GET rejects repeated and invalid query filters before querying PostgreSQL",async()=>{
@@ -194,7 +194,7 @@ test("CSV export is scoped, formula-safe, UTF-8, and does not reveal IP or devic
  assert.ok(csv.startsWith("\uFEFF"));
  assert.ok(csv.includes('"\'=SUM(1,2) Second line ""quoted"""'));
  assert.ok(csv.includes('"\'=HYPERLINK"'));
- assert.ok(csv.includes('"\'"+cmd"'));
+ assert.ok(csv.includes("\"'+cmd\""));
  assert.ok(csv.includes("Thay đổi IP"));
  assert.equal(csv.includes("192.0.2.42"),false);
  assert.equal(csv.includes("raw-device-secret"),false);
