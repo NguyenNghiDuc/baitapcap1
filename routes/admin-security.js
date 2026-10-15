@@ -38,9 +38,13 @@ module.exports=async function handleSecurity(req,res,p,{send,requireUser,load,st
   if(p==="/api/admin/device-logs"){
    const {URL}=require("node:url");
    const q=new URL(req.url,"http://localhost").searchParams;
-   const query={page:q.get("page")??"1",search:q.getAll("search")};
-   if(query.search.length>1){send(res,400,{error:"Bộ lọc không hợp lệ"},extra);return true}
-   query.search=query.search[0]||"";
+   const query={page:q.getAll("page"),search:q.getAll("search"),status:q.getAll("status")};
+   if(Object.values(query).some(values=>values.length>1)){
+    send(res,400,{error:"Bộ lọc không hợp lệ"},extra);return true;
+   }
+   query.page=query.page[0]??"1";
+   query.search=query.search[0]??"";
+   query.status=query.status[0]??"all";
    let parsed;try{parsed=adminDeviceLogs.filters(query)}
    catch{send(res,400,{error:"Bộ lọc không hợp lệ"},extra);return true}
    // PostgreSQL shared state, not a potentially stale serverless instance cache.
@@ -48,7 +52,7 @@ module.exports=async function handleSecurity(req,res,p,{send,requireUser,load,st
    if(!db||!Array.isArray(db.users))throw Error("Device database unavailable");
    const out=adminDeviceLogs.list(db,parsed);
    send(res,200,{...out,source:process.env.DATABASE_URL?"postgres":"local",
-    note:"Lịch sử đăng nhập đã ghi nhận, không phải thiết bị đang trực tuyến. IP có thể thay đổi hoặc thuộc VPN/mạng dùng chung."},extra);
+    note:"Số liệu dựa trên thiết bị đã ghi nhận, không phải số lần đăng nhập hay phiên đang online. Đổi IP có thể do mạng di động hoặc VPN, không khẳng định tài khoản bị xâm nhập."},extra);
    return true;
   }
   const db=load();
