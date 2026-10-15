@@ -441,7 +441,7 @@ function bind(){
  $("#examRoomForm")?.addEventListener("submit",async e=>{e.preventDefault();try{const d=Object.fromEntries(new FormData(e.currentTarget));await API.post("/api/exam-rooms",d);toast("Đã tạo phòng thi");render()}catch(x){toast(x.message)}});
  $("#joinExamForm")?.addEventListener("submit",async e=>{e.preventDefault();try{const j=await API.post("/api/exam-rooms/join",Object.fromEntries(new FormData(e.currentTarget)));toast("Đã vào phòng "+j.room.code);startQuiz("math",j.room.grade,null,j.room.lessonId)}catch(x){toast(x.message)}});
  $$("[data-room-start]").forEach(b=>b.onclick=()=>startQuiz("math",Number(b.dataset.roomGrade),null,b.dataset.roomStart));
- $("[data-user-devices]").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll("[data-user-devices]").forEach(b=>b.addEventListener("click",()=>{
   if(state.user?.role!=="admin")return;
   const id=b.dataset.userDevices;
   if(!id||id.length>128)return;
