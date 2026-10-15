@@ -17,8 +17,10 @@ test("Admin-only CSS is absent from guest critical styles but lazy-loaded per ro
   assert.equal(initial.includes("css/"+name+".css"),false);
   assert.ok(loader.includes('"/css/'+name+'.css"'),"No lazy CSS for "+name);
  }
- assert.ok(loader.includes('isAdmin||(isStaff&&["classInsights","gradeReviews","submissions"].includes(route))'),"Staff CSS must not be loaded for guests");
+ assert.ok(loader.includes('isAdmin||(isStaff&&["teacher","classInsights","gradeReviews","submissions"].includes(route))'),"Staff CSS must not be loaded for guests");
  assert.ok(loader.includes('classInsights:["/css/class-insights.css"]'));
+ assert.ok(loader.includes('teacher:["/css/teacher-dashboard.css"]'));
+ assert.equal(initial.includes("css/teacher-dashboard.css"),false);
  assert.equal(initial.includes("css/class-insights.css"),false);
  assert.ok(loader.includes("Promise.all([cssReady,scriptsReady])"));
 });

@@ -197,7 +197,41 @@ function ai(){return pageHead("TRỢ GIẢNG","🤖 AI học tập")+`<div class
 async function profile(){if(!state.user)return loginRequired();if(!window.ProfilePage?.render)throw new Error("Hồ sơ mới chưa tải. Vui lòng cập nhật trang.");return await window.ProfilePage.render()}
 
 async function parent(){if(!state.user||!["parent","admin"].includes(state.user.role))return loginRequired("Đăng nhập tài khoản phụ huynh.");let a=await analytics();return pageHead("PHỤ HUYNH","Theo dõi con","Liên kết bằng email tài khoản học sinh.")+`<div class="panel"><h3>🔗 Liên kết thêm học sinh</h3><form id="linkChildForm" class="chat-input"><input name="studentEmail" type="email" placeholder="Email học sinh" required><button class="primary">Liên kết</button></form></div>`+a}
-async function teacher(){if(!state.user||!["teacher","admin"].includes(state.user.role))return loginRequired("Đăng nhập tài khoản giáo viên.");return pageHead("GIÁO VIÊN","Bảng điều khiển giáo viên","Tập trung Toán lớp 4–5: ngân hàng câu hỏi, phòng thi, giao bài và chấm điểm.")+`<div class="admin-actions"><button class="outline" data-route="questionBank">🧮 Ngân hàng câu hỏi</button><button class="outline" data-route="examRooms">🧪 Phòng thi</button><button class="outline" data-route="classes">🏫 Quản lý lớp</button><button class="outline" data-route="classInsights">📚 Thống kê lớp học</button><button class="outline" data-route="assignments">📌 Giao bài</button><button class="outline" data-route="submissions">📨 Chấm bài</button><button class="outline" data-route="materials">📎 Tài liệu</button><button class="outline" data-route="notifications">🔔 Thông báo</button></div>`}
+async function teacher(){
+ if(!state.user||!["teacher","admin"].includes(state.user.role))
+  return loginRequired("Đăng nhập tài khoản giáo viên.");
+ const tools=[
+  ["questionBank","🧮","Ngân hàng câu hỏi","Tạo, chỉnh sửa và sắp xếp câu hỏi để xây dựng bài kiểm tra.","orange"],
+  ["examRooms","🧪","Phòng thi","Tổ chức bài kiểm tra và quản lý phòng thi cho học sinh.","blue"],
+  ["classes","🏫","Quản lý lớp","Tạo lớp, dùng mã lớp và theo dõi danh sách học sinh.","violet"],
+  ["classInsights","📊","Thống kê lớp học","Theo dõi kết quả và tiến độ học tập của từng lớp.","green"],
+  ["assignments","📌","Giao bài tập","Giao nhiệm vụ, đặt hạn nộp và quản lý bài được giao.","pink"],
+  ["submissions","📝","Chấm bài","Xem bài học sinh đã nộp và xử lý việc chấm điểm.","amber"],
+  ["materials","📂","Tài liệu học tập","Quản lý tài liệu hỗ trợ giảng dạy và ôn tập.","cyan"],
+  ["notifications","🔔","Thông báo","Xem thông báo và cập nhật dành cho giáo viên.","rose"]
+ ];
+ return '<div class="teacher-dashboard">'+
+  pageHead("KHÔNG GIAN GIẢNG DẠY","Bảng điều khiển giáo viên",
+   "Quản lý lớp 4–5, tạo bài tập, tổ chức kiểm tra và theo dõi tiến bộ của học sinh.")+
+  '<section class="teacher-dashboard-workspace" aria-label="Công cụ giảng dạy">'+
+  '<div class="teacher-dashboard-section-heading"><div>'+
+  '<span class="teacher-dashboard-kicker">TRUY CẬP NHANH</span>'+
+  '<h2>🎯 Công cụ giảng dạy</h2>'+
+  '<p>Chọn một công cụ để bắt đầu công việc của bạn.</p>'+
+  '</div><span class="teacher-dashboard-count">08 chức năng</span></div>'+
+  '<div class="teacher-dashboard-grid">'+tools.map(([route,icon,title,description,tone],i)=>
+   '<button type="button" class="teacher-tool-card teacher-tool--'+tone+'" data-route="'+route+
+   '" aria-label="Mở '+title+'">'+
+   '<span class="teacher-tool-icon" aria-hidden="true">'+icon+'</span>'+
+   '<span class="teacher-tool-label"><strong>'+title+'</strong><span class="teacher-tool-arrow" aria-hidden="true">↗</span></span>'+
+   '<span class="teacher-tool-description">'+description+'</span>'+
+   '<span class="teacher-tool-footer"><span>Mở chức năng <span aria-hidden="true">→</span></span>'+
+   '<span class="teacher-tool-index">'+String(i+1).padStart(2,"0")+'</span></span>'+
+   '</button>'
+  ).join("")+'</div>'+
+  '<p class="teacher-dashboard-hint"><span aria-hidden="true">💡</span> Gợi ý: Bắt đầu với <b>Quản lý lớp</b>, sau đó chọn <b>Giao bài tập</b> để giao bài cho học sinh.</p>'+
+  '</section></div>';
+}
 async function admin(){if(state.user?.role!=="admin")return loginRequired("Chỉ Admin được truy cập.");let j;try{j=await API.get("/api/admin/stats")}catch(e){return errorBox(e.message)}return pageHead("TRUNG TÂM ĐIỀU HÀNH","Bảng điều khiển Admin","Quản lý học sinh, theo dõi hoạt động và kiểm soát hệ thống trong một nơi.")+`<div class="metrics">${metric("👥",j.users,"Người dùng")}${metric("🧒",j.students,"Học sinh")}${metric("👩🏻‍🏫",j.teachers,"Giáo viên")}${metric("🏫",j.classes,"Lớp")}${metric("🟢",j.presenceAvailable?j.onlineTotal:"—","Đang online (2 phút)")}</div><div class="metrics">${metric("📌",j.assignments,"Bài giao")}${metric("📨",j.submissions,"Bài nộp")}${metric("📎",j.materials,"Tài liệu")}${metric("🛡️",j.audit.length,"Audit gần đây")}</div><div class="panel admin-dashboard-actions"><h3>⚙️ Lối tắt quản trị</h3><p class="muted">Truy cập nhanh các khu vực cần quản lý hằng ngày.</p><div class="admin-actions"><button class="outline" data-route="adminCenter">🧭 Trung tâm quản trị</button><button class="outline" data-route="adminUsers">👥 Quản lý user</button><button class="outline" data-route="adminResults">📊 Bảng điểm học sinh</button><button class="outline" data-route="questionBank">🧮 Ngân hàng câu hỏi</button><button class="outline" data-route="examRooms">🧪 Phòng thi</button><button class="outline" data-route="storageHealth">🐘 PostgreSQL / Redis</button><button class="outline" data-route="performanceMonitor">🚀 Hiệu năng API</button><button class="outline" data-route="adminAudit">📋 Nhật ký Admin</button><button class="outline" data-route="adminAlerts">🚨 Trung tâm cảnh báo</button></div></div><div class="panel admin-dashboard-security"><h3>🔐 Bảo mật Admin</h3><button class="outline" id="setup2fa">Thiết lập 2FA</button><div id="twofaInfo" class="tiny"></div></div><div class="panel admin-dashboard-audit"><h3>📋 Nhật ký hoạt động</h3><div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Action</th><th>User</th></tr></thead><tbody>${j.audit.map(a=>`<tr><td>${new Date(a.at).toLocaleString("vi-VN")}</td><td>${a.action}</td><td>${a.userId||"system"}</td></tr>`).join("")}</tbody></table></div></div>`}
 function achievements(){return pageHead("THÀNH TÍCH","Huy hiệu & XP")+`<div class="badge-grid">${[["🌱","Khởi đầu"],["🔥","Chăm chỉ"],["⭐","100 điểm"],["🏆","Siêu học sinh"],["🎯","Chính xác"],["📚","Mọt sách"]].map((b,i)=>`<article class="achievement ${state.results.length>i?"unlocked":"locked"}"><div>${b[0]}</div><h3>${b[1]}</h3><p>Tiếp tục học để mở khóa.</p></article>`).join("")}</div>`}
 function shop(){return pageHead("GAMIFICATION","Shop & phần thưởng","Khung chức năng XP/avatar; dữ liệu thanh toán Premium chưa bật nếu chưa cấu hình provider.")+`<div class="cards-3">${["🎓 Khung học giỏi","🐼 Thú cưng Panda","🌟 Avatar sao","🚀 Booster XP"].map((x,i)=>`<article class="test-card"><h3>${x}</h3><p>${(i+1)*100} XP</p><button class="outline">Đổi thưởng</button></article>`).join("")}</div>`}

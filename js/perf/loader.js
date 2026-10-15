@@ -2,6 +2,7 @@ window.PerfLoader=(()=>{
  const loaded=new Map(),stylesLoaded=new Map(),prefetched=new Set();let hashPromise=null,prefetchTimer=null;
  // Styles for private/secondary screens are not render-blocking for the home page.
  const routeStyles={
+  teacher:["/css/teacher-dashboard.css"],
   classInsights:["/css/class-insights.css"],
   gradeReviews:["/css/grade-reviews.css"],
   adminCenter:["/css/admin-console.css","/css/admin-center.css"],
@@ -76,7 +77,7 @@ window.PerfLoader=(()=>{
   if(route!=="tests")window.RuntimeGuard?.ready?.();
   if(window.RuntimeGuard&&!window.RuntimeGuard.enabled(route))throw new Error("Chức năng này đang được tạm tắt để bảo trì");
   const files=routeFiles[route]||[];
-  const css=(isAdmin||(isStaff&&["classInsights","gradeReviews","submissions"].includes(route)))?(routeStyles[route]||[]):[];
+  const css=(isAdmin||(isStaff&&["teacher","classInsights","gradeReviews","submissions"].includes(route)))?(routeStyles[route]||[]):[];
   const cssReady=Promise.all(css.map(style));
   const scriptsReady=(async()=>{
    if(["profile","handwriting","materials"].includes(route))await Promise.all(files.map(script));

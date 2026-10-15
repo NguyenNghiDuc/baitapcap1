@@ -1,0 +1,184 @@
+/* Teacher Dashboard · White & Tangerine
+ * Private route stylesheet: loaded for teacher/admin accounts only.
+ * Keep the landing page and other roles independent of these styles.
+ */
+.teacher-dashboard{--td-ink:#193551;--td-muted:#66788c;--td-orange:#eb7424;display:grid;gap:22px;min-width:0}
+.teacher-dashboard .page-head{
+ position:relative;isolation:isolate;overflow:hidden;margin:0;
+ padding:35px clamp(23px,3.5vw,46px) 37px;border-radius:25px;
+ background:linear-gradient(115deg,#fff7ed 0%,#fff3e4 49%,#ffe4c6 100%);
+ border:1px solid #f4dbc1;box-shadow:0 12px 33px rgba(147,82,26,.09);
+}
+.teacher-dashboard .page-head:before{
+ content:"";position:absolute;z-index:-1;width:260px;height:260px;
+ right:-64px;top:-136px;border-radius:50%;
+ background:radial-gradient(circle,rgba(248,150,63,.27),rgba(248,150,63,.03) 70%);
+}
+.teacher-dashboard .page-head:after{
+ content:"✦";position:absolute;right:7%;bottom:21%;
+ font-size:64px;line-height:1;color:rgba(225,110,28,.17);pointer-events:none;
+}
+.teacher-dashboard .page-head .eyebrow{
+ display:inline-flex;align-items:center;padding:7px 12px;border-radius:99px;
+ background:rgba(242,130,39,.13);border:1px solid rgba(235,119,26,.2);
+ color:#b35712;letter-spacing:.12em;font-size:10px;font-weight:850;
+}
+.teacher-dashboard .page-head h1{
+ margin:15px 0 10px;font:800 clamp(27px,3vw,39px)/1.2 "Baloo 2",sans-serif;
+ color:#203d5c;letter-spacing:-.028em;
+}
+.teacher-dashboard .page-head p{
+ margin:0;max-width:730px;color:#6f5b4d;font-size:13px;line-height:1.9;
+}
+.teacher-dashboard-workspace{
+ display:grid;gap:22px;min-width:0;
+ padding:clamp(18px,2.5vw,28px);
+ background:var(--surface,#fff);border:1px solid var(--line,#e5e9ee);
+ border-radius:24px;box-shadow:0 10px 36px rgba(58,66,83,.055);
+}
+.teacher-dashboard-section-heading{
+ display:flex;justify-content:space-between;align-items:center;
+ flex-wrap:wrap;gap:14px;
+}
+.teacher-dashboard-kicker{
+ display:block;margin:0 0 7px;font-size:10px;font-weight:850;
+ letter-spacing:.14em;color:#e17b31;
+}
+.teacher-dashboard-section-heading h2{
+ margin:0 0 7px;color:var(--text,#213c57);
+ font:800 clamp(20px,2vw,26px)/1.25 "Baloo 2",sans-serif;
+}
+.teacher-dashboard-section-heading p{
+ margin:0;font-size:12px;line-height:1.65;color:var(--muted,#6a7d8f);
+}
+.teacher-dashboard-count{
+ display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+ padding:10px 15px;border-radius:999px;border:1px solid #f2dcc7;
+ background:linear-gradient(110deg,#fff7ee,#fff0df);
+ color:#a65417;font-weight:800;font-size:12px;
+}
+.teacher-dashboard-grid{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ align-items:stretch;gap:16px;min-width:0;
+}
+.teacher-dashboard button.teacher-tool-card{
+ appearance:none;-webkit-appearance:none;
+ display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+ text-align:left;position:relative;min-width:0;min-height:216px;
+ gap:13px;padding:21px 19px 17px;border-radius:19px;
+ border:1px solid #eadfd4;background:linear-gradient(145deg,#fff 20%,#fffbf7);
+ box-shadow:0 5px 16px rgba(57,62,70,.045);
+ cursor:pointer;color:var(--td-ink);font-family:inherit;
+ transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.teacher-dashboard button.teacher-tool-card:hover{
+ transform:translateY(-4px);border-color:#f2a664;
+ box-shadow:0 16px 32px rgba(188,104,39,.14);
+}
+.teacher-dashboard button.teacher-tool-card:focus-visible{
+ outline:3px solid #f6a15b;outline-offset:3px;
+}
+.teacher-dashboard .teacher-tool-icon{
+ display:grid;place-items:center;width:54px;height:54px;flex:0 0 auto;
+ border-radius:16px;background:var(--td-icon-bg,#fff0e2);
+ border:1px solid var(--td-icon-border,#f8dcc4);
+ font-size:27px;line-height:1;
+}
+.teacher-dashboard .teacher-tool-label{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:6px;min-width:0;
+}
+.teacher-dashboard .teacher-tool-label strong{
+ color:var(--td-ink);font-weight:850;font-size:14px;line-height:1.4;
+}
+.teacher-dashboard .teacher-tool-arrow{
+ flex:0 0 auto;display:grid;place-items:center;width:26px;height:26px;
+ border-radius:9px;background:rgba(237,139,64,.09);color:#d67b33;
+ font-size:16px;font-weight:850;
+}
+.teacher-dashboard .teacher-tool-description{
+ display:block;flex:1;min-height:42px;font-size:11.5px;
+ color:var(--td-muted);line-height:1.7;font-weight:500;
+}
+.teacher-dashboard .teacher-tool-footer{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding-top:12px;border-top:1px solid #f1e9e2;
+ color:#c56c24;font-size:11px;font-weight:800;
+}
+.teacher-dashboard .teacher-tool-index{
+ font-size:10px;color:#b1a49a;font-weight:800;letter-spacing:.05em;
+}
+.teacher-dashboard .teacher-tool--orange{--td-icon-bg:#fff0e0;--td-icon-border:#f9dec7}
+.teacher-dashboard .teacher-tool--blue{--td-icon-bg:#e9f5ff;--td-icon-border:#d1e8fb}
+.teacher-dashboard .teacher-tool--violet{--td-icon-bg:#f0eafa;--td-icon-border:#e2d7fb}
+.teacher-dashboard .teacher-tool--green{--td-icon-bg:#e6f6e9;--td-icon-border:#ccead6}
+.teacher-dashboard .teacher-tool--pink{--td-icon-bg:#fff0f1;--td-icon-border:#fad8dd}
+.teacher-dashboard .teacher-tool--amber{--td-icon-bg:#fff6dd;--td-icon-border:#f6e6b9}
+.teacher-dashboard .teacher-tool--cyan{--td-icon-bg:#e5f8fa;--td-icon-border:#cbebf0}
+.teacher-dashboard .teacher-tool--rose{--td-icon-bg:#ffeaf0;--td-icon-border:#f7d3e0}
+.teacher-dashboard-hint{
+ display:flex;align-items:center;gap:11px;flex-wrap:wrap;
+ margin:0;padding:14px 17px;border:1px solid #f6e4ce;border-radius:14px;
+ background:linear-gradient(100deg,#fff9f1,#fffdf9);
+ color:#876343;font-size:12px;line-height:1.7;
+}
+.teacher-dashboard-hint>b{color:#8e4b18}
+:root[data-theme="dark"] .teacher-dashboard{
+ --td-ink:#ffe6d1;--td-muted:#d9c5b4;
+}
+:root[data-theme="dark"] .teacher-dashboard .page-head{
+ background:linear-gradient(115deg,#33261e,#3e2a1b 55%,#51341c);
+ border-color:#6b4a33;
+}
+:root[data-theme="dark"] .teacher-dashboard .page-head h1{color:#ffe8d2}
+:root[data-theme="dark"] .teacher-dashboard .page-head p{color:#dbc0a9}
+:root[data-theme="dark"] .teacher-dashboard .page-head .eyebrow{
+ background:#52331c;border-color:#774a2b;color:#ffb879;
+}
+:root[data-theme="dark"] .teacher-dashboard-workspace{
+ background:var(--surface);border-color:var(--line);
+}
+:root[data-theme="dark"] .teacher-dashboard .teacher-dashboard-count{
+ background:#4b321f;color:#ffbe83;border-color:#704c32;
+}
+:root[data-theme="dark"] .teacher-dashboard button.teacher-tool-card{
+ background:linear-gradient(145deg,#2d2824,#362b24);
+ border-color:#67503f;color:#ffe3ce;box-shadow:0 6px 22px rgba(0,0,0,.12);
+}
+:root[data-theme="dark"] .teacher-dashboard button.teacher-tool-card:hover{
+ border-color:#de965c;
+}
+:root[data-theme="dark"] .teacher-dashboard .teacher-tool-footer{border-color:#5a4638;color:#ffc087}
+:root[data-theme="dark"] .teacher-dashboard .teacher-tool-arrow{background:rgba(253,168,91,.12);color:#ffbb82}
+:root[data-theme="dark"] .teacher-dashboard-hint{background:#342920;border-color:#67513d;color:#f0d4b9}
+:root[data-theme="dark"] .teacher-dashboard-hint>b{color:#ffca9b}
+@media(max-width:1350px){
+ .teacher-dashboard-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:1080px){
+ .teacher-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .teacher-dashboard{gap:14px}
+ .teacher-dashboard .page-head{padding:24px 19px;border-radius:18px}
+ .teacher-dashboard .page-head:after{font-size:38px;right:4%}
+ .teacher-dashboard-workspace{padding:17px 13px;border-radius:18px;gap:17px}
+ .teacher-dashboard-grid{gap:10px}
+ .teacher-dashboard button.teacher-tool-card{
+  min-height:202px;padding:16px 13px 13px;gap:10px;border-radius:15px;
+ }
+ .teacher-dashboard .teacher-tool-icon{width:43px;height:43px;font-size:22px;border-radius:13px}
+ .teacher-dashboard .teacher-tool-label strong{font-size:12px}
+ .teacher-dashboard .teacher-tool-arrow{width:23px;height:23px;font-size:14px}
+ .teacher-dashboard .teacher-tool-description{font-size:10.5px;line-height:1.55}
+ .teacher-dashboard .teacher-tool-footer{font-size:10px}
+ .teacher-dashboard-count{padding:8px 10px;font-size:11px}
+}
+@media(max-width:400px){
+ .teacher-dashboard-grid{grid-template-columns:1fr}
+ .teacher-dashboard button.teacher-tool-card{min-height:168px}
+}
+@media(prefers-reduced-motion:reduce){
+ .teacher-dashboard button.teacher-tool-card{transition:none}
+ .teacher-dashboard button.teacher-tool-card:hover{transform:none}
+}
