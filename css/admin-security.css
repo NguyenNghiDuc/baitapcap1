@@ -108,3 +108,27 @@
 @media(max-width:360px){
  #content[data-admin-view="adminSecurity"] .admin-device-metrics{grid-template-columns:1fr}
 }
+
+/* Account-scoped device history with an explicit exit to full Admin overview. */
+#content[data-admin-view="adminSecurity"] .admin-device-focus{
+ display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+ padding:16px 18px;margin:15px 0;border-radius:15px;
+ border:1px solid rgba(237,143,57,.38);
+ background:linear-gradient(120deg,rgba(255,177,88,.14),transparent 78%),var(--surface);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-focus>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+#content[data-admin-view="adminSecurity"] .admin-device-focus b{font-size:15px;color:var(--text)}
+#content[data-admin-view="adminSecurity"] .admin-device-focus small{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+#content[data-admin-view="adminSecurity"] .admin-device-focus span{font-size:11px;color:#b66727;line-height:1.6}
+#content[data-admin-view="adminSecurity"] .admin-device-focus button{
+ flex:0 0 auto;min-height:40px;padding:8px 14px;border-radius:10px;
+ border:1px solid rgba(231,126,37,.35);color:var(--text);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-focus button:hover{
+ background:rgba(239,137,45,.09);border-color:#ef943f;
+}
+:root[data-theme="dark"] #content[data-admin-view="adminSecurity"] .admin-device-focus span{color:#ffc08b}
+@media(max-width:560px){
+ #content[data-admin-view="adminSecurity"] .admin-device-focus{align-items:stretch}
+ #content[data-admin-view="adminSecurity"] .admin-device-focus button{width:100%}
+}

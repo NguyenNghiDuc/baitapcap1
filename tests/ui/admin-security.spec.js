@@ -72,3 +72,59 @@ test("Admin sees IPs of other accounts and can search device history",async({pag
  await expect(page.locator(".admin-device-history tbody tr")).toHaveCount(1);
  expect(requests).toEqual(expect.arrayContaining([{search:"teacher@example.test",status:"ip-change"}]));
 });
+
+
+test("Admin opens only one account's IP history directly from the users table and clears scope",async({page})=>{
+ const requested=[];
+ await page.route("**/api/public-config",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({supabase:{enabled:false}})
+ }));
+ await page.route("**/api/admin/users?**",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   users:[{id:"student-a",name:"Mai",email:"mai@example.test",role:"student",grade:4,locked:false},
+    {id:"student-b",name:"Lan",email:"lan@example.test",role:"student",grade:5,locked:false}],
+   allUsersTotal:2,accountSummary:{roles:{student:2,parent:0,teacher:0,admin:0},unlocked:2,locked:0,total:2},
+   accountGrowth:[],presenceAvailable:false,canGrantAdmin:false,durable:true,
+   pagination:{page:1,limit:30,total:2,pages:1,hasMore:false}
+  })
+ }));
+ await page.route("**/api/admin/security",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   permissions:{title:"Admin",ownerConfigured:true,capabilities:{}},devices:[],notice:""
+  })
+ }));
+ await page.route("**/api/admin/device-logs?**",r=>{
+  const q=new URL(r.request().url()).searchParams;requested.push(q.get("userId")||"");
+  const all=[
+   {userId:"student-a",name:"Mai",email:"mai@example.test",ip:"203.0.113.90",device:"iPhone",browser:"Safari"},
+   {userId:"student-b",name:"Lan",email:"lan@example.test",ip:"198.51.100.48",device:"Windows",browser:"Chrome"}
+  ];
+  const selected=q.get("userId")||"";
+  const devices=all.filter(d=>!selected||d.userId===selected);
+  const account=selected?{userId:selected,name:selected==="student-a"?"Mai":"Lan",email:selected==="student-a"?"mai@example.test":"lan@example.test"}:null;
+  return r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+   devices,account,source:"postgres",
+   summary:{totalDevices:devices.length,uniqueAccounts:devices.length,recent24h:0,newDevices7d:0,changedIp7d:0},
+   pagination:{page:1,limit:20,total:devices.length,pages:1,hasMore:false}
+  })});
+ });
+ await page.goto("/#adminUsers");
+ await expect(page.locator("#content")).toContainText("Chỉ quản trị viên",{timeout:12000});
+ await page.evaluate(async()=>{
+  await window.SupabaseApp?.ready();
+  window.AppAuthBridge.setUser({id:"fixture-admin",name:"Admin",role:"admin",email:"admin@example.test"});
+ });
+ const buttons=page.locator("[data-user-devices]");
+ await expect(buttons).toHaveCount(2);
+ await page.locator('[data-user-devices="student-a"]').click();
+ await expect(page).toHaveURL(/#adminSecurity$/);
+ await expect(page.locator("#adminDeviceClearAccount")).toBeVisible({timeout:12000});
+ await expect(page.locator(".admin-device-focus")).toContainText("Mai");
+ await expect(page.locator(".admin-device-history")).toContainText("203.0.113.90");
+ await expect(page.locator(".admin-device-history")).not.toContainText("198.51.100.48");
+ expect(requested).toContain("student-a");
+ await page.locator("#adminDeviceClearAccount").click();
+ await expect(page.locator("#adminDeviceClearAccount")).toHaveCount(0);
+ await expect(page.locator(".admin-device-history")).toContainText("198.51.100.48");
+ expect(requested).toContain("");
+});

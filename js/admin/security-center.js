@@ -2,16 +2,25 @@
 window.AdminSecurity=(()=>{
  const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const time=s=>{const t=Date.parse(s||"");return Number.isFinite(t)?new Date(t).toLocaleString("vi-VN"):"—"};
- const history={page:1,search:"",status:"all"};
+ const history={page:1,search:"",status:"all",userId:""};
  const perm=[
   ["viewUsers","Xem tài khoản"],["manageRegularUsers","Quản lý người dùng thông thường"],
   ["viewAudit","Xem nhật ký"],["exportGrades","Xuất bảng điểm"],
   ["grantAdmin","Cấp quyền Admin"],["editOtherAdmins","Sửa quyền Admin khác"]
  ];
  async function crossAccountHistory(){
+  // One-time, in-memory handoff from Admin user directory; not stored in URL or localStorage.
+  const focus=window.AdminDeviceAccountFocus;
+  if(focus){
+   delete window.AdminDeviceAccountFocus;
+   if(typeof focus.userId==="string"&&focus.userId.length<=128){
+    history.userId=focus.userId;history.page=1;history.search="";history.status="all";
+   }
+  }
   const q=new URLSearchParams({page:String(history.page)});
   if(history.search)q.set("search",history.search);
   if(history.status!=="all")q.set("status",history.status);
+  if(history.userId)q.set("userId",history.userId);
   try{
    const j=await API.get("/api/admin/device-logs?"+q.toString(),{noCache:true,cancelPrevious:false});
    const rows=(j.devices||[]).map(d=>'<tr><td><b>'+esc(d.name)+'</b><small>'+esc(d.email)+'</small></td>'+
@@ -23,6 +32,11 @@ window.AdminSecurity=(()=>{
     (!d.newDevice7d&&!d.changedIp7d?'<span class="muted">—</span>':'')+
     '</div></td></tr>').join("");
    const pager=j.pagination||{},pages=Math.max(1,Number(pager.pages)||1),summary=j.summary||{};
+   const accountFocus=history.userId?
+    '<div class="admin-device-focus" role="status"><div><b>👤 '+(j.account?esc(j.account.name):"Tài khoản không còn tồn tại")+'</b>'+
+    '<small>'+(j.account?esc(j.account.email):"Không có dữ liệu")+'</small>'+
+    '<span>Chỉ hiển thị IP và thiết bị của tài khoản này.</span></div>'+
+    '<button type="button" id="adminDeviceClearAccount" class="outline">✕ Xem tất cả</button></div>':"";
    const metrics=[
     ["👥", "Tài khoản có thiết bị",summary.uniqueAccounts],
     ["🖥️", "Thiết bị đã ghi nhận",summary.totalDevices],
@@ -36,6 +50,7 @@ window.AdminSecurity=(()=>{
    const options=choices.map(([value,label])=>'<option value="'+value+'" '+(history.status===value?"selected":"")+'>'+label+'</option>').join("");
    return '<section class="panel admin-sec-panel admin-device-history"><div class="admin-sec-heading"><h2>🌐 IP và thiết bị của các tài khoản</h2></div>'+
     '<p class="admin-device-description">Đây là dấu vết thiết bị đã ghi nhận, không phải lượt đăng nhập hay phiên online. IP thay đổi có thể do Wi-Fi, mạng di động hoặc VPN; không tự động kết luận đáng ngờ.</p>'+
+    accountFocus+
     '<div class="admin-device-metrics" aria-label="Thống kê lịch sử thiết bị">'+metrics+'</div>'+
     '<form id="adminDeviceSearchForm" class="admin-device-filter"><label>Tìm theo tên, email, IP hoặc thiết bị'+
     '<input name="search" type="search" maxlength="100" value="'+esc(history.search)+'" placeholder="VD: email học sinh hoặc 192.0.2..." autocomplete="off"></label>'+
@@ -82,6 +97,9 @@ window.AdminSecurity=(()=>{
  }
  function bind(render){
   document.querySelector("#adminSecurityReload")?.addEventListener("click",render);
+  document.querySelector("#adminDeviceClearAccount")?.addEventListener("click",()=>{
+   history.userId="";history.search="";history.status="all";history.page=1;render();
+  });
   document.querySelector("#adminDeviceSearchForm")?.addEventListener("submit",e=>{
    e.preventDefault();const value=String(new FormData(e.currentTarget).get("search")||"").trim();
    const nextStatus=String(new FormData(e.currentTarget).get("status")||"all");

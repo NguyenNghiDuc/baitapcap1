@@ -66,3 +66,17 @@ test("Fresh Admin account overview module is loaded LAST and never cached in ini
  const staticServer=read("lib/static-server.js");
  assert.ok(staticServer.includes('base==="asset-hashes.json"'));
 });
+
+
+test("Account directory offers a per-user device view with Admin-only event handling",()=>{
+ const app=read("js/app.js"),secure=read("js/admin/security-center.js");
+ const css=read("css/admin-users.css"),secCss=read("css/admin-security.css");
+ assert.ok(app.includes("data-user-devices="));
+ assert.ok(app.includes("window.AdminDeviceAccountFocus={userId:id}"));
+ assert.ok(app.includes('nav("adminSecurity")'));
+ assert.ok(secure.includes('q.set("userId",history.userId)'));
+ assert.ok(secure.includes('id="adminDeviceClearAccount"'));
+ assert.ok(secure.includes('delete window.AdminDeviceAccountFocus'));
+ assert.ok(css.includes(".admin-user-devices"));
+ assert.ok(secCss.includes(".admin-device-focus"));
+});

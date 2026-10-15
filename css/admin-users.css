@@ -583,3 +583,13 @@
  #content[data-admin-view="adminUsers"] button.admin-users-role-card{transition:none}
  #content[data-admin-view="adminUsers"] button.admin-users-role-card:hover{transform:none}
 }
+
+/* Account row → direct view of only this account's recorded IPs/devices. */
+#content[data-admin-view="adminUsers"] .admin-user-actions .admin-user-devices{
+ background:rgba(242,133,44,.10)!important;border:1px solid rgba(230,128,50,.27)!important;
+ color:#ac531b!important;font-weight:750;white-space:nowrap;
+}
+#content[data-admin-view="adminUsers"] .admin-user-actions .admin-user-devices:hover{
+ background:rgba(241,136,52,.19)!important;border-color:rgba(228,120,33,.5)!important;
+}
+:root[data-theme="dark"] #content[data-admin-view="adminUsers"] .admin-user-actions .admin-user-devices{color:#ffd0a5!important}

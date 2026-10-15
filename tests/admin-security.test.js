@@ -124,3 +124,26 @@ test("Admin device-log API validates repeated, unsupported status filters",async
  assert.equal(valid.output.body.devices.length,1);
  assert.equal(valid.output.body.devices[0].deviceId,undefined);
 });
+
+
+test("Admin device-history API uses exact userId and does not include other accounts IPs",async()=>{
+ const db={users:[{id:"user-a",name:"A",email:"a@example.test"},
+  {id:"user-b",name:"B",email:"b@example.test"}],loginDevices:[
+   {userId:"user-a",deviceId:"hidden-a",ip:"203.0.113.25",lastSeenAt:"2026-10-14T12:00:00Z"},
+   {userId:"user-b",deviceId:"hidden-b",ip:"198.51.100.45",lastSeenAt:"2026-10-14T12:00:00Z"}
+  ]};
+ const admin=await req("/api/admin/device-logs?userId=user-a",{user:{id:"admin",role:"admin"},db});
+ assert.equal(admin.output.status,200);
+ assert.equal(admin.output.body.pagination.total,1);
+ assert.equal(admin.output.body.account.userId,"user-a");
+ assert.equal(admin.output.body.summary.uniqueAccounts,1);
+ assert.ok(!JSON.stringify(admin.output.body).includes("198.51.100.45"));
+ assert.ok(!JSON.stringify(admin.output.body).includes("hidden-a"));
+ const other=await req("/api/admin/device-logs?userId=user-a",{user:{id:"student",role:"student"},db});
+ assert.equal(other.output.status,403);
+ assert.ok(!JSON.stringify(other.output).includes("203.0.113.25"));
+ for(const suffix of ["?userId=user-a&userId=user-b","?userId=%20","?userId="+("a".repeat(129))]){
+  const response=await req("/api/admin/device-logs"+suffix,{user:{id:"admin",role:"admin"},db});
+  assert.equal(response.output.status,400);
+ }
+});

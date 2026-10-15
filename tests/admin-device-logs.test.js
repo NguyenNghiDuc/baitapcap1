@@ -68,3 +68,39 @@ test("Invalid device history statuses are rejected instead of falling back to al
   assert.throws(()=>filters(q),/Bộ lọc/);
  assert.equal(filters({status:"new-device"}).status,"new-device");
 });
+
+
+test("Account scope only returns the selected user's IPs and recomputes that scope's metrics",()=>{
+ const now=Date.parse("2026-10-15T12:00:00.000Z");
+ const db={users:[
+  {id:"student-a",name:"Student A",email:"a@example.test"},
+  {id:"student-b",name:"Student B",email:"b@example.test"}
+ ],loginDevices:[
+  {userId:"student-a",deviceId:"secret-a",ip:"203.0.113.100",device:"iPhone",
+   firstSeenAt:"2026-10-14T12:00:00Z",lastSeenAt:"2026-10-15T11:00:00Z"},
+  {userId:"student-b",deviceId:"secret-b",ip:"198.51.100.200",device:"Windows",
+   firstSeenAt:"2026-10-13T12:00:00Z",lastSeenAt:"2026-10-15T11:00:00Z"}
+ ]};
+ const selected=list(db,{userId:"student-a"},now);
+ assert.equal(selected.pagination.total,1);
+ assert.equal(selected.devices[0].ip,"203.0.113.100");
+ assert.equal(JSON.stringify(selected).includes("198.51.100.200"),false);
+ assert.equal(JSON.stringify(selected).includes("secret-a"),false);
+ assert.deepEqual(selected.account,{userId:"student-a",name:"Student A",email:"a@example.test"});
+ assert.equal(selected.userId,"student-a");
+ assert.deepEqual(selected.summary,{totalDevices:1,uniqueAccounts:1,recent24h:1,newDevices7d:1,changedIp7d:0});
+ const zero=list({...db,loginDevices:[db.loginDevices[1]]},{userId:"student-a"},now);
+ assert.equal(zero.pagination.total,0);
+ assert.equal(zero.account.email,"a@example.test");
+ assert.equal(zero.summary.totalDevices,0);
+ const unknown=list(db,{userId:"unknown"},now);
+ assert.equal(unknown.account,null);
+ assert.equal(unknown.devices.length,0);
+});
+test("Account scope rejects ambiguous or oversized identifiers and cannot broaden to another account",()=>{
+ for(const query of [{userId:" "},{userId:"x".repeat(129)},{userId:["a","b"]},{userId:{test:1}}]){
+  assert.throws(()=>filters(query),/Bộ lọc/);
+ }
+ assert.equal(filters({userId:"student-a"}).userId,"student-a");
+ assert.equal(filters({}).userId,"");
+});
