@@ -57,3 +57,54 @@
  #content[data-admin-view="adminSecurity"] .admin-device-filter button{width:100%}
  #content[data-admin-view="adminSecurity"] .admin-device-pager{justify-content:center}
 }
+
+
+/* Admin security telemetry: retrospective observations, not live-session claims. */
+#content[data-admin-view="adminSecurity"] .admin-device-metrics{
+ display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-metric{
+ display:grid;justify-items:start;align-content:start;gap:7px;min-width:0;
+ padding:15px 13px;border:1px solid var(--line);border-radius:15px;
+ background:linear-gradient(140deg,rgba(248,145,56,.085),transparent 80%),var(--surface);
+ box-shadow:0 6px 16px rgba(131,64,24,.065);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-metric>span{font-size:22px}
+#content[data-admin-view="adminSecurity"] .admin-device-metric strong{
+ font:800 25px/1.2 "Baloo 2",sans-serif;color:var(--text);
+ font-variant-numeric:tabular-nums;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-metric small{
+ font-size:11px;line-height:1.5;color:var(--muted);font-weight:750;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-filter{
+ grid-template-columns:minmax(0,1.6fr) minmax(175px,1fr) auto;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-filter select{
+ min-width:0;min-height:43px;width:100%;border-radius:10px;
+ border:1px solid var(--line);background:var(--surface);color:var(--text);
+ padding:10px;font-size:12px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-filter :is(input,select):focus-visible{
+ outline:3px solid rgba(238,129,47,.48);outline-offset:2px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-signals{display:flex;flex-wrap:wrap;gap:5px}
+#content[data-admin-view="adminSecurity"] .admin-device-signal-new{
+ background:rgba(61,169,115,.1);color:#16805c;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-signal-ip{
+ background:rgba(245,148,54,.15);color:#b95d15;
+}
+:root[data-theme="dark"] #content[data-admin-view="adminSecurity"] .admin-device-signal-new{color:#89e5bb}
+:root[data-theme="dark"] #content[data-admin-view="adminSecurity"] .admin-device-signal-ip{color:#ffbc86}
+@media(max-width:1200px){
+ #content[data-admin-view="adminSecurity"] .admin-device-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:720px){
+ #content[data-admin-view="adminSecurity"] .admin-device-filter{grid-template-columns:1fr}
+ #content[data-admin-view="adminSecurity"] .admin-device-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #content[data-admin-view="adminSecurity"] .admin-device-filter button{width:100%}
+}
+@media(max-width:360px){
+ #content[data-admin-view="adminSecurity"] .admin-device-metrics{grid-template-columns:1fr}
+}
