@@ -2,7 +2,7 @@
 window.AdminSecurity=(()=>{
  const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const time=s=>{const t=Date.parse(s||"");return Number.isFinite(t)?new Date(t).toLocaleString("vi-VN"):"—"};
- const history={page:1,search:"",status:"all",userId:""};
+ const history={page:1,search:"",status:"all",userId:"",period:"all"};
  const perm=[
   ["viewUsers","Xem tài khoản"],["manageRegularUsers","Quản lý người dùng thông thường"],
   ["viewAudit","Xem nhật ký"],["exportGrades","Xuất bảng điểm"],
@@ -14,12 +14,13 @@ window.AdminSecurity=(()=>{
   if(focus){
    delete window.AdminDeviceAccountFocus;
    if(typeof focus.userId==="string"&&focus.userId.length<=128){
-    history.userId=focus.userId;history.page=1;history.search="";history.status="all";
+    history.userId=focus.userId;history.page=1;history.search="";history.status="all";history.period="all";
    }
   }
   const q=new URLSearchParams({page:String(history.page)});
   if(history.search)q.set("search",history.search);
   if(history.status!=="all")q.set("status",history.status);
+  if(history.period!=="all")q.set("period",history.period);
   if(history.userId)q.set("userId",history.userId);
   try{
    const j=await API.get("/api/admin/device-logs?"+q.toString(),{noCache:true,cancelPrevious:false});
@@ -48,6 +49,8 @@ window.AdminSecurity=(()=>{
     '<small>'+label+'</small></div>').join("");
    const choices=[["all","Tất cả thiết bị"],["recent","Có hoạt động 24 giờ"],["new-device","Thiết bị mới 7 ngày"],["ip-change","IP thay đổi 7 ngày"]];
    const options=choices.map(([value,label])=>'<option value="'+value+'" '+(history.status===value?"selected":"")+'>'+label+'</option>').join("");
+   const periods=[["all","Toàn bộ lịch sử"],["24h","24 giờ qua"],["7d","7 ngày qua"],["30d","30 ngày qua"]];
+   const periodOptions=periods.map(([value,label])=>'<option value="'+value+'" '+(history.period===value?"selected":"")+'>'+label+'</option>').join("");
    return '<section class="panel admin-sec-panel admin-device-history"><div class="admin-sec-heading"><h2>🌐 IP và thiết bị của các tài khoản</h2></div>'+
     '<p class="admin-device-description">Đây là dấu vết thiết bị đã ghi nhận, không phải lượt đăng nhập hay phiên online. IP thay đổi có thể do Wi-Fi, mạng di động hoặc VPN; không tự động kết luận đáng ngờ.</p>'+
     accountFocus+
@@ -55,8 +58,11 @@ window.AdminSecurity=(()=>{
     '<form id="adminDeviceSearchForm" class="admin-device-filter"><label>Tìm theo tên, email, IP hoặc thiết bị'+
     '<input name="search" type="search" maxlength="100" value="'+esc(history.search)+'" placeholder="VD: email học sinh hoặc 192.0.2..." autocomplete="off"></label>'+
     '<label>Loại lịch sử<select name="status" aria-label="Lọc loại lịch sử thiết bị">'+options+'</select></label>'+
+    '<label>Hoạt động gần nhất<select name="period" aria-label="Lọc thời gian hoạt động của thiết bị">'+periodOptions+'</select></label>'+
     '<button type="submit" class="primary">🔎 Áp dụng</button></form>'+
-    '<p class="muted">'+Number(pager.total||0)+' thiết bị khớp bộ lọc • '+(j.source==="postgres"?"Dữ liệu dùng chung PostgreSQL":"Dữ liệu máy chủ hiện tại")+'</p>'+
+    '<p class="muted">'+Number(pager.total||0)+' thiết bị khớp bộ lọc • '+
+    (j.source==="postgres"?"Dữ liệu dùng chung PostgreSQL":"Dữ liệu máy chủ hiện tại")+
+    '. Thời gian lọc dựa trên hoạt động gần nhất của thiết bị; thống kê phía trên tính toàn bộ lịch sử trong phạm vi tài khoản.</p>'+
     '<div class="table-wrap" tabindex="0" aria-label="Danh sách thiết bị và IP đã đăng nhập"><table><thead><tr>'+
     '<th>Tài khoản</th><th>Thiết bị / trình duyệt</th><th>Địa chỉ IP</th><th>Gần nhất</th><th>Dấu hiệu</th></tr></thead><tbody>'+
     (rows||'<tr><td colspan="5">Chưa ghi nhận thiết bị nào phù hợp. Người dùng cần đăng nhập để hệ thống ghi nhận.</td></tr>')+
@@ -98,12 +104,13 @@ window.AdminSecurity=(()=>{
  function bind(render){
   document.querySelector("#adminSecurityReload")?.addEventListener("click",render);
   document.querySelector("#adminDeviceClearAccount")?.addEventListener("click",()=>{
-   history.userId="";history.search="";history.status="all";history.page=1;render();
+   history.userId="";history.search="";history.status="all";history.period="all";history.page=1;render();
   });
   document.querySelector("#adminDeviceSearchForm")?.addEventListener("submit",e=>{
    e.preventDefault();const value=String(new FormData(e.currentTarget).get("search")||"").trim();
    const nextStatus=String(new FormData(e.currentTarget).get("status")||"all");
-   history.search=value.slice(0,100);history.status=nextStatus;history.page=1;render();
+   const nextPeriod=String(new FormData(e.currentTarget).get("period")||"all");
+   history.search=value.slice(0,100);history.status=nextStatus;history.period=nextPeriod;history.page=1;render();
   });
   document.querySelector("#adminDevicePrev")?.addEventListener("click",()=>{
    history.page=Math.max(1,history.page-1);render();

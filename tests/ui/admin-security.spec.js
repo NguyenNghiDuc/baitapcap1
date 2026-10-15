@@ -32,7 +32,7 @@ test("security center renders server-confirmed permissions and only current user
 
 
 test("Admin sees IPs of other accounts and can search device history",async({page})=>{
- const requests=[];
+ const requests=[],periods=[];
  await page.route("**/api/public-config",r=>r.fulfill({
   status:200,contentType:"application/json",body:JSON.stringify({supabase:{enabled:false}})
  }));
@@ -42,6 +42,7 @@ test("Admin sees IPs of other accounts and can search device history",async({pag
  await page.route("**/api/admin/device-logs?**",r=>{
   const q=new URL(r.request().url()).searchParams;
   requests.push({search:q.get("search")||"",status:q.get("status")||"all"});
+  periods.push(q.get("period")||"all");
   const all=[{name:"Minh Anh",email:"student@example.test",device:"iPhone",browser:"Safari",ip:"203.0.113.5",lastSeenAt:"2026-10-14T00:00:00Z",newDevice7d:true,changedIp7d:false},
   {name:"Cô Lan",email:"teacher@example.test",device:"Windows",browser:"Chrome",ip:"198.51.100.6",lastSeenAt:"2026-10-13T00:00:00Z",newDevice7d:false,changedIp7d:true}];
   const matching=all.filter(d=>(!q.get("search")||d.email.includes(q.get("search"))||d.ip.includes(q.get("search")))&&
@@ -71,6 +72,10 @@ test("Admin sees IPs of other accounts and can search device history",async({pag
  await page.locator('#adminDeviceSearchForm button[type="submit"]').click();
  await expect(page.locator(".admin-device-history tbody tr")).toHaveCount(1);
  expect(requests).toEqual(expect.arrayContaining([{search:"teacher@example.test",status:"ip-change"}]));
+ await page.locator('#adminDeviceSearchForm select[name="period"]').selectOption("7d");
+ await page.locator('#adminDeviceSearchForm button[type="submit"]').click();
+ await expect(page.locator('#adminDeviceSearchForm select[name="period"]')).toHaveValue("7d");
+ expect(periods).toContain("7d");
 });
 
 
@@ -123,8 +128,12 @@ test("Admin opens only one account's IP history directly from the users table an
  await expect(page.locator(".admin-device-history")).toContainText("203.0.113.90");
  await expect(page.locator(".admin-device-history")).not.toContainText("198.51.100.48");
  expect(requested).toContain("student-a");
+ await page.locator('#adminDeviceSearchForm select[name="period"]').selectOption("24h");
+ await page.locator('#adminDeviceSearchForm button[type="submit"]').click();
+ await expect(page.locator('#adminDeviceSearchForm select[name="period"]')).toHaveValue("24h");
  await page.locator("#adminDeviceClearAccount").click();
  await expect(page.locator("#adminDeviceClearAccount")).toHaveCount(0);
+ await expect(page.locator('#adminDeviceSearchForm select[name="period"]')).toHaveValue("all");
  await expect(page.locator(".admin-device-history")).toContainText("198.51.100.48");
  expect(requested).toContain("");
 });

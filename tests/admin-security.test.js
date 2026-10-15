@@ -147,3 +147,22 @@ test("Admin device-history API uses exact userId and does not include other acco
   assert.equal(response.output.status,400);
  }
 });
+
+test("Time period query is validated by the Admin endpoint before reading any IP",async()=>{
+ const user={id:"admin",role:"admin"},db={users:[{id:"u",name:"User",email:"u@example.test"}],loginDevices:[
+  {userId:"u",deviceId:"secret",device:"iPhone",ip:"198.51.100.29",lastSeenAt:new Date().toISOString()}
+ ]};
+ for(const suffix of ["?period=99d","?period=","?period=all&period=24h"]){
+  const response=await req("/api/admin/device-logs"+suffix,{user,db});
+  assert.equal(response.output.status,400,suffix);
+  assert.equal(JSON.stringify(response.output).includes("198.51.100.29"),false);
+ }
+ const ok=await req("/api/admin/device-logs?period=7d&userId=u",{user,db});
+ assert.equal(ok.output.status,200);
+ assert.equal(ok.output.body.period,"7d");
+ assert.equal(ok.output.body.devices.length,1);
+ assert.equal(ok.output.body.account.userId,"u");
+ assert.equal(ok.output.headers["Cache-Control"],"private, no-store");
+ const unauthorized=await req("/api/admin/device-logs?period=7d",{user:{id:"student",role:"student"},db});
+ assert.equal(unauthorized.output.status,403);
+});

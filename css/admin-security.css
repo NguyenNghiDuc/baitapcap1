@@ -132,3 +132,20 @@
  #content[data-admin-view="adminSecurity"] .admin-device-focus{align-items:stretch}
  #content[data-admin-view="adminSecurity"] .admin-device-focus button{width:100%}
 }
+
+/* Retrospective activity window: exact API-backed 24h / 7d / 30d filters. */
+#content[data-admin-view="adminSecurity"] .admin-device-filter{
+ grid-template-columns:minmax(160px,1.45fr) minmax(135px,.8fr) minmax(145px,.8fr) auto;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-filter label{line-height:1.35}
+@media(max-width:1080px){
+ #content[data-admin-view="adminSecurity"] .admin-device-filter{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+ #content[data-admin-view="adminSecurity"] .admin-device-filter button{width:100%}
+}
+@media(max-width:720px){
+ #content[data-admin-view="adminSecurity"] .admin-device-filter{
+  grid-template-columns:1fr;
+ }
+}

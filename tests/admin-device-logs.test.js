@@ -104,3 +104,33 @@ test("Account scope rejects ambiguous or oversized identifiers and cannot broade
  assert.equal(filters({userId:"student-a"}).userId,"student-a");
  assert.equal(filters({}).userId,"");
 });
+
+test("Time window filters last device activity with inclusive boundaries and consistent totals",()=>{
+ const now=Date.parse("2026-10-15T12:00:00.000Z"),DAY=86400000;
+ const stamp=n=>new Date(now-n*DAY).toISOString();
+ const db={users:[{id:"u",name:"Student",email:"u@example.test"}],loginDevices:[
+  {userId:"u",ip:"198.51.100.1",lastSeenAt:stamp(0.5),device:"Phone",firstSeenAt:stamp(40)},
+  {userId:"u",ip:"198.51.100.2",lastSeenAt:stamp(1),device:"Laptop",firstSeenAt:stamp(40)},
+  {userId:"u",ip:"198.51.100.3",lastSeenAt:stamp(6),device:"Tablet",firstSeenAt:stamp(40)},
+  {userId:"u",ip:"198.51.100.4",lastSeenAt:stamp(30),device:"Desktop",firstSeenAt:stamp(40)},
+  {userId:"u",ip:"198.51.100.5",lastSeenAt:stamp(31),device:"Old Phone",firstSeenAt:stamp(40)},
+  {userId:"u",ip:"198.51.100.6",device:"Unknown"},
+  {userId:"u",ip:"198.51.100.7",lastSeenAt:stamp(-1),device:"Clock Ahead"}
+ ]};
+ const pick=period=>list(db,{period,userId:"u"},now);
+ assert.deepEqual(pick("24h").devices.map(x=>x.ip),["198.51.100.1","198.51.100.2"]);
+ assert.deepEqual(pick("7d").devices.map(x=>x.ip),["198.51.100.1","198.51.100.2","198.51.100.3"]);
+ assert.equal(pick("30d").pagination.total,4);
+ assert.equal(pick("all").pagination.total,7);
+ assert.equal(pick("24h").summary.totalDevices,7);
+ assert.equal(pick("24h").summary.uniqueAccounts,1);
+ assert.equal(pick("24h").period,"24h");
+ assert.equal(list(db,{period:"7d",search:"Desktop",userId:"u"},now).pagination.total,0);
+});
+test("Time filter is strict and never broadens invalid or repeated period params",()=>{
+ for(const period of ["tomorrow","365d","last-month","",["all","24h"],{},null,2]){
+  assert.throws(()=>filters({period}),/Bộ lọc/);
+ }
+ assert.equal(filters({}).period,"all");
+ assert.equal(filters({period:"30d",userId:"u"}).period,"30d");
+});

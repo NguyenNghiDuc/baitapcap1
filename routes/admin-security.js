@@ -38,7 +38,7 @@ module.exports=async function handleSecurity(req,res,p,{send,requireUser,load,st
   if(p==="/api/admin/device-logs"){
    const {URL}=require("node:url");
    const q=new URL(req.url,"http://localhost").searchParams;
-   const query={page:q.getAll("page"),search:q.getAll("search"),status:q.getAll("status"),userId:q.getAll("userId")};
+   const query={page:q.getAll("page"),search:q.getAll("search"),status:q.getAll("status"),userId:q.getAll("userId"),period:q.getAll("period")};
    if(Object.values(query).some(values=>values.length>1)){
     send(res,400,{error:"Bộ lọc không hợp lệ"},extra);return true;
    }
@@ -46,6 +46,7 @@ module.exports=async function handleSecurity(req,res,p,{send,requireUser,load,st
    query.search=query.search[0]??"";
    query.status=query.status[0]??"all";
    query.userId=query.userId[0]??"";
+   query.period=query.period[0]??"all";
    let parsed;try{parsed=adminDeviceLogs.filters(query)}
    catch{send(res,400,{error:"Bộ lọc không hợp lệ"},extra);return true}
    // PostgreSQL shared state, not a potentially stale serverless instance cache.
