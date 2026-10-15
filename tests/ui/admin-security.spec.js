@@ -252,3 +252,69 @@ test("Admin security journal filters by decision, type and review time, then res
  await expect(page.locator('#adminDeviceReviewFilters select[name="type"]')).toHaveValue("all");
  await expect(page.locator('#adminDeviceReviewFilters select[name="period"]')).toHaveValue("all");
 });
+
+test("Admin journal searches reviewer/reason and exports exactly the applied filters",async({page})=>{
+ const requests=[],exports=[];
+ const all=[
+  {id:"r1",userId:"u1",accountName:"Minh",type:"ip-change",status:"reviewed",
+   reason:"Đã xác minh với học sinh",reviewerId:"admin-42",reviewedAt:"2026-10-15T00:00:00Z"},
+  {id:"r2",userId:"u2",accountName:"Lan",type:"new-device",status:"dismissed",
+   reason:"Đã xác nhận máy quen thuộc",reviewerId:"admin-15",reviewedAt:"2026-09-20T00:00:00Z"}
+ ];
+ await page.route("**/api/public-config",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({supabase:{enabled:false}})
+ }));
+ await page.route("**/api/admin/security",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   permissions:{title:"Admin",ownerConfigured:false,capabilities:{}},devices:[],notice:""
+  })
+ }));
+ await page.route("**/api/admin/device-logs?**",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   devices:[],source:"postgres",
+   summary:{totalDevices:0,uniqueAccounts:0,recent24h:0,newDevices7d:0,changedIp7d:0},
+   pagination:{page:1,limit:20,total:0,pages:0,hasMore:false}
+  })
+ }));
+ await page.route("**/api/admin/device-reviews/export?**",r=>{
+  const q=new URL(r.request().url()).searchParams;
+  exports.push({status:q.get("status"),search:q.get("search")});
+  return r.fulfill({status:200,headers:{
+   "Content-Type":"text/csv; charset=utf-8",
+   "Content-Disposition":'attachment; filename="nhat-ky-bao-mat-admin.csv"'
+  },body:"\ufeffTime,Reason\r\n2026-10-15,Verified\r\n"});
+ });
+ await page.route("**/api/admin/device-reviews?**",r=>{
+  const q=new URL(r.request().url()).searchParams;
+  requests.push({status:q.get("status")||"all",search:q.get("search")||""});
+  const records=all.filter(x=>(!q.get("search")||
+   [x.accountName,x.reviewerId,x.reason].some(v=>v.toLowerCase().includes(q.get("search").toLowerCase())))&&
+   (!q.get("status")||x.status===q.get("status")));
+  return r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+   reviews:records,
+   summary:{total:2,reviewed:1,dismissed:1,newDevice:1,ipChange:1,last30d:1},
+   pagination:{page:1,limit:10,total:records.length,pages:1,hasMore:false}
+  })});
+ });
+ await page.goto("/#adminSecurity");
+ await expect(page.locator("#content")).toContainText("Chỉ quản trị viên",{timeout:12000});
+ await page.evaluate(async()=>{
+  await window.SupabaseApp?.ready();
+  window.AppAuthBridge.setUser({id:"admin",name:"Admin",role:"admin",email:"admin@test.local"});
+ });
+ await expect(page.locator("#adminDeviceReviewFilters")).toBeVisible({timeout:12000});
+ await page.locator('#adminDeviceReviewFilters input[name="search"]').fill("admin-42");
+ await page.locator('#adminDeviceReviewFilters select[name="status"]').selectOption("reviewed");
+ await page.locator('#adminDeviceReviewFilters button[type="submit"]').click();
+ await expect(page.locator(".admin-device-review-journal .admin-device-review-item")).toHaveCount(1);
+ await expect(page.locator(".admin-device-review-journal")).toContainText("Đã xác minh với học sinh");
+ expect(requests).toContainEqual({status:"reviewed",search:"admin-42"});
+ const downloadPromise=page.waitForEvent("download");
+ await page.locator("#adminDeviceReviewExport").click();
+ const download=await downloadPromise;
+ expect(download.suggestedFilename()).toBe("nhat-ky-bao-mat-admin.csv");
+ expect(exports).toContainEqual({status:"reviewed",search:"admin-42"});
+ await page.locator("#adminDeviceReviewResetFilters").click();
+ await expect(page.locator(".admin-device-review-journal .admin-device-review-item")).toHaveCount(2);
+ await expect(page.locator('#adminDeviceReviewFilters input[name="search"]')).toHaveValue("");
+});

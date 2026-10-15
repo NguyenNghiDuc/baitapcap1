@@ -269,3 +269,34 @@
 @media(max-width:390px){
  #content[data-admin-view="adminSecurity"] .admin-device-review-filter-actions{grid-template-columns:1fr}
 }
+
+
+/* Search + downloadable, Admin-authenticated security decision report. */
+#content[data-admin-view="adminSecurity"] .admin-device-review-filters .admin-device-review-search{
+ grid-column:1/-1;min-width:0;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-search input{
+ width:100%;min-width:0;min-height:43px;border:1px solid var(--line);
+ border-radius:10px;padding:10px 12px;background:var(--surface);color:var(--text);
+ font:inherit;font-size:12px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-search input:focus-visible{
+ outline:3px solid rgba(243,139,53,.44);outline-offset:2px;
+}
+#content[data-admin-view="adminSecurity"] #adminDeviceReviewExport{
+ border-color:rgba(230,120,33,.4);font-weight:800;
+}
+#content[data-admin-view="adminSecurity"] #adminDeviceReviewExport:hover{
+ background:rgba(245,143,53,.14);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-export-error{
+ grid-column:1/-1;margin:0;padding:10px 12px;font-size:12px;
+ border-radius:10px;color:var(--text);background:rgba(236,110,63,.12);
+}
+@media(max-width:700px){
+ #content[data-admin-view="adminSecurity"] .admin-device-review-filters .admin-device-review-search{grid-column:1}
+ #content[data-admin-view="adminSecurity"] .admin-device-review-filter-actions{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+ #content[data-admin-view="adminSecurity"] #adminDeviceReviewExport{grid-column:1/-1}
+}

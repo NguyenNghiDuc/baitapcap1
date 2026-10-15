@@ -1,6 +1,6 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
-const {activeObservations,findObservation,history,parseHistoryFilters,validateDecision,decide}=require("../lib/admin-device-reviews");
+const {activeObservations,findObservation,history,parseHistoryFilters,filteredHistoryRecords,exportJournalCsv,validateDecision,decide}=require("../lib/admin-device-reviews");
 const route=require("../routes/admin-device-reviews");
 const user={id:"admin",role:"admin"};
 const makeDb=()=>({users:[{id:"u1",name:"Minh Anh",role:"student"},{id:"u2",name:"Lan",role:"student"}],
@@ -155,6 +155,89 @@ test("Admin journal GET rejects repeated and invalid query filters before queryi
    "/api/admin/device-reviews",ctx);
   assert.equal(reply.status,200);
   assert.equal(reply.data.filters.period,"7d");
+  assert.equal(reads,1);
+ }finally{if(old===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=old}
+});
+
+test("Admin journal search finds reviewer, reason, account and email across all pages",()=>{
+ const db={users:[{id:"u1",name:"Nguyễn Minh",email:"minh@example.test"},
+  {id:"u2",name:"Trần Lan",email:"lan@example.test"}],deviceSecurityReviews:[
+  {id:"a",userId:"u1",type:"new-device",status:"reviewed",reason:"Đã xác nhận bảo mật",
+   reviewerId:"admin-27",reviewedAt:"2026-10-15T09:00:00Z"},
+  {id:"b",userId:"u2",type:"ip-change",status:"dismissed",reason:"Mạng di động",
+   reviewerId:"admin-16",reviewedAt:"2026-10-14T09:00:00Z"}
+ ]};
+ assert.deepEqual(history(db,{search:"MINH"}).reviews.map(x=>x.id),["a"]);
+ assert.deepEqual(history(db,{search:"nguyen"}).reviews.map(x=>x.id),["a"]);
+ assert.deepEqual(history(db,{search:"lan@example.test"}).reviews.map(x=>x.id),["b"]);
+ assert.deepEqual(history(db,{search:"ADMIN-27"}).reviews.map(x=>x.id),["a"]);
+ assert.deepEqual(history(db,{search:"bảo mật"}).reviews.map(x=>x.id),["a"]);
+ assert.deepEqual(history(db,{search:"bao mat"}).reviews.map(x=>x.id),["a"]);
+ assert.deepEqual(history(db,{search:"di động",status:"reviewed"}).reviews,[]);
+ assert.equal(history(db,{search:"minh"}).summary.total,2); // Global summary unaffected.
+ assert.deepEqual(filteredHistoryRecords(db,{search:"minh"}).map(x=>x.id),["a"]);
+ assert.equal(history(db,{search:"not found"}).pagination.total,0);
+ assert.equal(parseHistoryFilters({search:"  minH  "}).search,"minH");
+ for(const q of [{search:"x".repeat(121)},{search:["a","b"]},{search:null},{search:{value:"x"}}])
+  assert.throws(()=>parseHistoryFilters(q),/Invalid device review filters/);
+});
+test("CSV export is scoped, formula-safe, UTF-8, and does not reveal IP or device ID",()=>{
+ const db={users:[{id:"u1",name:"=HYPERLINK",email:"me@test.local"},
+  {id:"u2",name:"Other",email:"other@test.local"}],deviceSecurityReviews:[
+  {id:"r1",userId:"u1",type:"ip-change",status:"reviewed",
+   reason:'=SUM(1,2)\nSecond line "quoted"',reviewerId:"+cmd",
+   reviewedAt:"2026-10-14T10:00:00Z"},
+  {id:"r2",userId:"u2",type:"new-device",status:"dismissed",reason:"Check",
+   reviewerId:"admin-2",reviewedAt:"2026-10-10T09:00:00Z"}
+ ],loginDevices:[{deviceId:"raw-device-secret",ip:"192.0.2.42"}]};
+ const csv=exportJournalCsv(db,{userId:"u1",search:"=SUM"},Date.parse("2026-10-15T00:00:00Z"));
+ assert.ok(csv.startsWith("\uFEFF"));
+ assert.ok(csv.includes('"\'=SUM(1,2) Second line ""quoted"""'));
+ assert.ok(csv.includes('"\'=HYPERLINK"'));
+ assert.ok(csv.includes('"\'"+cmd"'));
+ assert.ok(csv.includes("Thay đổi IP"));
+ assert.equal(csv.includes("192.0.2.42"),false);
+ assert.equal(csv.includes("raw-device-secret"),false);
+ assert.equal(csv.includes("Other"),false);
+ assert.equal(csv.trim().split("\r\n").length,2);
+ const noRows=exportJournalCsv(db,{userId:"u1",status:"dismissed"});
+ assert.equal(noRows.trim().split("\r\n").length,1);
+ const big={users:[{id:"u1",name:"Test"}],
+  deviceSecurityReviews:Array.from({length:2001},(_,i)=>({id:"d"+i,userId:"u1",
+   status:"reviewed",type:"ip-change",reason:"Test",reviewerId:"admin",
+   reviewedAt:"2026-10-15T00:00:00Z"}))};
+ assert.throws(()=>exportJournalCsv(big,{}),e=>e.status===413);
+});
+test("CSV export API requires Admin and rejects invalid filters before reading history",async()=>{
+ const old=process.env.DATABASE_URL;process.env.DATABASE_URL="postgres://mock.invalid/db";
+ const state={users:[{id:"u1",name:"Minh"}],deviceSecurityReviews:[
+  {id:"r1",userId:"u1",type:"new-device",status:"reviewed",reason:"Đã kiểm tra",
+   reviewerId:"admin",reviewedAt:"2026-10-15T00:00:00Z"}
+ ]};
+ let reads=0,reply,allowed=true,head,body;
+ const ctx={requireUser:async()=>allowed?{id:"admin",role:"admin"}:null,
+  pg:{loadAppState:async()=>{reads++;return state}},
+  send:(_res,status,data)=>{reply={status,data}}};
+ const res={writeHead:(status,headers)=>{head={status,headers}},end:data=>{body=data}};
+ try{
+  for(const q of ["search="+("x".repeat(121)),"search=a&search=b","status=other"]){
+   await route({method:"GET",url:"/api/admin/device-reviews/export?"+q},res,
+    "/api/admin/device-reviews/export",ctx);
+   assert.equal(reply.status,400);
+  }
+  assert.equal(reads,0);
+  await route({method:"GET",url:"/api/admin/device-reviews/export?userId=u1"},res,
+   "/api/admin/device-reviews/export",ctx);
+  assert.equal(reads,1);
+  assert.equal(head.status,200);
+  assert.equal(head.headers["Cache-Control"],"private, no-store");
+  assert.match(head.headers["Content-Type"],/text\/csv/);
+  assert.match(body,/Đã kiểm tra/);
+  allowed=false;
+  head=null;
+  await route({method:"GET",url:"/api/admin/device-reviews/export"},res,
+   "/api/admin/device-reviews/export",ctx);
+  assert.equal(head,null);
   assert.equal(reads,1);
  }finally{if(old===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=old}
 });
