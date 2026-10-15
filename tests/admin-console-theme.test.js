@@ -2,11 +2,11 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
 const root=path.join(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p),"utf8");
-test("Admin theme is lazy and ordered after its feature-specific CSS",()=>{
+test("Admin theme is lazy and account-specific CSS overrides the shared Admin theme",()=>{
  const h=read("index.html"),loader=read("js/perf/loader.js");
  for(const f of ["admin-users.css","admin-results.css","admin-console.css","admin-audit.css"])
   assert.equal(h.includes('href="css/'+f+'"'),false,"Admin styles must not block guest home: "+f);
- assert.ok(loader.includes('adminUsers:["/css/admin-users.css","/css/admin-console.css"]'));
+ assert.ok(loader.includes('adminUsers:["/css/admin-console.css","/css/admin-users.css"]'));
  assert.ok(loader.includes('adminResults:["/css/admin-results.css","/css/admin-console.css"]'));
  assert.ok(loader.includes('adminAudit:["/css/admin-console.css","/css/admin-audit.css"]'));
 });
