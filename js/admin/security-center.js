@@ -2,7 +2,7 @@
 window.AdminSecurity=(()=>{
  const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const time=s=>{const t=Date.parse(s||"");return Number.isFinite(t)?new Date(t).toLocaleString("vi-VN"):"—"};
- const history={page:1,search:""};
+ const history={page:1,search:"",status:"all"};
  const perm=[
   ["viewUsers","Xem tài khoản"],["manageRegularUsers","Quản lý người dùng thông thường"],
   ["viewAudit","Xem nhật ký"],["exportGrades","Xuất bảng điểm"],
@@ -11,21 +11,40 @@ window.AdminSecurity=(()=>{
  async function crossAccountHistory(){
   const q=new URLSearchParams({page:String(history.page)});
   if(history.search)q.set("search",history.search);
+  if(history.status!=="all")q.set("status",history.status);
   try{
    const j=await API.get("/api/admin/device-logs?"+q.toString(),{noCache:true,cancelPrevious:false});
    const rows=(j.devices||[]).map(d=>'<tr><td><b>'+esc(d.name)+'</b><small>'+esc(d.email)+'</small></td>'+
     '<td><b>'+esc(d.device)+'</b><small>'+esc(d.browser)+'</small></td>'+
-    '<td><code>'+esc(d.ip||"Không xác định")+'</code></td><td>'+esc(time(d.lastSeenAt))+'</td></tr>').join("");
-   const pager=j.pagination||{},pages=Math.max(1,Number(pager.pages)||1);
+    '<td><code>'+esc(d.ip||"Không xác định")+'</code></td><td>'+esc(time(d.lastSeenAt))+'</td>'+
+    '<td><div class="admin-device-signals">'+
+    (d.newDevice7d?'<span class="admin-sec-chip admin-device-signal-new">Thiết bị mới 7 ngày</span>':'')+
+    (d.changedIp7d?'<span class="admin-sec-chip admin-device-signal-ip">IP đổi 7 ngày</span>':'')+
+    (!d.newDevice7d&&!d.changedIp7d?'<span class="muted">—</span>':'')+
+    '</div></td></tr>').join("");
+   const pager=j.pagination||{},pages=Math.max(1,Number(pager.pages)||1),summary=j.summary||{};
+   const metrics=[
+    ["👥", "Tài khoản có thiết bị",summary.uniqueAccounts],
+    ["🖥️", "Thiết bị đã ghi nhận",summary.totalDevices],
+    ["🕒", "Hoạt động 24 giờ",summary.recent24h],
+    ["✨", "Thiết bị mới 7 ngày",summary.newDevices7d],
+    ["🔄", "Thiết bị đổi IP 7 ngày",summary.changedIp7d]
+   ].map(([icon,label,count])=>'<div class="admin-device-metric"><span aria-hidden="true">'+icon+'</span>'+
+    '<strong>'+((count===undefined||count===null)?"—":Number(count).toLocaleString("vi-VN"))+'</strong>'+
+    '<small>'+label+'</small></div>').join("");
+   const choices=[["all","Tất cả thiết bị"],["recent","Có hoạt động 24 giờ"],["new-device","Thiết bị mới 7 ngày"],["ip-change","IP thay đổi 7 ngày"]];
+   const options=choices.map(([value,label])=>'<option value="'+value+'" '+(history.status===value?"selected":"")+'>'+label+'</option>').join("");
    return '<section class="panel admin-sec-panel admin-device-history"><div class="admin-sec-heading"><h2>🌐 IP và thiết bị của các tài khoản</h2></div>'+
-    '<p class="admin-device-description">Chỉ Admin xem được lịch sử đăng nhập đã ghi nhận của người dùng. IP có thể thuộc VPN hoặc mạng dùng chung, không xác định chính xác vị trí. Không bao gồm token hoặc mã thiết bị.</p>'+
+    '<p class="admin-device-description">Đây là dấu vết thiết bị đã ghi nhận, không phải lượt đăng nhập hay phiên online. IP thay đổi có thể do Wi-Fi, mạng di động hoặc VPN; không tự động kết luận đáng ngờ.</p>'+
+    '<div class="admin-device-metrics" aria-label="Thống kê lịch sử thiết bị">'+metrics+'</div>'+
     '<form id="adminDeviceSearchForm" class="admin-device-filter"><label>Tìm theo tên, email, IP hoặc thiết bị'+
     '<input name="search" type="search" maxlength="100" value="'+esc(history.search)+'" placeholder="VD: email học sinh hoặc 192.0.2..." autocomplete="off"></label>'+
-    '<button type="submit" class="primary">🔎 Tìm thiết bị</button></form>'+
+    '<label>Loại lịch sử<select name="status" aria-label="Lọc loại lịch sử thiết bị">'+options+'</select></label>'+
+    '<button type="submit" class="primary">🔎 Áp dụng</button></form>'+
     '<p class="muted">'+Number(pager.total||0)+' thiết bị khớp bộ lọc • '+(j.source==="postgres"?"Dữ liệu dùng chung PostgreSQL":"Dữ liệu máy chủ hiện tại")+'</p>'+
     '<div class="table-wrap" tabindex="0" aria-label="Danh sách thiết bị và IP đã đăng nhập"><table><thead><tr>'+
-    '<th>Tài khoản</th><th>Thiết bị / trình duyệt</th><th>Địa chỉ IP</th><th>Gần nhất</th></tr></thead><tbody>'+
-    (rows||'<tr><td colspan="4">Chưa ghi nhận thiết bị nào phù hợp. Người dùng cần đăng nhập để hệ thống ghi nhận.</td></tr>')+
+    '<th>Tài khoản</th><th>Thiết bị / trình duyệt</th><th>Địa chỉ IP</th><th>Gần nhất</th><th>Dấu hiệu</th></tr></thead><tbody>'+
+    (rows||'<tr><td colspan="5">Chưa ghi nhận thiết bị nào phù hợp. Người dùng cần đăng nhập để hệ thống ghi nhận.</td></tr>')+
     '</tbody></table></div><div class="admin-device-pager"><button type="button" id="adminDevicePrev" class="outline" '+(history.page<=1?"disabled":"")+'>← Trước</button>'+
     '<span>Trang '+history.page+'/'+pages+'</span><button type="button" id="adminDeviceNext" class="outline" '+(pager.hasMore?"":"disabled")+'>Tiếp →</button></div></section>';
   }catch(e){
@@ -65,7 +84,8 @@ window.AdminSecurity=(()=>{
   document.querySelector("#adminSecurityReload")?.addEventListener("click",render);
   document.querySelector("#adminDeviceSearchForm")?.addEventListener("submit",e=>{
    e.preventDefault();const value=String(new FormData(e.currentTarget).get("search")||"").trim();
-   history.search=value.slice(0,100);history.page=1;render();
+   const nextStatus=String(new FormData(e.currentTarget).get("status")||"all");
+   history.search=value.slice(0,100);history.status=nextStatus;history.page=1;render();
   });
   document.querySelector("#adminDevicePrev")?.addEventListener("click",()=>{
    history.page=Math.max(1,history.page-1);render();
