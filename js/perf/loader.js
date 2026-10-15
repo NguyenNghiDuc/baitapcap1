@@ -10,7 +10,7 @@ window.PerfLoader=(()=>{
   adminBackup:["/css/admin-console.css","/css/admin-backup.css"],
   adminIntegrity:["/css/admin-console.css","/css/admin-integrity.css"],
   admin:["/css/admin-console.css"],
-  adminUsers:["/css/admin-users.css","/css/admin-console.css"],
+  adminUsers:["/css/admin-console.css","/css/admin-users.css"],
   adminResults:["/css/admin-results.css","/css/admin-console.css"],
   history:["/css/admin-results.css","/css/admin-console.css"], // applied only if role is Admin; see ensureRoute
   adminAudit:["/css/admin-console.css","/css/admin-audit.css"],
@@ -50,7 +50,7 @@ window.PerfLoader=(()=>{
   historyCompare:["/js/student/history-compare.js"],performanceMode:["/js/student/performance-mode.js"],chapterAchievements:["/js/student/chapter-achievements.js"],
   materials:["/js/perf/image-opt.js","/js/supabase/storage.js","/js/teacher/material-storage.js"]
  };
- async function versioned(src){if(!hashPromise)hashPromise=Promise.race([fetch("/asset-hashes.json",{cache:"force-cache"}).then(r=>r.ok?r.json():null).catch(()=>null),new Promise(resolve=>setTimeout(()=>resolve(null),350))]);const m=await hashPromise,h=m?.hashes?.[src];return h?src+"?h="+h:src}
+ async function versioned(src){if(!hashPromise)hashPromise=Promise.race([fetch("/asset-hashes.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),new Promise(resolve=>setTimeout(()=>resolve(null),1500))]);const m=await hashPromise,h=m?.hashes?.[src];return h?src+"?h="+h:src}
  async function script(src){
   if(loaded.has(src))return loaded.get(src);
   if(document.querySelector(`script[data-lazy-src="${src}"]`))return Promise.resolve();

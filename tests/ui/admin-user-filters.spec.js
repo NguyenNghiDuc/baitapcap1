@@ -41,6 +41,26 @@ test("Admin users filter role and locked accounts and reset without losing manag
  await expect(page.locator('[data-user-save]')).toHaveCount(4);
  await expect(page.locator(".admin-users-role-card")).toHaveCount(6);
  await expect(page.locator(".admin-users-growth-month")).toHaveCount(6);
+ const visual=await page.evaluate(()=>{
+  const roleGrid=document.querySelector(".admin-users-role-grid");
+  const card=document.querySelector(".admin-users-role-card");
+  const bars=document.querySelector(".admin-users-growth-bars");
+  const track=document.querySelector(".admin-users-growth-track");
+  const role=getComputedStyle(roleGrid),c=getComputedStyle(card),b=getComputedStyle(bars),t=getComputedStyle(track);
+  return {roleDisplay:role.display,roleColumns:role.gridTemplateColumns.split(/\s+/).length,
+   cardDisplay:c.display,cardHeight:parseFloat(c.minHeight),
+   barsDisplay:b.display,barsColumns:b.gridTemplateColumns.split(/\s+/).length,
+   trackHeight:parseFloat(t.height),barBackground:getComputedStyle(document.querySelector(".admin-users-growth-bar")).backgroundImage};
+ });
+ expect(visual.roleDisplay).toBe("grid");
+ expect(visual.roleColumns).toBeGreaterThanOrEqual(2);
+ expect(visual.cardDisplay).toBe("flex");
+ expect(visual.cardHeight).toBeGreaterThanOrEqual(90);
+ expect(visual.barsDisplay).toBe("grid");
+ expect(visual.barsColumns).toBe(6);
+ expect(visual.trackHeight).toBeGreaterThanOrEqual(120);
+ expect(visual.barBackground).toContain("linear-gradient");
+
  await expect(page.locator(".admin-users-growth-total")).toContainText("11");
  await expect(page.locator('[aria-label="Tháng 10/26: 4 đăng ký"]')).toHaveCount(1);
  await expect(page.locator('[data-users-summary-role="student"]')).toContainText("2");

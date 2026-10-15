@@ -21,6 +21,7 @@ self.addEventListener("fetch",e=>{
  if(req.mode==="navigate")return; // Let the browser fetch pages and show real server errors instead of cached HTTP 504.
  const dest=req.destination;
  if(dest==="script"||dest==="style"){e.respondWith(u.searchParams.has("h")?cacheFirst(req):networkFirst(req,{fallback:null,timeout:4000}));return}
+ if(u.pathname==="/asset-hashes.json"){e.respondWith(networkFirst(req,{fallback:null,timeout:2200}));return}
  if(u.pathname.endsWith(".json")||u.pathname.endsWith(".webmanifest")){e.respondWith(staleWhileRevalidate(req));return}
  if(["image","font","audio"].includes(dest)){e.respondWith(cacheFirst(req));return}
  e.respondWith(staleWhileRevalidate(req))
