@@ -6,7 +6,7 @@ test("Admin theme is lazy and account-specific CSS overrides the shared Admin th
  const h=read("index.html"),loader=read("js/perf/loader.js");
  for(const f of ["admin-users.css","admin-results.css","admin-console.css","admin-audit.css"])
   assert.equal(h.includes('href="css/'+f+'"'),false,"Admin styles must not block guest home: "+f);
- assert.ok(loader.includes('adminUsers:["/css/admin-console.css","/css/admin-users.css"]'));
+ assert.ok(loader.includes('adminUsers:["/css/admin-console.css","/css/admin-users.css","/css/admin-users-overview.css"]'));
  assert.ok(loader.includes('adminResults:["/css/admin-results.css","/css/admin-console.css"]'));
  assert.ok(loader.includes('adminAudit:["/css/admin-console.css","/css/admin-audit.css"]'));
 });
