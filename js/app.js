@@ -213,6 +213,26 @@ async function teacher(){
  return '<div class="teacher-dashboard">'+
   pageHead("KHÔNG GIAN GIẢNG DẠY","Bảng điều khiển giáo viên",
    "Quản lý lớp 4–5, tạo bài tập, tổ chức kiểm tra và theo dõi tiến bộ của học sinh.")+
+  '<section class="teacher-overview" aria-label="Tổng quan công việc giáo viên">'+
+  '<div class="teacher-overview-head"><div><span class="teacher-dashboard-kicker">DỮ LIỆU CỦA TÔI</span>'+
+  '<h2>📊 Tổng quan công việc</h2><p>Chỉ tính các lớp và bài tập do tài khoản này phụ trách.</p></div>'+
+  '<button type="button" id="teacherOverviewRefresh" class="outline" aria-label="Làm mới tổng quan giáo viên">↻ Làm mới</button></div>'+
+  '<div class="teacher-overview-stats" aria-label="Thống kê công việc">'+
+  [["🏫","Lớp phụ trách","classes","classes"],["👩‍🎓","Học sinh trong lớp","students","classes"],
+   ["📚","Bài đã giao","assignments","assignments"],["📝","Bài cần chấm","pendingGrading","submissions"]]
+   .map(([icon,label,key,route])=>
+    '<button type="button" class="teacher-overview-stat teacher-overview-stat--'+key+
+    '" data-route="'+route+'" aria-label="Mở '+label+'">'+
+    '<span class="teacher-overview-stat-icon" aria-hidden="true">'+icon+'</span>'+
+    '<span class="teacher-overview-stat-detail"><strong data-teacher-count="'+key+'">—</strong>'+
+    '<small>'+label+'</small></span><span class="teacher-overview-stat-arrow" aria-hidden="true">↗</span></button>'
+   ).join("")+'</div>'+
+  '<div class="teacher-overview-recent"><div class="teacher-overview-recent-head">'+
+  '<h3>🗂️ Bài tập mới giao</h3><button type="button" class="teacher-overview-view-all" data-route="assignments">Xem tất cả →</button></div>'+
+  '<div id="teacherRecentAssignments" class="teacher-overview-recent-list" aria-live="polite">'+
+  '<p class="teacher-overview-status">Đang tải dữ liệu mới nhất…</p></div></div>'+
+  '<p id="teacherOverviewStatus" class="teacher-overview-status" role="status">Đang đồng bộ thống kê giáo viên…</p>'+
+  '</section>'+
   '<section class="teacher-dashboard-workspace" aria-label="Công cụ giảng dạy">'+
   '<div class="teacher-dashboard-section-heading"><div>'+
   '<span class="teacher-dashboard-kicker">TRUY CẬP NHANH</span>'+
@@ -393,6 +413,7 @@ function quiz(){
 }async function finishQuiz(auto=false){const z=state.quiz;let correct=0,wrong=[];z.questions.forEach(q=>{if(z.answers[q.id]===q.answer)correct++;else wrong.push(q.id)});state.lastWrong=z.questions.filter(q=>wrong.includes(q.id)).map(q=>({id:q.id,q:q.q,options:q.options,answer:q.answer,grade:q.grade,lessonId:q.lessonId,subject:q.subject,type:q.type,topic:D.lessons.find(l=>l.lessonId===q.lessonId)?.topic||(subj(q.subject).name+" • "+(q.type||"Tổng hợp")),explain:q.explain}));window.StudentReview?.add(state.lastWrong);const score=Math.round(correct/z.questions.length*100),durationSec=Math.round((Date.now()-z.start)/1000),proctor=z.examId?window.StudentExamProctor?.stop():null;window.StudentRewards?.earn(score,correct);window.StudentMastery?.record(z.questions,z.questions.filter(q=>z.answers[q.id]===q.answer).map(q=>q.id));const r={...(window.ResultAccount?.fromUser?.(state.user)||{}),id:Date.now(),title:z.customTitle||z.examId?((z.customTitle)||((D.examSets||[]).find(t=>t.examId===z.examId)?.title||`Đề tổng hợp lớp ${z.grade}`)):z.lessonId?(D.lessons.find(l=>l.lessonId===z.lessonId)?.title||`${subj(z.subject).name} lớp ${z.grade}`):`${subj(z.subject).name} lớp ${z.grade}`,subject:z.subject,grade:z.grade,correct,total:z.questions.length,score,points:correct*10,durationSec,date:new Date().toLocaleDateString("vi-VN"),isoDate:new Date().toISOString(),proctor};state.results.push(r);saveLocal();if(state.user?.role==="student"){try{r.clientSubmissionId=window.OfflineSyncQueue?.enqueueResult?.({...r,wrongQuestionIds:wrong});await window.OfflineSyncQueue?.flush?.();if(z.assignmentId)await API.post("/api/assignments/"+z.assignmentId+"/submit",{answers:z.answers,score})}catch(e){toast("Đã lưu local; sẽ tự đồng bộ khi có mạng")}}window.ExamLock?.exit();$("#content").innerHTML=`<section class="result-card"><div class="score-ring"><b>${score}%</b><span>${correct}/${z.questions.length} đúng</span></div><h1>${auto?"Hết giờ – bài đã tự nộp ⏰":score>=80?"Xuất sắc 🎉":score>=50?"Làm tốt 👍":"Ôn thêm nhé 💪"}</h1><div class="result-review">${z.questions.map((q,i)=>`<div class="review ${z.answers[q.id]===q.answer?"":"bad"}"><b>Câu ${i+1}: ${esc(q.q)}</b><p>Đáp án đúng: ${esc(q.options[q.answer])}</p><small>💡 ${esc(q.explain||"")}</small></div>`).join("")}</div><div class="quiz-actions"><button class="outline" id="analyzeWrong">🤖 AI phân tích câu sai</button><button class="outline" id="similarWrong">🔁 5 câu tương tự</button><button class="primary" id="goHistory">Xem kết quả</button></div><div id="wrongAnalysis"></div></section>`;$("#goHistory").onclick=()=>nav("history");$("#similarWrong").onclick=()=>{const src=z.questions.find(q=>wrong.includes(q.id));if(!src)return toast("Không có câu sai");startCustom(window.StudentAdaptive?.similar(src,5)||[],"5 câu tương tự")};$("#analyzeWrong").onclick=async()=>{const box=$("#wrongAnalysis");if(!state.lastWrong.length){box.innerHTML="<div class=\"panel\"><h3>🎉 Không có câu sai</h3><p>Em đã làm đúng toàn bộ bài này.</p></div>";return}if(!state.user){box.innerHTML="<div class=\"panel\"><p>Đăng nhập để AI lưu và phân tích lỗi sai theo tiến độ của em.</p></div>";return}box.innerHTML="<div class=\"panel\">Đang phân tích...</div>";try{const j=await API.post("/api/ai/analyze-wrong",{grade:z.grade,lessonId:z.lessonId,items:state.lastWrong});box.innerHTML=`<div class="panel"><h3>🎯 Chủ đề cần ôn: ${esc(j.weakTopic||"Toán")}</h3><p>${esc(j.summary||"")}</p>${j.ai?`<p>${esc(j.ai)}</p>`:""}<ol>${(j.plan||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`}catch(e){box.innerHTML=`<div class="panel"><p>${esc(e.message)}</p></div>`}};state.quiz=null;localStorage.removeItem("bt_quiz");window.OfflineSyncQueue?.clearDraft?.()}
 function openAuth(){return window.AuthUI?.open("login")}
 function bind(){
+ if(state.route==="teacher")window.TeacherOverview?.bind?.();
  bindAdminPresence();
  // Open immediately on mobile while preserving the direct-link fallback.
  const registerLink=$("#registerBtn");

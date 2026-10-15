@@ -9,6 +9,7 @@ const handleAdminResultReviews=require("./routes/admin-result-reviews");
 const handleAdminAudit=require("./routes/admin-audit");
 const handleAdminSecurity=require("./routes/admin-security");
 const handleAdminDeviceReviews=require("./routes/admin-device-reviews");
+const handleTeacherOverview=require("./routes/teacher-overview");
 const handleAdminBackup=require("./routes/admin-backup");
 const handleAdminIntegrity=require("./routes/admin-integrity");
 const handleClassInsights=require("./routes/class-insights");
@@ -169,6 +170,7 @@ async function api(req,res,p,ip){
  if(req.method==="POST"&&p==="/api/reset-password"){let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const r=resetTokens.get(String(d.token||""));if(!r||r.exp<Date.now())return send(res,400,{error:"Mã đặt lại không hợp lệ hoặc đã hết hạn"});if(String(d.password||"").length<8)return send(res,400,{error:"Mật khẩu tối thiểu 8 ký tự"});const db=load(),u=db.users.find(x=>x.id===r.uid);u.password=hashPassword(String(d.password));resetTokens.delete(String(d.token));audit(db,u,"password_reset");save(db);return send(res,200,{ok:true})}
  if(req.method==="POST"&&p==="/api/verify-email")return send(res,501,{error:"Xác minh email chưa được cấu hình. Không thể tự xác minh."})
 
+ if(await handleTeacherOverview(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(req.method==="GET"&&p==="/api/classes"){const u=await requireUser(req,res);if(!u)return;const db=load();const list=u.role==="admin"?db.classes:u.role==="teacher"?db.classes.filter(c=>c.teacherId===u.id):u.role==="student"?db.classes.filter(c=>c.studentIds?.includes(u.id)):db.classes.filter(c=>c.studentIds?.some(s=>u.children?.includes(s)));return send(res,200,{classes:list})}
  if(req.method==="POST"&&p==="/api/classes"){const u=await requireUser(req,res,["teacher","admin"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),c={id:id(),name:String(d.name||"Lớp học").slice(0,80),grade:Number(d.grade)||1,teacherId:u.id,code:crypto.randomBytes(3).toString("hex").toUpperCase(),studentIds:[],createdAt:new Date().toISOString()};db.classes.push(c);audit(db,u,"class_created",{classId:c.id});save(db);return send(res,201,{class:c})}
  if(req.method==="POST"&&p==="/api/classes/join"){const u=await requireUser(req,res,["student"]);if(!u)return;let d;try{d=await parseBody(req)}catch{return send(res,400,{error:"Dữ liệu không hợp lệ"})}const db=load(),c=db.classes.find(x=>x.code===String(d.code||"").trim().toUpperCase());if(!c)return send(res,404,{error:"Không tìm thấy mã lớp"});c.studentIds=[...new Set([...(c.studentIds||[]),u.id])];audit(db,u,"class_joined",{classId:c.id});save(db);return send(res,200,{class:c})}

@@ -22,6 +22,7 @@ window.PerfLoader=(()=>{
   submissions:["/css/grade-reviews.css","/css/admin-console.css"]
  };
  const routeFiles={
+  teacher:["/js/teacher/overview.js"],
   classInsights:["/js/teacher/class-insights.js"],
   gradeReviews:["/js/teacher/grade-reviews.js"],
   adminCenter:["/js/admin/center.js"],
