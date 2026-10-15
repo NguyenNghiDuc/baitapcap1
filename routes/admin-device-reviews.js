@@ -1,7 +1,7 @@
 "use strict";
 const {URL}=require("node:url");
 const {execute,readLatest}=require("../lib/grade-mutation");
-const {history,validateDecision,decide}=require("../lib/admin-device-reviews");
+const {history,parseHistoryFilters,validateDecision,decide}=require("../lib/admin-device-reviews");
 const HEADERS={"Cache-Control":"private, no-store"};
 module.exports=async function handler(req,res,p,ctx){
  if(p!=="/api/admin/device-reviews")return false;
@@ -11,12 +11,20 @@ module.exports=async function handler(req,res,p,ctx){
  if(req.method==="GET"){
   try{
    const q=new URL(req.url,"http://localhost").searchParams;
-   if(["page","status","userId"].some(k=>q.getAll(k).length>1)){
+   if(["page","status","userId","type","period"].some(k=>q.getAll(k).length>1)){
+    send(res,400,{error:"Bộ lọc lịch sử không hợp lệ"},HEADERS);return true;
+   }
+   let filters;
+   try{
+    filters=parseHistoryFilters({
+     page:q.get("page")??"1",status:q.get("status")??"all",
+     userId:q.get("userId")??"",type:q.get("type")??"all",period:q.get("period")??"all"
+    });
+   }catch{
     send(res,400,{error:"Bộ lọc lịch sử không hợp lệ"},HEADERS);return true;
    }
    const db=await readLatest(ctx);
-   send(res,200,history(db,{page:q.get("page")??"1",
-    status:q.get("status")??"all",userId:q.get("userId")??""}),HEADERS);
+   send(res,200,history(db,filters),HEADERS);
   }catch(e){
    send(res,/Invalid device review filters/.test(e.message)?400:503,
     {error:"Không đọc được lịch sử xem xét hoặc bộ lọc không hợp lệ."},HEADERS);

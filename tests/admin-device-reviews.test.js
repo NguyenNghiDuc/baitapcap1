@@ -1,6 +1,6 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
-const {activeObservations,findObservation,history,validateDecision,decide}=require("../lib/admin-device-reviews");
+const {activeObservations,findObservation,history,parseHistoryFilters,validateDecision,decide}=require("../lib/admin-device-reviews");
 const route=require("../routes/admin-device-reviews");
 const user={id:"admin",role:"admin"};
 const makeDb=()=>({users:[{id:"u1",name:"Minh Anh",role:"student"},{id:"u2",name:"Lan",role:"student"}],
@@ -90,4 +90,71 @@ test("API denies students and protects records with PostgreSQL transaction clien
   await route({url:"/api/admin/device-reviews",method:"POST"}, {block:true}, "/api/admin/device-reviews",ctx);
   assert.equal(response.status,403);
  }finally{if(prior===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=prior}
+});
+
+test("Admin journal combines status, type, account, time and stable paging",()=>{
+ const now=Date.parse("2026-10-15T12:00:00.000Z"),DAY=86400000;
+ const at=(days)=>new Date(now-days*DAY).toISOString();
+ const db={users:[{id:"u1",name:"Minh Anh"},{id:"u2",name:"Lan"}],deviceSecurityReviews:[
+  {id:"r1",userId:"u1",type:"new-device",status:"reviewed",reason:"Checked",
+   reviewerId:"admin",reviewedAt:at(0.5)},
+  {id:"r2",userId:"u1",type:"ip-change",status:"dismissed",reason:"Roaming",
+   reviewerId:"admin",reviewedAt:at(7)},
+  {id:"r3",userId:"u1",type:"ip-change",status:"reviewed",reason:"Checked",
+   reviewerId:"admin",reviewedAt:at(30)},
+  {id:"r4",userId:"u2",type:"new-device",status:"dismissed",reason:"Known",
+   reviewerId:"admin",reviewedAt:at(91)},
+  {id:"r5",userId:"u2",type:"new-device",status:"reviewed",reason:"No timestamp",
+   reviewerId:"admin",reviewedAt:null},
+  {id:"r6",userId:"u1",type:"new-device",status:"reviewed",reason:"Future",
+   reviewerId:"admin",reviewedAt:at(-1)}
+ ]};
+ const scoped=history(db,{userId:"u1",status:"reviewed",type:"ip-change",period:"30d"},now);
+ assert.deepEqual(scoped.reviews.map(r=>r.id),["r3"]);
+ assert.equal(scoped.pagination.total,1);
+ assert.equal(scoped.summary.total,4);
+ assert.equal(scoped.summary.reviewed,3);
+ assert.equal(scoped.summary.dismissed,1);
+ assert.equal(scoped.summary.newDevice,2);
+ assert.equal(scoped.summary.ipChange,2);
+ assert.equal(scoped.summary.last30d,3);
+ assert.deepEqual(history(db,{userId:"u1",period:"7d"},now).reviews.map(r=>r.id),["r1","r2"]);
+ assert.equal(history(db,{period:"24h"},now).pagination.total,1);
+ assert.equal(history(db,{period:"90d",status:"dismissed"},now).pagination.total,1);
+ assert.equal(history(db,{type:"new-device",userId:"u2"},now).pagination.total,2);
+ assert.equal(history(db,{userId:"u1",page:2},now).reviews.length,0);
+});
+test("Journal page limits, unsupported intervals and parameter injection are rejected",()=>{
+ for(const query of [
+  {page:"0"},{page:"-1"},{page:"2.5"},{page:"1abc"},
+  {page:["1","2"]},{page:"10001"},{page:1.2},
+  {status:"unknown"},{status:["reviewed","dismissed"]},
+  {type:"hacking"},{type:["new-device","ip-change"]},
+  {period:"365d"},{period:""},{period:["all","7d"]},
+  {period:null},{userId:["u1","u2"]},{userId:"x".repeat(129)}
+ ])assert.throws(()=>parseHistoryFilters(query),/Invalid device review filters/);
+ assert.deepEqual(parseHistoryFilters({}),{
+  page:1,status:"all",userId:"",period:"all",type:"all"
+ });
+});
+test("Admin journal GET rejects repeated and invalid query filters before querying PostgreSQL",async()=>{
+ const old=process.env.DATABASE_URL;process.env.DATABASE_URL="postgres://mock.invalid/db";
+ let reads=0,reply,allowed=true;
+ const ctx={requireUser:async()=>allowed?{id:"admin",role:"admin"}:null,
+  pg:{loadAppState:async()=>{reads++;return {users:[],deviceSecurityReviews:[]}}},
+  send:(_res,status,data)=>{reply={status,data}}};
+ try{
+  for(const query of ["status=reviewed&status=dismissed","type=ip-change&type=new-device",
+   "period=24h&period=7d","period=365d","page=1abc","userId="+("a".repeat(129))]){
+   await route({method:"GET",url:"/api/admin/device-reviews?"+query},{},
+    "/api/admin/device-reviews",ctx);
+   assert.equal(reply.status,400,query);
+  }
+  assert.equal(reads,0);
+  await route({method:"GET",url:"/api/admin/device-reviews?period=7d&type=ip-change"},{},
+   "/api/admin/device-reviews",ctx);
+  assert.equal(reply.status,200);
+  assert.equal(reply.data.filters.period,"7d");
+  assert.equal(reads,1);
+ }finally{if(old===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=old}
 });

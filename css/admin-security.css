@@ -205,3 +205,67 @@
  #content[data-admin-view="adminSecurity"] .admin-device-review-form{padding:14px 12px}
  #content[data-admin-view="adminSecurity"] .admin-device-review-actions button{flex:1}
 }
+
+
+/* Admin security journal: compact decision counters and responsive filters. */
+#content[data-admin-view="adminSecurity"] .admin-device-review-stats{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-stat{
+ display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:10px;row-gap:4px;
+ padding:14px 15px;border:1px solid var(--line);border-radius:14px;
+ background:linear-gradient(130deg,rgba(251,155,68,.1),transparent),var(--surface);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-stat>span{
+ grid-row:span 2;display:grid;place-items:center;width:36px;height:36px;
+ border-radius:11px;background:rgba(244,137,57,.12);font-size:19px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-stat strong{
+ font-size:22px;font-weight:850;color:var(--text);font-variant-numeric:tabular-nums;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-stat small{
+ font-size:10px;line-height:1.5;color:var(--muted);font-weight:700;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-filters{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:11px;align-items:end;
+ background:var(--surface2);border:1px solid var(--line);padding:15px;
+ border-radius:15px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-filters label{
+ display:grid;gap:7px;min-width:0;font-size:11px;font-weight:800;color:var(--text);
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-filters select{
+ min-width:0;width:100%;min-height:43px;border-radius:10px;border:1px solid var(--line);
+ padding:9px 11px;background:var(--surface);color:var(--text);font-size:12px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-filters select:focus-visible,
+#content[data-admin-view="adminSecurity"] .admin-device-review-filters button:focus-visible{
+ outline:3px solid rgba(242,135,48,.48);outline-offset:2px;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-filter-actions{
+ display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-filter-actions button{
+ min-height:43px;padding:8px 13px;border-radius:10px;white-space:nowrap;
+}
+#content[data-admin-view="adminSecurity"] .admin-device-review-count{
+ margin:0;font-size:11px;line-height:1.6;color:var(--muted);
+}
+@media(max-width:1180px){
+ #content[data-admin-view="adminSecurity"] .admin-device-review-filters{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+ #content[data-admin-view="adminSecurity"] .admin-device-review-filter-actions{grid-column:1/-1}
+}
+@media(max-width:700px){
+ #content[data-admin-view="adminSecurity"] .admin-device-review-stats{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+ #content[data-admin-view="adminSecurity"] .admin-device-review-filters{grid-template-columns:1fr}
+ #content[data-admin-view="adminSecurity"] .admin-device-review-filter-actions{
+  grid-column:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+@media(max-width:390px){
+ #content[data-admin-view="adminSecurity"] .admin-device-review-filter-actions{grid-template-columns:1fr}
+}

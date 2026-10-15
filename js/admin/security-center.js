@@ -2,7 +2,7 @@
 window.AdminSecurity=(()=>{
  const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const time=s=>{const t=Date.parse(s||"");return Number.isFinite(t)?new Date(t).toLocaleString("vi-VN"):"—"};
- const history={page:1,search:"",status:"all",userId:"",period:"all",reviewPage:1,reviewId:""};
+ const history={page:1,search:"",status:"all",userId:"",period:"all",reviewPage:1,reviewId:"",reviewStatus:"all",reviewType:"all",reviewPeriod:"all"};
  let reviewError="";
  const perm=[
   ["viewUsers","Xem tài khoản"],["manageRegularUsers","Quản lý người dùng thông thường"],
@@ -15,7 +15,7 @@ window.AdminSecurity=(()=>{
   if(focus){
    delete window.AdminDeviceAccountFocus;
    if(typeof focus.userId==="string"&&focus.userId.length<=128){
-    history.userId=focus.userId;history.page=1;history.search="";history.status="all";history.period="all";history.reviewPage=1;history.reviewId="";reviewError="";
+    history.userId=focus.userId;history.page=1;history.search="";history.status="all";history.period="all";history.reviewPage=1;history.reviewStatus="all";history.reviewType="all";history.reviewPeriod="all";history.reviewId="";reviewError="";
    }
   }
   const q=new URLSearchParams({page:String(history.page)});
@@ -27,6 +27,9 @@ window.AdminSecurity=(()=>{
    const j=await API.get("/api/admin/device-logs?"+q.toString(),{noCache:true,cancelPrevious:false});
    const reviewsQuery=new URLSearchParams({page:String(history.reviewPage)});
    if(history.userId)reviewsQuery.set("userId",history.userId);
+   if(history.reviewStatus!=="all")reviewsQuery.set("status",history.reviewStatus);
+   if(history.reviewType!=="all")reviewsQuery.set("type",history.reviewType);
+   if(history.reviewPeriod!=="all")reviewsQuery.set("period",history.reviewPeriod);
    const journal=await API.get("/api/admin/device-reviews?"+reviewsQuery.toString(),
     {noCache:true,cancelPrevious:false}).catch(()=>({reviews:[],pagination:{page:1,total:0,pages:0,hasMore:false},error:true}));
    const reviewButtons=d=>(d.observations||[]).map(o=>{
@@ -60,10 +63,35 @@ window.AdminSecurity=(()=>{
     '<p>'+esc(r.type==="ip-change"?"Thay đổi IP":"Thiết bị mới")+' · '+esc(time(r.reviewedAt))+'</p>'+
     '<p class="admin-device-review-reason">'+esc(r.reason)+'</p>'+
     '<small>Người xử lý: '+esc(r.reviewerId)+'</small></article>').join("");
+   const journalSummary=journal.summary||{};
+   const selectOptions=(items,current)=>items.map(([value,label])=>
+    '<option value="'+value+'" '+(current===value?"selected":"")+'>'+label+'</option>').join("");
+   const reviewFilters='<form id="adminDeviceReviewFilters" class="admin-device-review-filters" aria-label="Lọc nhật ký xử lý">'+
+    '<label>Kết luận<select name="status" aria-label="Lọc kết luận nhật ký">'+
+    selectOptions([["all","Tất cả kết luận"],["reviewed","Đã kiểm tra"],["dismissed","Đã bỏ qua"]],history.reviewStatus)+
+    '</select></label>'+
+    '<label>Loại dấu hiệu<select name="type" aria-label="Lọc loại dấu hiệu nhật ký">'+
+    selectOptions([["all","Tất cả loại"],["new-device","Thiết bị mới"],["ip-change","Đổi IP"]],history.reviewType)+
+    '</select></label>'+
+    '<label>Thời gian xử lý<select name="period" aria-label="Lọc thời gian xử lý">'+
+    selectOptions([["all","Toàn bộ lịch sử"],["24h","24 giờ qua"],["7d","7 ngày qua"],["30d","30 ngày qua"],["90d","90 ngày qua"]],history.reviewPeriod)+
+    '</select></label>'+
+    '<div class="admin-device-review-filter-actions"><button type="submit" class="primary">🔎 Lọc nhật ký</button>'+
+    '<button type="button" id="adminDeviceReviewResetFilters" class="outline">↺ Xóa lọc</button></div></form>';
+   const journalCards='<div class="admin-device-review-stats" aria-label="Thống kê quyết định bảo mật">'+
+    [["📋","Tổng đã xử lý",journalSummary.total],["✅","Đã kiểm tra",journalSummary.reviewed],
+     ["↩️","Đã bỏ qua",journalSummary.dismissed],["🗓️","30 ngày gần nhất",journalSummary.last30d]]
+    .map(([icon,label,n])=>'<div class="admin-device-review-stat"><span aria-hidden="true">'+icon+'</span>'+
+      '<strong>'+(Number.isFinite(Number(n))?Number(n).toLocaleString("vi-VN"):"—")+'</strong>'+
+      '<small>'+label+'</small></div>').join("")+'</div>';
    const reviewJournal='<section class="panel admin-sec-panel admin-device-review-journal">'+
     '<div class="admin-sec-heading"><h2>📋 Nhật ký xử lý dấu hiệu</h2><span class="muted">'+
     Number(journal.pagination?.total||0)+' quyết định</span></div>'+
-    '<p class="muted">Lưu quyết định của Admin và lý do, không lưu thêm IP cũ hoặc mã thiết bị. Không tự động khóa tài khoản.</p>'+
+    '<p class="muted">Lưu quyết định của Admin và lý do, không lưu thêm IP cũ hoặc mã thiết bị. Không tự động khóa tài khoản. '+
+    'Bộ lọc thời gian tính theo thời điểm Admin xử lý, không phải thời điểm đăng nhập.</p>'+
+    journalCards+reviewFilters+
+    '<p class="admin-device-review-count">'+Number(journal.pagination?.total||0)+' kết quả phù hợp / '+
+      Number(journalSummary.total||0)+' quyết định trong phạm vi đang xem</p>'+
     (journal.error?'<p role="alert">Không tải được lịch sử xử lý. Vui lòng thử tải lại.</p>':
       historyRows||'<p class="muted">Chưa có quyết định xử lý nào.</p>')+
     '<div class="admin-device-pager"><button type="button" class="outline" id="adminDeviceReviewPrev" '+
@@ -142,7 +170,7 @@ window.AdminSecurity=(()=>{
  function bind(render){
   document.querySelector("#adminSecurityReload")?.addEventListener("click",render);
   document.querySelector("#adminDeviceClearAccount")?.addEventListener("click",()=>{
-   history.userId="";history.search="";history.status="all";history.period="all";history.page=1;history.reviewPage=1;history.reviewId="";reviewError="";render();
+   history.userId="";history.search="";history.status="all";history.period="all";history.page=1;history.reviewPage=1;history.reviewStatus="all";history.reviewType="all";history.reviewPeriod="all";history.reviewId="";reviewError="";render();
   });
   document.querySelector("#adminDeviceSearchForm")?.addEventListener("submit",e=>{
    e.preventDefault();const value=String(new FormData(e.currentTarget).get("search")||"").trim();
@@ -177,6 +205,18 @@ window.AdminSecurity=(()=>{
     if(!message.parentElement)form.appendChild(message);
     button.disabled=false;
    }
+  });
+  document.querySelector("#adminDeviceReviewFilters")?.addEventListener("submit",e=>{
+   e.preventDefault();
+   const values=new FormData(e.currentTarget);
+   history.reviewStatus=String(values.get("status")||"all");
+   history.reviewType=String(values.get("type")||"all");
+   history.reviewPeriod=String(values.get("period")||"all");
+   history.reviewPage=1;history.reviewId="";reviewError="";render();
+  });
+  document.querySelector("#adminDeviceReviewResetFilters")?.addEventListener("click",()=>{
+   history.reviewStatus="all";history.reviewType="all";history.reviewPeriod="all";
+   history.reviewPage=1;history.reviewId="";reviewError="";render();
   });
   document.querySelector("#adminDeviceReviewPrev")?.addEventListener("click",()=>{
    history.reviewPage=Math.max(1,history.reviewPage-1);render();

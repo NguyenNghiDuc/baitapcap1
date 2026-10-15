@@ -193,3 +193,62 @@ test("Admin reviews a new-device observation and reads its durable journal witho
  expect(calls).toBeGreaterThan(1);
  await expect(page.locator(".admin-device-review-journal")).not.toContainText("203.0.113.12");
 });
+
+test("Admin security journal filters by decision, type and review time, then resets them",async({page})=>{
+ const queries=[];
+ const records=[
+  {id:"s1",accountName:"Minh Anh",userId:"u1",type:"ip-change",status:"reviewed",
+   reviewerId:"admin-1",reason:"Đã kiểm tra tài khoản",reviewedAt:"2026-10-14T00:00:00Z"},
+  {id:"s2",accountName:"Lan",userId:"u2",type:"new-device",status:"dismissed",
+   reviewerId:"admin-1",reason:"Thiết bị quen thuộc",reviewedAt:"2026-09-01T00:00:00Z"}
+ ];
+ await page.route("**/api/public-config",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({supabase:{enabled:false}})
+ }));
+ await page.route("**/api/admin/security",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   permissions:{title:"Admin",ownerConfigured:false,capabilities:{}},devices:[],notice:""
+  })
+ }));
+ await page.route("**/api/admin/device-logs?**",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   devices:[],source:"postgres",summary:{totalDevices:0,uniqueAccounts:0,
+    recent24h:0,newDevices7d:0,changedIp7d:0},
+   pagination:{page:1,limit:20,total:0,pages:0,hasMore:false}
+  })
+ }));
+ await page.route("**/api/admin/device-reviews?**",r=>{
+  const q=new URL(r.request().url()).searchParams;
+  const filters={status:q.get("status")||"all",type:q.get("type")||"all",period:q.get("period")||"all"};
+  queries.push(filters);
+  const filtered=records.filter(x=>(filters.status==="all"||x.status===filters.status)&&
+   (filters.type==="all"||x.type===filters.type)&&
+   (filters.period==="all"||filters.period==="30d"&&x.id==="s1"));
+  return r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+   reviews:filtered,summary:{total:2,reviewed:1,dismissed:1,newDevice:1,ipChange:1,last30d:1},
+   pagination:{page:1,limit:10,total:filtered.length,pages:1,hasMore:false}
+  })});
+ });
+ await page.goto("/#adminSecurity");
+ await expect(page.locator("#content")).toContainText("Chỉ quản trị viên",{timeout:12000});
+ await page.evaluate(async()=>{
+  await window.SupabaseApp?.ready();
+  window.AppAuthBridge.setUser({id:"admin-1",name:"Admin",email:"admin@example.test",role:"admin"});
+ });
+ await expect(page.locator(".admin-device-review-stats .admin-device-review-stat")).toHaveCount(4,{timeout:12000});
+ await expect(page.locator(".admin-device-review-journal .admin-device-review-item")).toHaveCount(2);
+ await page.locator('#adminDeviceReviewFilters select[name="status"]').selectOption("reviewed");
+ await page.locator('#adminDeviceReviewFilters select[name="type"]').selectOption("ip-change");
+ await page.locator('#adminDeviceReviewFilters select[name="period"]').selectOption("30d");
+ await page.locator('#adminDeviceReviewFilters button[type="submit"]').click();
+ await expect(page.locator(".admin-device-review-journal .admin-device-review-item")).toHaveCount(1);
+ await expect(page.locator(".admin-device-review-journal")).toContainText("Đã kiểm tra tài khoản");
+ await expect(page.locator(".admin-device-review-journal")).not.toContainText("Thiết bị quen thuộc");
+ await expect(page.locator('#adminDeviceReviewFilters select[name="period"]')).toHaveValue("30d");
+ expect(queries).toEqual(expect.arrayContaining([{status:"reviewed",type:"ip-change",period:"30d"}]));
+ await page.locator("#adminDeviceReviewResetFilters").click();
+ await expect(page.locator(".admin-device-review-journal .admin-device-review-item")).toHaveCount(2);
+ await expect(page.locator('#adminDeviceReviewFilters select[name="status"]')).toHaveValue("all");
+ await expect(page.locator('#adminDeviceReviewFilters select[name="type"]')).toHaveValue("all");
+ await expect(page.locator('#adminDeviceReviewFilters select[name="period"]')).toHaveValue("all");
+});
