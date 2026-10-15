@@ -105,3 +105,22 @@ test("Admin device history reads PostgreSQL shared state instead of stale instan
   assert.equal(response.body.devices[0].deviceId,undefined);
  }finally{if(old===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=old}
 });
+
+
+test("Admin device-log API validates repeated, unsupported status filters",async()=>{
+ const data={users:[{id:"u",name:"Student",email:"u@example.test"}],loginDevices:[
+  {userId:"u",deviceId:"hidden",ip:"203.0.113.9",firstSeenAt:new Date().toISOString(),lastSeenAt:new Date().toISOString()}
+ ]};
+ for(const url of ["/api/admin/device-logs?status=malicious",
+  "/api/admin/device-logs?status=all&status=ip-change",
+  "/api/admin/device-logs?page=1&page=2"]){
+  const response=await req(url,{user:{id:"admin",role:"admin"},db:data});
+  assert.equal(response.output.status,400);
+  assert.equal(JSON.stringify(response.output).includes("203.0.113.9"),false);
+ }
+ const valid=await req("/api/admin/device-logs?status=new-device",{user:{id:"admin",role:"admin"},db:data});
+ assert.equal(valid.output.status,200);
+ assert.equal(valid.output.body.summary.newDevices7d,1);
+ assert.equal(valid.output.body.devices.length,1);
+ assert.equal(valid.output.body.devices[0].deviceId,undefined);
+});
