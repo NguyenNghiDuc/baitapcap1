@@ -39,3 +39,32 @@ test("Device history safely bounds filters",()=>{
  assert.equal(list(many,{page:3}).devices.length,5);
  assert.equal(list(many,{page:3}).pagination.hasMore,false);
 });
+
+
+test("Admin security metrics separate recent use, first-seen devices, and IP changes",()=>{
+ const now=Date.parse("2026-10-15T12:00:00Z");
+ const db={users:[{id:"a",name:"An",email:"an@example.test"},{id:"b",name:"Binh",email:"binh@example.test"}],
+  loginDevices:[
+   {userId:"a",deviceId:"id-one",ip:"198.51.100.1",device:"Windows",browser:"Chrome",
+    firstSeenAt:"2026-09-01T12:00:00Z",lastSeenAt:"2026-10-15T11:00:00Z",ipChangedAt:"2026-10-14T12:00:00Z"},
+   {userId:"b",deviceId:"id-two",ip:"203.0.113.1",device:"iPhone",browser:"Safari",
+    firstSeenAt:"2026-10-14T12:00:00Z",lastSeenAt:"2026-10-14T12:00:00Z"},
+   {userId:"a",deviceId:"id-three",ip:"203.0.113.3",device:"iPhone",browser:"Safari",
+    firstSeenAt:"2026-07-10T12:00:00Z",lastSeenAt:"2026-09-11T12:00:00Z"}
+  ]};
+ const result=list(db,{search:"An"},now);
+ // Search is scoped, but overview metrics always cover all observed devices.
+ assert.deepEqual(result.summary,{totalDevices:3,uniqueAccounts:2,recent24h:2,newDevices7d:1,changedIp7d:1});
+ assert.equal(result.pagination.total,2);
+ assert.equal(list(db,{status:"ip-change"},now).devices[0].ipChangedAt,"2026-10-14T12:00:00Z");
+ assert.deepEqual(list(db,{status:"ip-change"},now).devices.map(d=>d.userId),["a"]);
+ assert.deepEqual(list(db,{status:"new-device"},now).devices.map(d=>d.userId),["b"]);
+ assert.equal(list(db,{status:"recent"},now).pagination.total,2);
+ assert.equal(list(db,{status:"ip-change",search:"unmatched"},now).pagination.total,0);
+ assert.equal(JSON.stringify(list(db,{},now)).includes("id-one"),false);
+});
+test("Invalid device history statuses are rejected instead of falling back to all IPs",()=>{
+ for(const q of [{status:"compromised"},{status:["all","ip-change"]},{status:5},{status:""},{search:{"$ne":""}}])
+  assert.throws(()=>filters(q),/Bộ lọc/);
+ assert.equal(filters({status:"new-device"}).status,"new-device");
+});
