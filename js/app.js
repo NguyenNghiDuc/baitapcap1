@@ -131,6 +131,28 @@ function adminUserFilterControls(){
  '<option value="locked" '+option("locked",f.accountStatus||"")+'>Đã khóa</option></select></label>'+
  '<button type="button" class="outline" id="adminUsersResetFilters">↺ Xóa bộ lọc</button></div>';
 }
+function adminUserStats(summary){
+ const f=window.PerfLists.state("adminUsers"),roles=summary?.roles||{};
+ const cards=[
+  {key:"student",icon:"🎒",name:"Học sinh",value:roles.student||0,kind:"role"},
+  {key:"teacher",icon:"👩‍🏫",name:"Giáo viên",value:roles.teacher||0,kind:"role"},
+  {key:"parent",icon:"👨‍👩‍👧",name:"Phụ huynh",value:roles.parent||0,kind:"role"},
+  {key:"admin",icon:"🛡️",name:"Quản trị viên",value:roles.admin||0,kind:"role"},
+  {key:"active",icon:"✅",name:"Chưa khóa",value:summary?.unlocked||0,kind:"status"},
+  {key:"locked",icon:"🔒",name:"Đã khóa",value:summary?.locked||0,kind:"status"}
+ ];
+ return '<section class="admin-users-role-section" aria-label="Thống kê vai trò và trạng thái tài khoản">'+
+  '<div class="admin-users-role-heading"><div><h3>📊 Cơ cấu tài khoản</h3>'+
+  '<p>Tổng toàn hệ thống • Bấm vào thẻ để lọc danh sách bên dưới</p></div></div>'+
+  '<div class="admin-users-role-grid">'+cards.map(c=>{
+   const attr=c.kind==="role"?'data-users-summary-role="'+c.key+'"':'data-users-summary-status="'+c.key+'"';
+   const selected=(c.kind==="role"?f.role:f.accountStatus)===c.key;
+   return '<button class="admin-users-role-card'+(selected?' is-selected':'')+'" type="button" '+
+    attr+' aria-pressed="'+selected+'" aria-label="Lọc '+c.name+'"><span class="admin-users-role-icon" aria-hidden="true">'+c.icon+'</span>'+
+    '<span class="admin-users-role-copy"><strong>'+Number(c.value).toLocaleString("vi-VN")+'</strong><small>'+c.name+'</small></span>'+
+    '<span class="admin-users-role-arrow" aria-hidden="true">↗</span></button>';
+  }).join("")+'</div></section>';
+}
 async function adminUsers(){
  if(state.user?.role!=="admin")return loginRequired("Chỉ Admin được quản lý tài khoản.");
  let j;try{const filters=window.PerfLists.state("adminUsers");j=await window.PerfLists.get("adminUsers","/api/admin/users",{role:filters.role||"",accountStatus:filters.accountStatus||""})}catch(e){return errorBox(e.message)}
@@ -139,7 +161,7 @@ async function adminUsers(){
  '<article class="admin-users-stat"><span class="admin-users-stat-icon" aria-hidden="true">👥</span><div><small>Tổng tài khoản</small><strong>'+Number(j.allUsersTotal??j.pagination?.total??0).toLocaleString("vi-VN")+'</strong><span>Đã đăng ký trên hệ thống</span></div></article>'+
  '<article class="admin-users-stat admin-users-stat-online"><span class="admin-users-stat-icon" aria-hidden="true">🟢</span><div><small>Đang trực tuyến</small><strong id="adminUsersOnlineStat">'+(j.presenceAvailable?Number(j.onlineTotal||0).toLocaleString("vi-VN"):"—")+'</strong><span>Hoạt động trong 2 phút gần đây</span></div></article>'+
  '<article class="admin-users-stat"><span class="admin-users-stat-icon" aria-hidden="true">📋</span><div><small>Đang hiển thị</small><strong>'+Number(j.users?.length||0).toLocaleString("vi-VN")+'</strong><span>Tài khoản trong trang này</span></div></article>'+
- '</section>'+(j.durable?"":'<div class="panel admin-users-warning" role="alert"><b>⚠️ Chưa có PostgreSQL dùng chung.</b><p>Trên Vercel, cần cấu hình DATABASE_URL trước khi khóa/mở khóa tài khoản. Không nên sử dụng JSON cục bộ để quản lý quyền thật.</p></div>')+`
+ '</section>'+adminUserStats(j.accountSummary)+(j.durable?"":'<div class="panel admin-users-warning" role="alert"><b>⚠️ Chưa có PostgreSQL dùng chung.</b><p>Trên Vercel, cần cấu hình DATABASE_URL trước khi khóa/mở khóa tài khoản. Không nên sử dụng JSON cục bộ để quản lý quyền thật.</p></div>')+`
  <div class="panel admin-presence-summary admin-users-live-banner" id="adminPresenceSummary" role="status" data-available="${j.presenceAvailable?"1":"0"}">${j.presenceAvailable?"🟢 "+Number(j.onlineTotal||0)+" tài khoản đang online (toàn hệ thống)":"⚪ Chưa bật giám sát online: Vercel cần DATABASE_URL"}. Trạng thái online là hoạt động trên website trong khoảng 2 phút gần nhất.</div>
  <section class="panel admin-users-grant"><div class="admin-users-grant-head"><span class="admin-users-grant-icon" aria-hidden="true">🛡️</span><div><h3>Cấp quyền quản trị viên</h3><p class="muted">${j.canGrantAdmin?"Bạn đang dùng tài khoản Admin chính. Có thể cấp quyền cho tài khoản Supabase đã liên kết.":"Chỉ Admin chính đã được cấu hình mới có thể cấp quyền này."} Tài khoản nhận quyền cần đăng ký và đăng nhập website ít nhất một lần.</p></div></div><form id="grantAdminForm" class="admin-users-grant-form"><label for="grantAdminEmail">Email tài khoản<input id="grantAdminEmail" name="email" type="email" autocomplete="email" placeholder="Nhập email tài khoản cần cấp quyền" required></label><button class="primary" type="submit" ${j.canGrantAdmin?"":"disabled title='Chỉ Admin chính được cấp quyền'"}>🛡️ Cấp quyền Admin</button></form></section>
  <section class="admin-users-directory"><div class="admin-users-directory-heading"><div><span class="admin-users-eyebrow">DANH SÁCH THÀNH VIÊN</span><h3>Quản lý người dùng</h3><p>Tìm kiếm, cập nhật vai trò và quản lý trạng thái tài khoản.</p></div><span class="admin-users-count">${Number(j.pagination?.total||0)} tài khoản khớp bộ lọc</span></div>${adminUserFilterControls()}${window.PerfLists.controls("adminUsers",j.pagination,{placeholder:"🔎 Tìm tên hoặc email..."})}<div class="panel admin-users-table-card"><div class="table-wrap" tabindex="0" aria-label="Bảng quản lý tài khoản, có thể cuộn ngang"><table><thead><tr><th>Tên</th><th>Email</th><th>Vai trò</th><th>Lớp</th><th>Tài khoản</th><th>Trực tuyến</th><th>Thao tác</th></tr></thead><tbody>${j.users.map(u=>`<tr class="${u.locked?"is-locked":""}"><td><div class="admin-user-identity"><span class="admin-user-avatar" aria-hidden="true">${esc(String(u.name||u.email||"U").trim().charAt(0).toLocaleUpperCase("vi-VN"))}</span><span class="admin-user-name">${esc(u.name||"Chưa có tên")}</span></div></td><td><span class="admin-user-email">${esc(u.email)}</span></td><td><select class="admin-user-role-select" aria-label="Vai trò của ${esc(u.name||u.email)}" data-user-role="${esc(u.id)}" data-current-role="${esc(u.role)}" data-user-email="${esc(u.email)}" data-can-grant-admin="${j.canGrantAdmin?"1":"0"}">${[["student","Học sinh"],["parent","Phụ huynh"],["teacher","Giáo viên"],["admin","Quản trị viên"]].map(([r,t])=>`<option value="${r}" ${r===u.role?"selected":""} ${r==="admin"&&u.role!=="admin"&&!j.canGrantAdmin?"disabled":""}>${t}</option>`).join("")}</select></td><td><span class="admin-user-grade">${u.grade?"Lớp "+Number(u.grade):"—"}</span></td><td><span class="admin-account-state ${u.locked?"locked":"active"}">${u.locked?"🔒 Đã khóa":"✓ Hoạt động"}</span></td><td data-live-user="${esc(u.id)}">${liveBadge(u.presence,j.presenceAvailable)}</td><td><div class="admin-user-actions"><button type="button" class="outline small admin-user-save" data-user-save="${esc(u.id)}">Lưu vai trò</button><button type="button" class="outline small admin-user-lock ${u.locked?"unlock":"lock"}" data-user-lock="${esc(u.id)}" data-user-email="${esc(u.email)}" data-locked="${u.locked?"1":"0"}" ${u.id===state.user.id?"disabled title='Không thể tự khóa tài khoản'":""}>${u.locked?"🔓 Mở khóa":"🔒 Khóa tài khoản"}</button></div></td></tr>`).join("")||'<tr><td colspan="7" class="admin-users-empty">Không có tài khoản phù hợp với bộ lọc hiện tại.</td></tr>'}</tbody></table></div></div></section></div>`
@@ -334,6 +356,14 @@ function bind(){
   $("#adminUsersResetFilters")?.addEventListener("click",()=>{
    const f=window.PerfLists.state("adminUsers");f.role="";f.accountStatus="";f.search="";f.page=1;render();
   });
+  $("[data-users-summary-role]").forEach(button=>button.addEventListener("click",()=>{
+   const f=window.PerfLists.state("adminUsers"),role=button.dataset.usersSummaryRole;
+   f.role=f.role===role?"":role;f.page=1;render();
+  }));
+  $("[data-users-summary-status]").forEach(button=>button.addEventListener("click",()=>{
+   const f=window.PerfLists.state("adminUsers"),status=button.dataset.usersSummaryStatus;
+   f.accountStatus=f.accountStatus===status?"":status;f.page=1;render();
+  }));
  }
  if(state.route==="performanceMonitor")window.PerformanceMonitor?.bind?.();
  if(state.route==="history"&&state.user?.role!=="admin"&&state.results.length>250){

@@ -4,7 +4,7 @@ const loginDevices=require("./lib/login-devices");
 const apiPerformance=require("./lib/api-performance");
 const handleAdminResults=require("./routes/admin-results");
 const {parseUserFilters,applyUserFilters}=require("./lib/admin-user-filters");
-const {readAdminUserPage,loadAdminUserPage}=require("./lib/admin-user-directory");
+const {readAdminUserPage,loadAdminUserPage,summarizeUsers}=require("./lib/admin-user-directory");
 const handleAdminResultReviews=require("./routes/admin-result-reviews");
 const handleAdminAudit=require("./routes/admin-audit");
 const handleAdminSecurity=require("./routes/admin-security");
@@ -249,12 +249,13 @@ async function api(req,res,p,ip){
   let filters,paging;
   try{filters=parseUserFilters(query);paging=readAdminUserPage(query)}
   catch{return send(res,400,{error:"Bộ lọc tài khoản hoặc phân trang không hợp lệ"})}
-  let pg,allUsersTotal;
+  let pg,allUsersTotal,accountSummary;
   if(process.env.DATABASE_URL){
    try{
     const result=await loadAdminUserPage(pgStore,filters,paging);
     pg={items:result.items,pagination:result.pagination};
     allUsersTotal=result.allUsersTotal;
+    accountSummary=result.accountSummary;
    }catch(e){
     safeMonitorError("admin_list_db_failed",{message:e.message});
     return send(res,503,{error:"Không đọc được danh sách tài khoản từ PostgreSQL"});
@@ -262,6 +263,7 @@ async function api(req,res,p,ip){
   }else{
    const db=load(),list=db.users.map(x=>({...safeUser(x),locked:!!x.locked}));
    allUsersTotal=list.length;
+   accountSummary=summarizeUsers(list);
    pg=pageList(applyUserFilters(list,filters),req,{searchFn:x=>(x.name||"")+" "+(x.email||"")+" "+(x.role||"")});
   }
   let live;
@@ -271,7 +273,7 @@ async function api(req,res,p,ip){
   const users=pg.items.map(x=>({...x,presence:mapped.get(String(x.id))||null}));
   const ownerUid=String(process.env.ADMIN_SUPABASE_UID||"").trim();
   const canGrantAdmin=!!ownerUid&&u.authUserId===ownerUid;
-  return send(res,200,{users,pagination:pg.pagination,allUsersTotal,filters,durable:storage.status().mode==="supabase",presenceAvailable:live.available,onlineTotal:live.onlineTotal,canGrantAdmin});
+  return send(res,200,{users,pagination:pg.pagination,allUsersTotal,accountSummary,filters,durable:storage.status().mode==="supabase",presenceAvailable:live.available,onlineTotal:live.onlineTotal,canGrantAdmin});
  }
  if(req.method==="POST"&&p==="/api/admin/grant-admin"){
   const current=await requireUser(req,res,["admin"]);if(!current)return;

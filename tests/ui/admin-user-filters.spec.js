@@ -22,7 +22,9 @@ test("Admin users filter role and locked accounts and reset without losing manag
   const pageNumber=Number(q.get("page")||1),limit=Number(q.get("limit")||30);
   const pageUsers=filtered.slice((pageNumber-1)*limit,pageNumber*limit);
   return r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
-   users:pageUsers,allUsersTotal:users.length,durable:true,presenceAvailable:false,
+   users:pageUsers,allUsersTotal:users.length,
+   accountSummary:{roles:{student:2,parent:0,teacher:1,admin:1},unlocked:3,locked:1,total:4},
+   durable:true,presenceAvailable:false,
    canGrantAdmin:false,pagination:{page:pageNumber,limit,total:filtered.length,
     pages:Math.ceil(filtered.length/limit),hasMore:pageNumber*limit<filtered.length}
   })});
@@ -36,9 +38,16 @@ test("Admin users filter role and locked accounts and reset without losing manag
  await expect(page.locator("#adminUsersRoleFilter")).toBeVisible({timeout:12000});
  await expect(page.locator(".admin-users-table-card tbody tr")).toHaveCount(4);
  await expect(page.locator('[data-user-save]')).toHaveCount(4);
- await page.locator("#adminUsersRoleFilter").selectOption("student");
+ await expect(page.locator(".admin-users-role-card")).toHaveCount(6);
+ await expect(page.locator('[data-users-summary-role="student"]')).toContainText("2");
+ await expect(page.locator('[data-users-summary-role="admin"]')).toContainText("1");
+ await expect(page.locator('[data-users-summary-status="locked"]')).toContainText("1");
+ await page.locator('[data-users-summary-role="student"]').click();
+ await expect(page.locator("#adminUsersRoleFilter")).toHaveValue("student");
+ await expect(page.locator('[data-users-summary-role="student"]')).toHaveAttribute("aria-pressed","true");
  await expect(page.locator(".admin-users-table-card tbody tr")).toHaveCount(2);
- await page.locator("#adminUsersStatusFilter").selectOption("locked");
+ await page.locator('[data-users-summary-status="locked"]').click();
+ await expect(page.locator("#adminUsersStatusFilter")).toHaveValue("locked");
  await expect(page.locator(".admin-users-table-card tbody tr")).toHaveCount(1);
  await expect(page.locator(".admin-users-table-card")).toContainText("Ngọc");
  await expect(page.locator(".admin-users-table-card")).not.toContainText("Minh Anh");
