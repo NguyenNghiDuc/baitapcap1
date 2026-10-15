@@ -8,6 +8,7 @@ const {readAdminUserPage,loadAdminUserPage,summarizeUsers,summarizeGrowth}=requi
 const handleAdminResultReviews=require("./routes/admin-result-reviews");
 const handleAdminAudit=require("./routes/admin-audit");
 const handleAdminSecurity=require("./routes/admin-security");
+const handleAdminDeviceReviews=require("./routes/admin-device-reviews");
 const handleAdminBackup=require("./routes/admin-backup");
 const handleAdminIntegrity=require("./routes/admin-integrity");
 const handleClassInsights=require("./routes/class-insights");
@@ -128,6 +129,7 @@ async function api(req,res,p,ip){
  if(await handleAdminResultReviews(req,res,p,{send,parseBody,requireUser,load,save,storage,pg:pgStore,audit}))return;
  if(await handleAdminAudit(req,res,p,{send,requireUser,load,pg:pgStore}))return;
  if(await handleAdminSecurity(req,res,p,{send,requireUser,load,storage,pg:pgStore}))return;
+ if(await handleAdminDeviceReviews(req,res,p,{send,parseBody,requireUser,load,save,storage,pg:pgStore,audit}))return;
  if(await handleAdminBackup(req,res,p,{send,requireUser,pg:pgStore,storage}))return;
  if(await handleAdminIntegrity(req,res,p,{send,requireUser,pg:pgStore}))return;
  if(await handleClassInsights(req,res,p,{send,requireUser,load}))return;

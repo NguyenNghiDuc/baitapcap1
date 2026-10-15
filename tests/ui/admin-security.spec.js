@@ -137,3 +137,59 @@ test("Admin opens only one account's IP history directly from the users table an
  await expect(page.locator(".admin-device-history")).toContainText("198.51.100.48");
  expect(requested).toContain("");
 });
+
+
+test("Admin reviews a new-device observation and reads its durable journal without storing raw device ID",async({page})=>{
+ let saved=[],calls=0;const observationId="a".repeat(64);
+ await page.route("**/api/public-config",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({supabase:{enabled:false}})
+ }));
+ await page.route("**/api/admin/security",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   permissions:{title:"Admin",ownerConfigured:false,capabilities:{}},devices:[],notice:""
+  })
+ }));
+ await page.route("**/api/admin/device-logs?**",r=>r.fulfill({
+  status:200,contentType:"application/json",body:JSON.stringify({
+   devices:[{userId:"student",name:"Mai",email:"mai@example.test",
+    device:"iPhone",browser:"Safari",ip:"203.0.113.12",newDevice7d:true,changedIp7d:false,
+    observations:[{id:observationId,type:"new-device",observedAt:"2026-10-15T00:00:00Z",
+     reviewStatus:saved.length?"reviewed":null}]}],
+   source:"postgres",summary:{totalDevices:1,uniqueAccounts:1,recent24h:0,newDevices7d:1,changedIp7d:0},
+   pagination:{page:1,limit:20,total:1,pages:1,hasMore:false}
+  })
+ }));
+ await page.route("**/api/admin/device-reviews?**",r=>{
+  calls++;
+  return r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+   reviews:saved.map(x=>({id:"decision",observationId,userId:"student",
+    accountName:"Mai",type:"new-device",status:x.status,reason:x.reason,
+    reviewerId:"admin-1",reviewedAt:"2026-10-15T01:00:00Z"})),
+   pagination:{page:1,limit:10,total:saved.length,pages:1,hasMore:false}
+  })});
+ });
+ await page.route("**/api/admin/device-reviews",async r=>{
+  const data=r.request().postDataJSON();
+  saved.push(data);
+  return r.fulfill({status:201,contentType:"application/json",
+   body:JSON.stringify({review:{id:"decision",...data}})});
+ });
+ await page.goto("/#adminSecurity");
+ await expect(page.locator("#content")).toContainText("Chỉ quản trị viên",{timeout:12000});
+ await page.evaluate(async()=>{
+  await window.SupabaseApp?.ready();
+  window.AppAuthBridge.setUser({id:"admin-1",name:"Admin",email:"admin@example.test",role:"admin"});
+ });
+ await expect(page.locator(".admin-device-history")).toBeVisible({timeout:12000});
+ await expect(page.locator("[data-observation-review]")).toHaveCount(1);
+ await page.locator("[data-observation-review]").click();
+ await expect(page.locator("#adminDeviceReviewForm")).toBeVisible();
+ await page.locator('#adminDeviceReviewForm textarea[name="reason"]').fill("Đã kiểm tra thiết bị cùng học sinh.");
+ await page.locator('#adminDeviceReviewForm button[type="submit"]').click();
+ await expect(page.locator(".admin-device-review-journal")).toContainText("Đã kiểm tra thiết bị cùng học sinh.");
+ await expect(page.locator("[data-observation-review]")).toHaveCount(0);
+ expect(saved).toHaveLength(1);
+ expect(saved[0]).toEqual({observationId,status:"reviewed",reason:"Đã kiểm tra thiết bị cùng học sinh."});
+ expect(calls).toBeGreaterThan(1);
+ await expect(page.locator(".admin-device-review-journal")).not.toContainText("203.0.113.12");
+});

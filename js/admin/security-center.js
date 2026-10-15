@@ -2,7 +2,8 @@
 window.AdminSecurity=(()=>{
  const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const time=s=>{const t=Date.parse(s||"");return Number.isFinite(t)?new Date(t).toLocaleString("vi-VN"):"—"};
- const history={page:1,search:"",status:"all",userId:"",period:"all"};
+ const history={page:1,search:"",status:"all",userId:"",period:"all",reviewPage:1,reviewId:""};
+ let reviewError="";
  const perm=[
   ["viewUsers","Xem tài khoản"],["manageRegularUsers","Quản lý người dùng thông thường"],
   ["viewAudit","Xem nhật ký"],["exportGrades","Xuất bảng điểm"],
@@ -14,7 +15,7 @@ window.AdminSecurity=(()=>{
   if(focus){
    delete window.AdminDeviceAccountFocus;
    if(typeof focus.userId==="string"&&focus.userId.length<=128){
-    history.userId=focus.userId;history.page=1;history.search="";history.status="all";history.period="all";
+    history.userId=focus.userId;history.page=1;history.search="";history.status="all";history.period="all";history.reviewPage=1;history.reviewId="";reviewError="";
    }
   }
   const q=new URLSearchParams({page:String(history.page)});
@@ -24,6 +25,15 @@ window.AdminSecurity=(()=>{
   if(history.userId)q.set("userId",history.userId);
   try{
    const j=await API.get("/api/admin/device-logs?"+q.toString(),{noCache:true,cancelPrevious:false});
+   const reviewsQuery=new URLSearchParams({page:String(history.reviewPage)});
+   if(history.userId)reviewsQuery.set("userId",history.userId);
+   const journal=await API.get("/api/admin/device-reviews?"+reviewsQuery.toString(),
+    {noCache:true,cancelPrevious:false}).catch(()=>({reviews:[],pagination:{page:1,total:0,pages:0,hasMore:false},error:true}));
+   const reviewButtons=d=>(d.observations||[]).map(o=>{
+    if(o.reviewStatus)return '<span class="admin-sec-chip is-allowed">'+(o.reviewStatus==="reviewed"?"Đã xem xét":"Đã bỏ qua")+'</span>';
+    return '<button type="button" class="outline admin-review-open" data-observation-review="'+esc(o.id)+'" aria-label="Xem xét dấu hiệu '+(o.type==="ip-change"?"đổi IP":"thiết bị mới")+'">'+
+     (o.type==="ip-change"?"🔄 Xem xét IP":"✨ Xem xét thiết bị")+'</button>';
+   }).join("");
    const rows=(j.devices||[]).map(d=>'<tr><td><b>'+esc(d.name)+'</b><small>'+esc(d.email)+'</small></td>'+
     '<td><b>'+esc(d.device)+'</b><small>'+esc(d.browser)+'</small></td>'+
     '<td><code>'+esc(d.ip||"Không xác định")+'</code></td><td>'+esc(time(d.lastSeenAt))+'</td>'+
@@ -31,8 +41,36 @@ window.AdminSecurity=(()=>{
     (d.newDevice7d?'<span class="admin-sec-chip admin-device-signal-new">Thiết bị mới 7 ngày</span>':'')+
     (d.changedIp7d?'<span class="admin-sec-chip admin-device-signal-ip">IP đổi 7 ngày</span>':'')+
     (!d.newDevice7d&&!d.changedIp7d?'<span class="muted">—</span>':'')+
-    '</div></td></tr>').join("");
+    '</div>'+reviewButtons(d)+'</td></tr>').join("");
    const pager=j.pagination||{},pages=Math.max(1,Number(pager.pages)||1),summary=j.summary||{};
+   const selected=(j.devices||[]).flatMap(d=>(d.observations||[]).map(o=>({...o,userId:d.userId})))
+    .find(o=>o.id===history.reviewId&&!o.reviewStatus);
+   const reviewForm=selected?'<form id="adminDeviceReviewForm" class="admin-device-review-form">'+
+    '<div><h3>📝 Ghi nhận kết quả xem xét</h3><p>Dấu hiệu: '+(selected.type==="ip-change"?"IP thiết bị đã thay đổi":"Thiết bị được ghi nhận mới")+'. '+
+    'Thao tác này chỉ ghi nhật ký, không khóa tài khoản.</p></div>'+
+    '<label>Kết luận<select name="status" required><option value="reviewed">Đã kiểm tra</option>'+
+    '<option value="dismissed">Bỏ qua sau khi xem xét</option></select></label>'+
+    '<label>Lý do<textarea name="reason" required minlength="10" maxlength="500" rows="3" placeholder="Nhập lý do hoặc kết quả kiểm tra (10–500 ký tự)"></textarea></label>'+
+    '<div class="admin-device-review-actions"><button type="submit" class="primary">Lưu quyết định</button>'+
+    '<button type="button" class="outline" id="adminDeviceReviewCancel">Hủy</button></div>'+
+    (reviewError?'<p role="alert">'+esc(reviewError)+'</p>':'')+'</form>':"";
+   const historyRows=(journal.reviews||[]).map(r=>'<article class="admin-device-review-item">'+
+    '<div><b>'+esc(r.accountName)+'</b><span class="admin-sec-chip '+(r.status==="reviewed"?"is-allowed":"")+'">'+
+    (r.status==="reviewed"?"Đã kiểm tra":"Bỏ qua")+'</span></div>'+
+    '<p>'+esc(r.type==="ip-change"?"Thay đổi IP":"Thiết bị mới")+' · '+esc(time(r.reviewedAt))+'</p>'+
+    '<p class="admin-device-review-reason">'+esc(r.reason)+'</p>'+
+    '<small>Người xử lý: '+esc(r.reviewerId)+'</small></article>').join("");
+   const reviewJournal='<section class="panel admin-sec-panel admin-device-review-journal">'+
+    '<div class="admin-sec-heading"><h2>📋 Nhật ký xử lý dấu hiệu</h2><span class="muted">'+
+    Number(journal.pagination?.total||0)+' quyết định</span></div>'+
+    '<p class="muted">Lưu quyết định của Admin và lý do, không lưu thêm IP cũ hoặc mã thiết bị. Không tự động khóa tài khoản.</p>'+
+    (journal.error?'<p role="alert">Không tải được lịch sử xử lý. Vui lòng thử tải lại.</p>':
+      historyRows||'<p class="muted">Chưa có quyết định xử lý nào.</p>')+
+    '<div class="admin-device-pager"><button type="button" class="outline" id="adminDeviceReviewPrev" '+
+    (history.reviewPage<=1?"disabled":"")+'>← Trước</button><span>Trang '+history.reviewPage+'/'+
+    Math.max(1,Number(journal.pagination?.pages)||1)+'</span><button type="button" class="outline" id="adminDeviceReviewNext" '+
+    (journal.pagination?.hasMore?"":"disabled")+'>Tiếp →</button></div></section>';
+
    const accountFocus=history.userId?
     '<div class="admin-device-focus" role="status"><div><b>👤 '+(j.account?esc(j.account.name):"Tài khoản không còn tồn tại")+'</b>'+
     '<small>'+(j.account?esc(j.account.email):"Không có dữ liệu")+'</small>'+
@@ -66,8 +104,8 @@ window.AdminSecurity=(()=>{
     '<div class="table-wrap" tabindex="0" aria-label="Danh sách thiết bị và IP đã đăng nhập"><table><thead><tr>'+
     '<th>Tài khoản</th><th>Thiết bị / trình duyệt</th><th>Địa chỉ IP</th><th>Gần nhất</th><th>Dấu hiệu</th></tr></thead><tbody>'+
     (rows||'<tr><td colspan="5">Chưa ghi nhận thiết bị nào phù hợp. Người dùng cần đăng nhập để hệ thống ghi nhận.</td></tr>')+
-    '</tbody></table></div><div class="admin-device-pager"><button type="button" id="adminDevicePrev" class="outline" '+(history.page<=1?"disabled":"")+'>← Trước</button>'+
-    '<span>Trang '+history.page+'/'+pages+'</span><button type="button" id="adminDeviceNext" class="outline" '+(pager.hasMore?"":"disabled")+'>Tiếp →</button></div></section>';
+    '</tbody></table></div>'+reviewForm+'<div class="admin-device-pager"><button type="button" id="adminDevicePrev" class="outline" '+(history.page<=1?"disabled":"")+'>← Trước</button>'+
+    '<span>Trang '+history.page+'/'+pages+'</span><button type="button" id="adminDeviceNext" class="outline" '+(pager.hasMore?"":"disabled")+'>Tiếp →</button></div></section>'+reviewJournal;
   }catch(e){
    return '<section class="panel admin-sec-panel admin-device-history" role="alert"><h2>🌐 IP các tài khoản</h2><p>Chưa tải được lịch sử thiết bị: '+esc(e.message||"Có lỗi")+'</p></section>';
   }
@@ -104,18 +142,48 @@ window.AdminSecurity=(()=>{
  function bind(render){
   document.querySelector("#adminSecurityReload")?.addEventListener("click",render);
   document.querySelector("#adminDeviceClearAccount")?.addEventListener("click",()=>{
-   history.userId="";history.search="";history.status="all";history.period="all";history.page=1;render();
+   history.userId="";history.search="";history.status="all";history.period="all";history.page=1;history.reviewPage=1;history.reviewId="";reviewError="";render();
   });
   document.querySelector("#adminDeviceSearchForm")?.addEventListener("submit",e=>{
    e.preventDefault();const value=String(new FormData(e.currentTarget).get("search")||"").trim();
    const nextStatus=String(new FormData(e.currentTarget).get("status")||"all");
    const nextPeriod=String(new FormData(e.currentTarget).get("period")||"all");
-   history.search=value.slice(0,100);history.status=nextStatus;history.period=nextPeriod;history.page=1;render();
+   history.search=value.slice(0,100);history.status=nextStatus;history.period=nextPeriod;history.page=1;history.reviewId="";reviewError="";render();
   });
   document.querySelector("#adminDevicePrev")?.addEventListener("click",()=>{
    history.page=Math.max(1,history.page-1);render();
   });
   document.querySelector("#adminDeviceNext")?.addEventListener("click",()=>{history.page++;render()});
+  document.querySelectorAll("[data-observation-review]").forEach(button=>button.addEventListener("click",()=>{
+   history.reviewId=button.dataset.observationReview;reviewError="";render();
+  }));
+  document.querySelector("#adminDeviceReviewCancel")?.addEventListener("click",()=>{
+   history.reviewId="";reviewError="";render();
+  });
+  document.querySelector("#adminDeviceReviewForm")?.addEventListener("submit",async e=>{
+   e.preventDefault();
+   const form=e.currentTarget,button=form.querySelector('button[type="submit"]');
+   const values=new FormData(form);
+   button.disabled=true;reviewError="";
+   try{
+    await API.post("/api/admin/device-reviews",{
+     observationId:history.reviewId,status:values.get("status"),reason:values.get("reason")
+    });
+    history.reviewId="";history.reviewPage=1;
+    await render();
+   }catch(error){reviewError=String(error.message||"Không lưu được quyết định");
+    const message=form.querySelector('[role="alert"]')||document.createElement("p");
+    message.setAttribute("role","alert");message.textContent=reviewError;
+    if(!message.parentElement)form.appendChild(message);
+    button.disabled=false;
+   }
+  });
+  document.querySelector("#adminDeviceReviewPrev")?.addEventListener("click",()=>{
+   history.reviewPage=Math.max(1,history.reviewPage-1);render();
+  });
+  document.querySelector("#adminDeviceReviewNext")?.addEventListener("click",()=>{
+   history.reviewPage++;render();
+  });
  }
  return {render,bind};
 })();

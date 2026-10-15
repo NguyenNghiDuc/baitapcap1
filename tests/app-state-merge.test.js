@@ -106,3 +106,18 @@ test("legacy snapshots cannot forge, alter or remove Admin result-review decisio
   assert.throws(()=>mergeAppState(base,local,copy(base)),/lịch sử xem xét/);
  }
 });
+
+
+test("Legacy snapshots cannot overwrite Admin device observation decision journal",()=>{
+ const base=fixture(),local=copy(base),remote=copy(base);
+ remote.deviceSecurityReviews=[{id:"decision-1",observationId:"abc",status:"reviewed",reason:"Checked"}];
+ local.users[1].name="Updated student";
+ const merged=mergeAppState(base,local,remote);
+ assert.equal(merged.users[1].name,"Updated student");
+ assert.equal(merged.deviceSecurityReviews.length,1);
+ assert.equal(merged.deviceSecurityReviews[0].id,"decision-1");
+ for(const manipulated of [[],[{id:"fake",status:"dismissed"}]]){
+  const next=copy(remote);next.deviceSecurityReviews=manipulated;
+  assert.throws(()=>validateLegacy(remote,next),/nhật ký xem xét đăng nhập/);
+ }
+});
