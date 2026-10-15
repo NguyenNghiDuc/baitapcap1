@@ -36,3 +36,26 @@ test("stores no more than 25 recent browser entries per account",()=>{
  for(let i=0;i<27;i++)devices.record(db,user,req("btdev_"+String(i).padStart(12,"0"),"Chrome/131.0","127.0.0.1"));
  assert.equal(devices.list(db,user,req("btdev_"+String(26).padStart(12,"0"),"Chrome/131.0","127.0.0.1")).length,25);
 });
+
+
+test("Records timestamp only when a known IP actually changes on an existing device",()=>{
+ const previous=process.env.TRUST_PROXY;process.env.TRUST_PROXY="1";
+ try{
+  const db={loginDevices:[]},user={id:"student-1"};
+  const same=req("btdev_1234567890123","Chrome/131.0","203.0.113.10");
+  const moved=req("btdev_1234567890123","Chrome/131.0","198.51.100.11");
+  assert.equal(devices.record(db,user,same),true);
+  assert.equal(db.loginDevices[0].ipChangedAt,undefined);
+  assert.equal(devices.record(db,user,same),false);
+  assert.equal(db.loginDevices[0].ipChangedAt,undefined);
+  assert.equal(devices.record(db,user,moved),true);
+  assert.equal(db.loginDevices[0].ip,"198.51.100.11");
+  assert.ok(Number.isFinite(Date.parse(db.loginDevices[0].ipChangedAt)));
+  assert.equal(db.loginDevices[0].previousIp,undefined);
+  const changedAt=db.loginDevices[0].ipChangedAt;
+  assert.equal(devices.record(db,user,moved),false);
+  assert.equal(db.loginDevices[0].ipChangedAt,changedAt);
+ }finally{
+  if(previous===undefined)delete process.env.TRUST_PROXY;else process.env.TRUST_PROXY=previous;
+ }
+});
