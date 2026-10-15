@@ -332,3 +332,60 @@
 }
 @media(max-width:360px){.admin-users-page .admin-users-role-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.admin-users-page .admin-users-role-card{transition:none}.admin-users-page .admin-users-role-card:hover{transform:none}}
+
+
+/* Six-month registrations chart — accessible CSS bars, no charting dependency. */
+.admin-users-page .admin-users-growth{display:grid;gap:18px;margin:0!important;padding:21px 23px!important}
+.admin-users-page .admin-users-growth-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.admin-users-page .admin-users-growth-head h3{
+ color:var(--text);font:800 clamp(17px,1.7vw,22px)/1.35 "Baloo 2",sans-serif;margin:0 0 6px
+}
+.admin-users-page .admin-users-growth-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.admin-users-page .admin-users-growth-total{
+ display:flex;align-items:baseline;gap:6px;white-space:nowrap;
+ background:rgba(247,135,43,.10);border:1px solid rgba(242,139,50,.20);
+ border-radius:12px;padding:9px 12px;font-size:11px;font-weight:750;color:var(--text)
+}
+.admin-users-page .admin-users-growth-total b{font:800 23px/1.1 "Baloo 2",sans-serif;color:#de711e}
+.admin-users-page .admin-users-growth-bars{
+ display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;
+ border-radius:15px;padding:17px 12px 12px;
+ background:linear-gradient(180deg,rgba(248,142,50,.055),transparent),var(--surface2)
+}
+.admin-users-page .admin-users-growth-month{
+ display:flex;flex-direction:column;align-items:center;min-width:0;gap:7px
+}
+.admin-users-page .admin-users-growth-month strong{
+ color:var(--text);font:800 13px/1.4 "Be Vietnam Pro",sans-serif;
+ font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.admin-users-page .admin-users-growth-track{
+ display:flex;align-items:flex-end;justify-content:center;
+ height:160px;width:min(100%,75px);
+ border-radius:12px 12px 8px 8px;
+ background:linear-gradient(180deg,rgba(243,137,52,.06),rgba(238,124,31,.10));
+ overflow:hidden
+}
+.admin-users-page .admin-users-growth-bar{
+ display:block;width:100%;min-height:0;border-radius:11px 11px 7px 7px;
+ background:linear-gradient(180deg,#ffb65a 0%,#f68a2d 48%,#d96312 100%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.29);
+ transition:height .3s ease
+}
+.admin-users-page .admin-users-growth-month small{font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
+.admin-users-page .admin-users-growth-note{margin:0;color:var(--muted);font-size:11px;line-height:1.65}
+:root[data-theme="dark"] .admin-users-page .admin-users-growth-total b{color:#ffb871}
+:root[data-theme="dark"] .admin-users-page .admin-users-growth-bars{
+ background:linear-gradient(180deg,rgba(203,95,26,.10),transparent),var(--surface2)
+}
+@media(max-width:590px){
+ .admin-users-page .admin-users-growth{padding:17px 13px!important}
+ .admin-users-page .admin-users-growth-head{flex-wrap:wrap}
+ .admin-users-page .admin-users-growth-bars{gap:5px;padding:12px 4px 9px}
+ .admin-users-page .admin-users-growth-track{height:125px}
+ .admin-users-page .admin-users-growth-month strong{font-size:11px}
+ .admin-users-page .admin-users-growth-month small{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .admin-users-page .admin-users-growth-bar{transition:none}
+}
