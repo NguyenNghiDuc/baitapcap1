@@ -1,4 +1,12 @@
 window.ExamInteraction={
+ prepareQuestions(questions){
+  return questions.map(q=>{
+   if((q.examType||"mcq")!=="mcq"||!Array.isArray(q.options))return {...q};
+   const order=q.options.map((_,i)=>i);
+   for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+   return {...q,options:order.map(i=>q.options[i]),answer:order.indexOf(q.answer)};
+  });
+ },
  escape(v){return String(v??"").replace(/[&<>"\']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))},
  render(q,value){
   const type=q.examType||"mcq";

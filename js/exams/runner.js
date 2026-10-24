@@ -4,7 +4,7 @@ window.ExamRunner=(()=>{
  function save(){localStorage.setItem("bt_term_quiz",JSON.stringify(quiz));window.OfflineSyncQueue?.saveDraft?.({kind:"term",quiz})}
  function start(questions,title,meta={}){
   if(!Array.isArray(questions)||questions.length!==30)return alert("Đề chưa đủ 30 câu.");
-  quiz={questions,i:0,answers:{},marked:[],title,grade:questions[0]?.grade||meta.grade||4,start:Date.now(),meta};
+  quiz={questions:window.ExamInteraction.prepareQuestions(questions),i:0,answers:{},marked:[],title,grade:questions[0]?.grade||meta.grade||4,start:Date.now(),meta};
   try{render();save();if(meta.time)window.StudentExamProctor?.start(meta.time);if(meta.time)window.StudentExamProctor?.attach(document.querySelector("#timer"),()=>finish(true));}catch(error){window.ExamLock?.exit();quiz=null;localStorage.removeItem("bt_term_quiz");throw error;}
  }
  function body(q){
