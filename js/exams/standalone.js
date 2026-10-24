@@ -49,7 +49,7 @@
    return;
   }
   if(!Array.isArray(questions)||questions.length<1){err("Đề không có câu hỏi hợp lệ.");return;}
-  stop();exam={info,questions,i:0,answers:{},started:Date.now(),duration:minutes};seconds=minutes*60;
+  stop();exam={info,questions:I.prepareQuestions(questions),i:0,answers:{},started:Date.now(),duration:minutes};seconds=minutes*60;
   try{paint();timer=setInterval(()=>{seconds=Math.max(0,seconds-1);const el=document.querySelector("#countdown");if(el)el.textContent=clock();if(seconds===0)finish(true);},1000);}catch(e){err(e);}
  }
  function clock(){return Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");}
